@@ -165,3 +165,4 @@ C:\Users\47401\Documents\SubApp1\RAYS\obj\Debug\net8.0\refint\RAYS.dll
 C:\Users\47401\Documents\SubApp1\RAYS\obj\Debug\net8.0\RAYS.pdb
 C:\Users\47401\Documents\SubApp1\RAYS\obj\Debug\net8.0\RAYS.genruntimeconfig.cache
 C:\Users\47401\Documents\SubApp1\RAYS\obj\Debug\net8.0\ref\RAYS.dll
+C:\Users\47401\Documents\SubApp1\RAYS\obj\Debug\net8.0\RAYS.sourcelink.json

@@ -4,15 +4,15 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using ServerAPI.DAL;
+using RAYS.DAL;
 
 #nullable disable
 
 namespace RAYS.Migrations
 {
     [DbContext(typeof(ServerAPIContext))]
-    [Migration("20241030102149_SecondCreate")]
-    partial class SecondCreate
+    [Migration("20241030104810_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -20,7 +20,7 @@ namespace RAYS.Migrations
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.10");
 
-            modelBuilder.Entity("ServerAPI.Models.Comment", b =>
+            modelBuilder.Entity("RAYS.Models.Comment", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -34,6 +34,7 @@ namespace RAYS.Migrations
 
                     b.Property<string>("Text")
                         .IsRequired()
+                        .HasMaxLength(500)
                         .HasColumnType("TEXT");
 
                     b.Property<int>("UserId")
@@ -48,7 +49,7 @@ namespace RAYS.Migrations
                     b.ToTable("Comments");
                 });
 
-            modelBuilder.Entity("ServerAPI.Models.Friend", b =>
+            modelBuilder.Entity("RAYS.Models.Friend", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -62,6 +63,7 @@ namespace RAYS.Migrations
 
                     b.Property<string>("Status")
                         .IsRequired()
+                        .HasMaxLength(20)
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
@@ -69,7 +71,7 @@ namespace RAYS.Migrations
                     b.ToTable("Friends");
                 });
 
-            modelBuilder.Entity("ServerAPI.Models.Like", b =>
+            modelBuilder.Entity("RAYS.Models.Like", b =>
                 {
                     b.Property<int>("UserId")
                         .HasColumnType("INTEGER");
@@ -87,7 +89,7 @@ namespace RAYS.Migrations
                     b.ToTable("Likes");
                 });
 
-            modelBuilder.Entity("ServerAPI.Models.Message", b =>
+            modelBuilder.Entity("RAYS.Models.Message", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -95,6 +97,7 @@ namespace RAYS.Migrations
 
                     b.Property<string>("Content")
                         .IsRequired()
+                        .HasMaxLength(1000)
                         .HasColumnType("TEXT");
 
                     b.Property<int>("ReceiverId")
@@ -111,7 +114,7 @@ namespace RAYS.Migrations
                     b.ToTable("Messages");
                 });
 
-            modelBuilder.Entity("ServerAPI.Models.Post", b =>
+            modelBuilder.Entity("RAYS.Models.Post", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -119,6 +122,7 @@ namespace RAYS.Migrations
 
                     b.Property<string>("Content")
                         .IsRequired()
+                        .HasMaxLength(2000)
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("CreatedAt")
@@ -143,7 +147,7 @@ namespace RAYS.Migrations
                     b.ToTable("Posts");
                 });
 
-            modelBuilder.Entity("ServerAPI.Models.User", b =>
+            modelBuilder.Entity("RAYS.Models.User", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -155,10 +159,12 @@ namespace RAYS.Migrations
 
                     b.Property<string>("PasswordHash")
                         .IsRequired()
+                        .HasMaxLength(256)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Username")
                         .IsRequired()
+                        .HasMaxLength(50)
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
@@ -166,39 +172,39 @@ namespace RAYS.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("ServerAPI.Models.Comment", b =>
+            modelBuilder.Entity("RAYS.Models.Comment", b =>
                 {
-                    b.HasOne("ServerAPI.Models.Post", null)
+                    b.HasOne("RAYS.Models.Post", null)
                         .WithMany()
                         .HasForeignKey("PostId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ServerAPI.Models.User", null)
+                    b.HasOne("RAYS.Models.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("ServerAPI.Models.Like", b =>
+            modelBuilder.Entity("RAYS.Models.Like", b =>
                 {
-                    b.HasOne("ServerAPI.Models.Post", null)
+                    b.HasOne("RAYS.Models.Post", null)
                         .WithMany()
                         .HasForeignKey("PostId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ServerAPI.Models.User", null)
+                    b.HasOne("RAYS.Models.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("ServerAPI.Models.Post", b =>
+            modelBuilder.Entity("RAYS.Models.Post", b =>
                 {
-                    b.HasOne("ServerAPI.Models.User", null)
+                    b.HasOne("RAYS.Models.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)

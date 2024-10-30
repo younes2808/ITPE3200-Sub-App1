@@ -6,6 +6,10 @@ builder.Services.AddDbContext<ServerAPIContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddHttpsRedirection(options =>
+{
+    options.HttpsPort = 5002; 
+});
 
 var app = builder.Build();
 
