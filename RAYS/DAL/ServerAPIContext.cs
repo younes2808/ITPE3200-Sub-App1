@@ -58,6 +58,34 @@ namespace RAYS.DAL
                 .WithMany()  // No navigation property to Comments in Post
                 .HasForeignKey(c => c.PostId)  // PostId is the foreign key
                 .OnDelete(DeleteBehavior.Cascade);  // Cascade delete if post is removed
+
+            // Define relationship between Friend and User (Sender)
+            modelBuilder.Entity<Friend>()
+                .HasOne<User>()  // Use User entity directly for Sender
+                .WithMany()  // No navigation property to Friends in User
+                .HasForeignKey(f => f.SenderId)  // SenderId is the foreign key
+                .OnDelete(DeleteBehavior.Cascade);  // Cascade delete if user is removed
+
+            // Define relationship between Friend and User (Receiver)
+            modelBuilder.Entity<Friend>()
+                .HasOne<User>()  // Use User entity directly for Receiver
+                .WithMany()  // No navigation property to Friends in User
+                .HasForeignKey(f => f.ReceiverId)  // ReceiverId is the foreign key
+                .OnDelete(DeleteBehavior.Cascade);  // Cascade delete if user is removed
+
+            // Define relationship between Message and User (Sender)
+            modelBuilder.Entity<Message>()
+                .HasOne<User>()  // Use User entity directly for Sender
+                .WithMany()  // No navigation property to Messages in User
+                .HasForeignKey(m => m.SenderId)  // SenderId is the foreign key
+                .OnDelete(DeleteBehavior.Cascade);  // Cascade delete if user is removed
+
+            // Define relationship between Message and User (Receiver)
+            modelBuilder.Entity<Message>()
+                .HasOne<User>()  // Use User entity directly for Receiver
+                .WithMany()  // No navigation property to Messages in User
+                .HasForeignKey(m => m.ReceiverId)  // ReceiverId is the foreign key
+                .OnDelete(DeleteBehavior.Cascade);  // Cascade delete if user is removed
         }
     }
 }
