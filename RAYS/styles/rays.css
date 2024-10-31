@@ -1,0 +1,71 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.Login-Bakgrunn {
+    @apply bg-emerald-200;
+}
+
+.Landing-page-box {
+    @apply flex items-center justify-center min-h-screen;
+}
+
+/* Map container styles */
+.map-container {
+    @apply h-60 w-full rounded-lg shadow-md overflow-hidden; /* Ensure it has a height, width, and rounded corners */
+}
+
+/* Scrollbar styles for WebKit browsers */
+.post-textarea::-webkit-scrollbar {
+    width: 7px; /* Width of the scrollbar */
+}
+
+.post-textarea::-webkit-scrollbar-track {
+    background: grey; /* Background color of the track */
+    border-radius: 5px; /* Round the track corners */
+}
+
+.post-textarea::-webkit-scrollbar-thumb {
+    background-color: #1DA1F2; /* Color of the scrollbar thumb */
+    border-radius: 10px; /* Round the thumb corners */
+}
+
+/* Optional: Change thumb color on hover */
+.post-textarea::-webkit-scrollbar-thumb:hover {
+    background-color: #0d8ddb; /* Darker blue on hover */
+}
+
+/* Grey version - Copy all styles from post-textarea */
+.post-textarea-grey::-webkit-scrollbar {
+    width: 3px; /* Width of the scrollbar */
+}
+
+.post-textarea-grey::-webkit-scrollbar-track {
+    border-radius: 10px; /* Round the track corners */
+}
+
+.post-textarea-grey::-webkit-scrollbar-thumb {
+    background-color: grey; /* Color of the scrollbar thumb */
+    border-radius: 10px; /* Round the thumb corners */
+    max-height: 10px;
+}
+
+/* Optional: Change thumb color on hover for grey scrollbar */
+.post-textarea-grey::-webkit-scrollbar-thumb:hover {
+    background-color: #808080; /* Darker grey on hover */
+}
+/* src/styles/tailwind.css */
+@font-face {
+    font-family: 'ClashGrotesk';
+    src: url('./fonts/ClashGrotesk-Variable.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: 'General';
+    src: url('./fonts/GeneralSans-Variable.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: 'Lexend';
+    src: url('./fonts/Lexend-VariableFont.ttf') format('truetype');
+}
