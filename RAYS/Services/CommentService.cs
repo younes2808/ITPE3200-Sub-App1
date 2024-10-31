@@ -1,6 +1,7 @@
-using RAYS.DAL;
 using RAYS.Models;
-using Microsoft.EntityFrameworkCore; // Importer denne linjen for ToListAsync()
+using RAYS.Repositories;
+using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -9,80 +10,101 @@ namespace RAYS.Services
 {
     public class CommentService
     {
-        private readonly ServerAPIContext _context;
+        private readonly ICommentRepository _commentRepository;
+        private readonly ILogger<CommentService> _logger;
 
-        public CommentService(ServerAPIContext context)
+        public CommentService(ICommentRepository commentRepository, ILogger<CommentService> logger)
         {
-            _context = context;
+            _commentRepository = commentRepository;
+            _logger = logger;
         }
 
         public async Task<Comment> AddComment(Comment comment)
         {
-            // Sjekk om posten finnes
-            if (!_context.Posts.Any(p => p.Id == comment.PostId))
+            _logger.LogInformation("Attempting to add a new comment.");
+
+            // Check if the post exists (this should be a repository method)
+            if (await _commentRepository.GetByIdAsync(comment.PostId) == null)
             {
+                _logger.LogWarning("Post with ID {PostId} not found.", comment.PostId);
                 throw new KeyNotFoundException("Post not found.");
             }
 
-            // Sjekk om brukeren finnes
-            if (!_context.Users.Any(u => u.Id == comment.UserId))
+            // Assuming you have a method to check if the user exists
+            if (await _commentRepository.GetByUserIdAsync(comment.UserId) == null)
             {
+                _logger.LogWarning("User with ID {UserId} not found.", comment.UserId);
                 throw new KeyNotFoundException("User not found.");
             }
 
-            // Legg til kommentaren
-            comment.CreatedAt = DateTime.UtcNow; // Sett CreatedAt
-            _context.Comments.Add(comment);
-            await _context.SaveChangesAsync();
+            comment.CreatedAt = DateTime.UtcNow; // Ensure you're setting this correctly
+            await _commentRepository.AddAsync(comment);
 
-            return comment; // Returner den opprettede kommentaren
+            _logger.LogInformation("Comment added successfully with ID {CommentId}.", comment.Id);
+            return comment;
         }
 
-        public async Task<List<Comment>> GetCommentsForPost(int postId)
+        public async Task<IEnumerable<Comment>> GetCommentsForPost(int postId)
         {
-            return await _context.Comments
-                .Where(c => c.PostId == postId)
-                .OrderBy(c => c.CreatedAt)
-                .ToListAsync(); // Bruker ToListAsync() fra EF Core
+            _logger.LogInformation("Retrieving comments for post ID {PostId}.", postId);
+            var comments = await _commentRepository.GetAllAsync(postId);
+            _logger.LogInformation("Retrieved {Count} comments for post ID {PostId}.", comments.Count(), postId);
+            return comments; // Return IEnumerable instead of List
+        }
+
+        public async Task<Comment> GetCommentByIdAsync(int commentId)
+        {
+            _logger.LogInformation("Retrieving comment with ID {CommentId}.", commentId);
+            var comment = await _commentRepository.GetByIdAsync(commentId);
+            if (comment == null)
+            {
+                _logger.LogWarning("Comment with ID {CommentId} not found.", commentId);
+                throw new KeyNotFoundException("Comment not found.");
+            }
+            return comment;
         }
 
         public async Task<Comment> UpdateComment(int commentId, string text, int userId)
         {
-            var existingComment = await _context.Comments.FindAsync(commentId);
+            _logger.LogInformation("Attempting to update comment with ID {CommentId}.", commentId);
+            var existingComment = await _commentRepository.GetByIdAsync(commentId);
             if (existingComment == null)
             {
+                _logger.LogWarning("Comment with ID {CommentId} not found.", commentId);
                 throw new KeyNotFoundException("Comment not found.");
             }
 
-            // Sjekk om bruker ID samsvarer
             if (existingComment.UserId != userId)
             {
+                _logger.LogWarning("User with ID {UserId} is not authorized to update comment ID {CommentId}.", userId, commentId);
                 throw new UnauthorizedAccessException("User does not have permission to update this comment.");
             }
 
-            // Oppdater kommentaren
             existingComment.Text = text;
-            await _context.SaveChangesAsync();
+            await _commentRepository.UpdateAsync(existingComment);
 
-            return existingComment; // Returner den oppdaterte kommentaren
+            _logger.LogInformation("Comment with ID {CommentId} updated successfully.", commentId);
+            return existingComment;
         }
 
         public async Task DeleteComment(int id, int userId)
         {
-            var comment = await _context.Comments.FindAsync(id);
+            _logger.LogInformation("Attempting to delete comment with ID {CommentId}.", id);
+            var comment = await _commentRepository.GetByIdAsync(id);
             if (comment == null)
             {
+                _logger.LogWarning("Comment with ID {CommentId} not found.", id);
                 throw new KeyNotFoundException("Comment not found.");
             }
 
-            // Sjekk om bruker ID samsvarer
             if (comment.UserId != userId)
             {
+                _logger.LogWarning("User with ID {UserId} is not authorized to delete comment ID {CommentId}.", userId, id);
                 throw new UnauthorizedAccessException("User does not have permission to delete this comment.");
             }
 
-            _context.Comments.Remove(comment);
-            await _context.SaveChangesAsync();
+            await _commentRepository.DeleteAsync(id);
+            _logger.LogInformation("Comment with ID {CommentId} deleted successfully.", id);
         }
     }
 }

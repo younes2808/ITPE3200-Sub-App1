@@ -1,0 +1,51 @@
+@{
+    var user = ViewData["User"] as RAYS.Models.User;
+    var userId = user?.Id.ToString() ?? "";
+    var friends = new List<RAYS.Models.User>
+    {
+        new RAYS.Models.User { Id = 2, Username = "friend1", Email = "friend1@example.com", PasswordHash = "hashedpassword1" },
+        new RAYS.Models.User { Id = 3, Username = "friend2", Email = "friend2@example.com", PasswordHash = "hashedpassword2" }
+    };
+    var loading = false;
+
+    string GetColorForIndex(int index)
+    {
+        var colors = new[] { "#FCA5A5", "#A5B4FC", "#FCD34D", "#F0ABFC" };
+        return colors[index % colors.Length];
+    }
+}
+
+@if (loading)
+{
+    <div class="text-white">Loading...</div>
+}
+else
+{
+    <div class="hidden 970px:flex flex-col h-full 970px:w-48 1150px:w-60 bg-white text-black p-6 border-gray-200 border-l-2 border-r-2">
+        <h2 class="text-2xl font-lexend ml-4 mt-4 pb-4 text-left">Friends</h2>
+        <div class="flex-grow overflow-y-auto post-textarea-grey">
+            <div class="grid grid-cols-1 gap-3 w-full pr-2">
+                @if (friends.Any())
+                {
+                    @foreach (var friend in friends.Select((value, index) => new { value, index }))
+                    {
+                        <div class="flex flex-col items-center bg-emerald-50 border-2 p-3 border-emerald-200 rounded-lg w-full h-40">
+                            <div class="h-16 w-12 rounded-full flex items-center justify-center text-white text-pretty font-bold mb-2" style="background-color: @GetColorForIndex(friend.index)">
+                                <span class="text-black text-l font-bold">@friend.value.Username.FirstOrDefault().ToString().ToUpper()</span>
+                            </div>
+                            <p class="text-pretty font-general font-medium leading-tight">@friend.value.Username</p>
+                            <p class="text-xs text-gray-400 font-clash leading-tight">@friend.value.Username.ToLower()</p>
+                            <button onclick="location.href='/profile/@friend.value.Id'" class="mt-3 w-24 py-1 font-general bg-emerald-300 text-sm text-black rounded-lg hover:bg-emerald-500 hover:text-white transition duration-200 1150px:w-36 1150px:text-base">
+                                View Profile
+                            </button>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="text-gray-400 text-center pt-5">No friends found</div>
+                }
+            </div>
+        </div>
+    </div>
+}
