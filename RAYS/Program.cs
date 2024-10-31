@@ -5,10 +5,6 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<ServerAPIContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddControllersWithViews();
-builder.Services.AddHttpsRedirection(options =>
-{
-    options.HttpsPort = 5002; 
-});
 
 var app = builder.Build();
 
