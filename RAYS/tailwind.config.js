@@ -1,13 +1,12 @@
-/** @type {import('tailwindcss').Config} */
+﻿/** @type {import('tailwindcss').Config} */
 module.exports = {
-  content: [
-    "./Views/**/*.{cshtml,html}", // Sjekker alle cshtml-filer
-    "./wwwroot/css/**/*.{css,html}", // Sjekker CSS-filer
-    "./wwwroot/dist/**/*.{css,html}" // Sjekker eventuelle genererte CSS-filer
-  ],
-  theme: {
-    extend: {},
-  },
-  plugins: [],
+    content: [
+        './**/*.{razor,html,cshtml}',
+        './wwwroot/**/*.js',
+    ],
+    plugins: [
+        require('@tailwindcss/forms'),
+        require('@tailwindcss/aspect-ratio'),
+        require('@tailwindcss/typography'),
+    ]
 }
-
