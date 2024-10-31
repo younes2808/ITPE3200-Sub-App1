@@ -19,7 +19,7 @@ namespace RAYS.Controllers
 
         // POST: api/friend/request
         [HttpPost("request")]
-        public async Task<IActionResult> SendFriendRequest([FromBody] FriendRequest friendRequest)
+        public async Task<IActionResult> SendFriendRequest([FromBody] Friend friendRequest)
         {
             if (await _friendService.SendFriendRequestAsync(friendRequest))
             {

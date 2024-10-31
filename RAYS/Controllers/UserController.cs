@@ -70,7 +70,7 @@ namespace RAYS.Controllers
         }
 
         [HttpGet("search")]
-        public async Task<IActionResult> SearchUsers([FromQuery] string query)
+        public async Task<IActionResult> SearchUsers([FromQuery] string query) // Removed [FromBody]
         {
             if (string.IsNullOrWhiteSpace(query))
             {
