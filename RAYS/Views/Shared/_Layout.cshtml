@@ -4,24 +4,40 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - RAYS</title>
-    <link rel="stylesheet" href="~/css/app.css"/>
+    <link rel="stylesheet" href="~/css/app.css" />
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"> <!-- Legg til Material Icons hvis du bruker dem -->
 </head>
-<body>
-    <div class="container">
-        <div class="row">
-            <div class="col-md-3">
-                <partial name="_LeftNavbar" />
-            </div>
-            <div class="col-md-6">
-                <main role="main" class="pb-3">
-                    @RenderBody()
-                </main>
-            </div>
-            <div class="col-md-3">
-                <partial name="_RightNavbar" />
-            </div>
+<body class="bg-gray-100">
+    <!-- Top Bar -->
+    <div class="sticky top-0 z-10 bg-white shadow">
+        <!-- Her kan du legge til TopBar-innhold, hvis du har det -->
+    </div>
+
+    <!-- Hovedcontainer -->
+    <div class="flex w-full max-w-[1200px] mx-auto bg-gray-100 min-h-screen">
+        <!-- Venstre Navbar -->
+        <div class="flex-none">
+            <partial name="_LeftNavbar" />
         </div>
+
+        <!-- Hovedinnhold -->
+        <div class="flex-grow p-6">
+            <main role="main" class="pb-3">
+                <div style="background-color: red; height: 100px;">Test</div>
+                @RenderBody()
+            </main>
+        </div>
+
+        <!-- Høyre Navbar -->
+        <div class="flex-none">
+            <partial name="_RightNavbar" />
+        </div>
+    </div>
+
+    <!-- Bunnnavbar -->
+    <div class="sticky bottom-0 bg-white shadow">
+        <!-- Her kan du legge til BottomNavbar-innhold, hvis du har det -->
     </div>
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
