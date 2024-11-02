@@ -19,7 +19,6 @@ namespace RAYS.Services
 
         public async Task<bool> SendFriendRequestAsync(Friend friend)
         {
-            // Ensure that the friend request is valid
             if (!friend.IsValid())
             {
                 _logger.LogWarning($"Invalid friend request from {friend.SenderId} to {friend.ReceiverId}.");

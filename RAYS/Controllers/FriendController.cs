@@ -1,7 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using RAYS.Models;
 using RAYS.Services;
+using RAYS.ViewModels; // Make sure to include this namespace for your view models
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace RAYS.Controllers
@@ -32,8 +34,20 @@ namespace RAYS.Controllers
         [HttpGet("requests/{userId}")]
         public async Task<IActionResult> GetFriendRequests(int userId)
         {
+            // Fetch friend requests using the service
             var requests = await _friendService.GetFriendRequestsAsync(userId);
-            return View("FriendRequests", requests); // Return a view for friend requests
+
+            // Map the requests to the FriendRequestViewModel
+            var requestViewModels = requests.Select(request => new FriendRequestViewModel
+            {
+                Id = request.Id,
+                SenderId = request.SenderId,
+                ReceiverId = request.ReceiverId,
+                Status = request.Status
+            }).ToList();
+
+            // Return the list of requests as a JSON response
+            return Ok(requestViewModels); // or return View("FriendRequests", requestViewModels) if you are using a view
         }
 
         // PUT: api/friend/accept/{id}
@@ -63,7 +77,18 @@ namespace RAYS.Controllers
         public async Task<IActionResult> GetFriends(int userId)
         {
             var friends = await _friendService.GetFriendsAsync(userId);
-            return View("FriendsList", friends); // Return a view for the friends list
+            var friendViewModels = friends.Select(friend => new FriendViewModel
+            {
+                FriendId = friend.ReceiverId == userId ? friend.SenderId : friend.ReceiverId,
+                FriendName = "Get Friend's Name Here" // You would replace this with actual name fetching logic
+            }).ToList();
+
+            var friendListViewModel = new FriendListViewModel
+            {
+                Friends = friendViewModels
+            };
+
+            return Ok(friendListViewModel); // or return View("FriendsList", friendListViewModel) if you are using a view
         }
 
         // DELETE: api/friend/delete/{userId}/{friendId}

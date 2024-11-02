@@ -25,14 +25,12 @@ namespace RAYS.Repositories
 
         public async Task<IEnumerable<Message>> GetConversationsByUserIdAsync(int userId)
         {
-            // Query to get the last message of each conversation for the user
             var lastMessages = await _context.Messages
                 .Where(m => m.SenderId == userId || m.ReceiverId == userId)
                 .GroupBy(m => m.SenderId == userId ? m.ReceiverId : m.SenderId)
                 .Select(g => g.OrderByDescending(m => m.Timestamp).FirstOrDefault())
                 .ToListAsync();
 
-            // Filter out null messages and return only non-null messages
             return lastMessages.Where(m => m != null).Cast<Message>();
         }
 
@@ -44,7 +42,6 @@ namespace RAYS.Repositories
                 .OrderBy(m => m.Timestamp)
                 .ToListAsync();
 
-            // Filter out null messages and return only non-null messages
             return messages.Where(m => m != null).Cast<Message>();
         }
     }

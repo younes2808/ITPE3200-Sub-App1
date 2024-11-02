@@ -1,11 +1,12 @@
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using RAYS.Models;
 using RAYS.Services;
+using RAYS.ViewModels;
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace RAYS.Controllers
 {
@@ -37,20 +38,20 @@ namespace RAYS.Controllers
         // POST: posts/create
         [HttpPost("create")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([FromForm] PostRequestModel request)
+        public async Task<IActionResult> Create([FromForm] PostViewModel model)
         {
             if (!ModelState.IsValid)
             {
-                return View(request); // Return the view with validation errors
+                return View(model); // Return the view with validation errors
             }
 
             var post = new Post
             {
-                Content = request.Content,
-                ImagePath = request.Image != null ? await SaveImage(request.Image) : null,
-                VideoUrl = request.VideoUrl,
-                Location = request.Location,
-                UserId = request.UserId
+                Content = model.Content,
+                ImagePath = model.Image != null ? await SaveImage(model.Image) : null,
+                VideoUrl = model.VideoUrl,
+                Location = model.Location,
+                UserId = model.UserId
             };
 
             await _postService.AddAsync(post);
@@ -78,23 +79,44 @@ namespace RAYS.Controllers
             {
                 return NotFound(); // Return a 404 if the post is not found
             }
-            return View(post); // Return the edit view with the post
+
+            var model = new PostViewModel
+            {
+                Id = post.Id,
+                Content = post.Content,
+                VideoUrl = post.VideoUrl,
+                Location = post.Location,
+                UserId = post.UserId
+                // ImagePath is typically not set here, as it's not user input
+            };
+
+            return View(model); // Return the edit view with the post
         }
 
         // POST: posts/edit/{id}
         [HttpPost("edit/{id}")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [FromForm] Post post)
+        public async Task<IActionResult> Edit(int id, [FromForm] PostViewModel model)
         {
-            if (id != post.Id)
+            if (id != model.Id)
             {
                 return BadRequest(); // Return bad request if IDs do not match
             }
 
             if (!ModelState.IsValid)
             {
-                return View(post); // Return the view with validation errors
+                return View(model); // Return the view with validation errors
             }
+
+            var post = new Post
+            {
+                Id = model.Id,
+                Content = model.Content,
+                ImagePath = model.Image != null ? await SaveImage(model.Image) : null,
+                VideoUrl = model.VideoUrl,
+                Location = model.Location,
+                UserId = model.UserId
+            };
 
             await _postService.UpdateAsync(post);
             return RedirectToAction(nameof(Index)); // Redirect to the list of posts
@@ -114,7 +136,7 @@ namespace RAYS.Controllers
             if (image == null || image.Length == 0) return null;
 
             // Define the path to save the image
-            var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images"); // Adjust as necessary
+            var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images");
             var uniqueFileName = Guid.NewGuid().ToString() + Path.GetExtension(image.FileName);
             var filePath = Path.Combine(uploadsFolder, uniqueFileName);
 

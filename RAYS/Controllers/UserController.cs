@@ -1,8 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using RAYS.Models;
 using RAYS.Services;
-using System.Collections.Generic;
-using System.Linq;
+using RAYS.ViewModels;
 using System.Threading.Tasks;
 
 namespace RAYS.Controllers
@@ -17,12 +16,13 @@ namespace RAYS.Controllers
             _userService = userService;
         }
 
+        // POST: user/register
         [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody] RegistrationRequest request)
+        public async Task<IActionResult> Register([FromBody] RegistrationViewModel request)
         {
-            if (request == null || string.IsNullOrWhiteSpace(request.Username) || string.IsNullOrWhiteSpace(request.Email) || string.IsNullOrWhiteSpace(request.Password))
+            if (!ModelState.IsValid)
             {
-                return BadRequest("Invalid user data.");
+                return BadRequest(ModelState); // Return validation errors if model state is not valid
             }
 
             try
@@ -33,16 +33,17 @@ namespace RAYS.Controllers
             catch (System.Exception ex)
             {
                 ModelState.AddModelError("", ex.Message);
-                return View("Register", request); // Return to registration view with error
+                return BadRequest(ModelState); // Return error messages if registration fails
             }
         }
 
+        // POST: user/login
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] LoginRequest request)
+        public async Task<IActionResult> Login([FromBody] LoginViewModel request)
         {
-            if (request == null || string.IsNullOrWhiteSpace(request.Username) || string.IsNullOrWhiteSpace(request.Password))
+            if (!ModelState.IsValid)
             {
-                return BadRequest("Invalid login data.");
+                return BadRequest(ModelState); // Return validation errors if model state is not valid
             }
 
             try
@@ -53,7 +54,7 @@ namespace RAYS.Controllers
             catch (System.UnauthorizedAccessException ex)
             {
                 ModelState.AddModelError("", ex.Message);
-                return View("Login", request); // Return to login view with error
+                return BadRequest(ModelState); // Return error messages if login fails
             }
         }
 
@@ -70,7 +71,7 @@ namespace RAYS.Controllers
         }
 
         [HttpGet("search")]
-        public async Task<IActionResult> SearchUsers([FromQuery] string query) // Removed [FromBody]
+        public async Task<IActionResult> SearchUsers([FromQuery] string query)
         {
             if (string.IsNullOrWhiteSpace(query))
             {

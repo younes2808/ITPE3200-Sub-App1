@@ -62,7 +62,8 @@ namespace RAYS.Controllers
         public async Task<IActionResult> GetLikesForPost(int postId)
         {
             var likes = await _likeService.GetLikesForPostAsync(postId);
-            return View("LikesList", likes); // Returner visningen med listen over likes
+            var likeCount = likes.Count(); // Or just `await _likeService.GetLikeCountForPostAsync(postId);`
+            return Json(new { count = likeCount });
         }
     }
 }

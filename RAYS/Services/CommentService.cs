@@ -1,5 +1,6 @@
 using RAYS.Models;
 using RAYS.Repositories;
+using RAYS.ViewModels;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -11,11 +12,13 @@ namespace RAYS.Services
     public class CommentService
     {
         private readonly ICommentRepository _commentRepository;
+        private readonly IUserRepository _userRepository; // User repository for fetching user info
         private readonly ILogger<CommentService> _logger;
 
-        public CommentService(ICommentRepository commentRepository, ILogger<CommentService> logger)
+        public CommentService(ICommentRepository commentRepository, IUserRepository userRepository, ILogger<CommentService> logger)
         {
             _commentRepository = commentRepository;
+            _userRepository = userRepository;
             _logger = logger;
         }
 
@@ -23,33 +26,51 @@ namespace RAYS.Services
         {
             _logger.LogInformation("Attempting to add a new comment.");
 
-            // Check if the post exists (this should be a repository method)
+            // Check if the post exists
             if (await _commentRepository.GetByIdAsync(comment.PostId) == null)
             {
                 _logger.LogWarning("Post with ID {PostId} not found.", comment.PostId);
                 throw new KeyNotFoundException("Post not found.");
             }
 
-            // Assuming you have a method to check if the user exists
-            if (await _commentRepository.GetByUserIdAsync(comment.UserId) == null)
+            // Check if the user exists using GetUserByIdAsync
+            if (await _userRepository.GetUserByIdAsync(comment.UserId) == null)
             {
                 _logger.LogWarning("User with ID {UserId} not found.", comment.UserId);
                 throw new KeyNotFoundException("User not found.");
             }
 
-            comment.CreatedAt = DateTime.UtcNow; // Ensure you're setting this correctly
+            comment.CreatedAt = DateTime.UtcNow; // Set creation time
             await _commentRepository.AddAsync(comment);
 
             _logger.LogInformation("Comment added successfully with ID {CommentId}.", comment.Id);
             return comment;
         }
 
-        public async Task<IEnumerable<Comment>> GetCommentsForPost(int postId)
+        public async Task<IEnumerable<CommentWithUserViewModel>> GetCommentsForPost(int postId)
         {
             _logger.LogInformation("Retrieving comments for post ID {PostId}.", postId);
             var comments = await _commentRepository.GetAllAsync(postId);
-            _logger.LogInformation("Retrieved {Count} comments for post ID {PostId}.", comments.Count(), postId);
-            return comments; // Return IEnumerable instead of List
+            var userIds = comments.Select(c => c.UserId).Distinct().ToList(); // Get distinct user IDs
+
+            var commentsWithUsernames = new List<CommentWithUserViewModel>();
+
+            foreach (var comment in comments)
+            {
+                var user = await _userRepository.GetUserByIdAsync(comment.UserId);
+                commentsWithUsernames.Add(new CommentWithUserViewModel
+                {
+                    Id = comment.Id,
+                    Text = comment.Text,
+                    CreatedAt = comment.CreatedAt,
+                    UserId = comment.UserId,
+                    PostId = comment.PostId,
+                    UserName = user?.Username ?? "Unknown" // Use username or "Unknown" if user not found
+                });
+            }
+
+            _logger.LogInformation("Retrieved {Count} comments for post ID {PostId}.", commentsWithUsernames.Count, postId);
+            return commentsWithUsernames; // Return comments with usernames
         }
 
         public async Task<Comment> GetCommentByIdAsync(int commentId)

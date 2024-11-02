@@ -18,61 +18,74 @@ namespace RAYS.Repositories
 
         public async Task<bool> SendFriendRequestAsync(Friend friend)
         {
-            // Sjekk om sender og mottaker er den samme
+            // Check if sender and receiver are the same
             if (friend.SenderId == friend.ReceiverId)
-                return false; // Sender og mottaker kan ikke være den samme
+                return false; // Sender and receiver cannot be the same
 
-            // Sjekk om en eksisterende vennforespørsel allerede finnes
+            // Check if an existing friend request already exists
             var existingRequest = await _context.Friends
                 .FirstOrDefaultAsync(f => 
                     (f.SenderId == friend.SenderId && f.ReceiverId == friend.ReceiverId) ||
                     (f.SenderId == friend.ReceiverId && f.ReceiverId == friend.SenderId));
 
             if (existingRequest != null)
-                return false; // En vennforespørsel eksisterer allerede
+                return false; // A friend request already exists
 
-            // Sett status til "Pending"
+            // Set status to "Pending"
             friend.Status = "Pending";
 
-            // Legg til ny vennforespørsel i databasen
+            // Add new friend request to the database
             _context.Friends.Add(friend);
             await _context.SaveChangesAsync();
-            return true; // Vennforespørsel sendt
+            return true; // Friend request sent
         }
 
         public async Task<IEnumerable<Friend>> GetFriendRequestsAsync(int userId)
         {
-            // Hent vennforespørslene for brukeren
+            // Retrieve friend requests for the user
             return await _context.Friends
                 .Where(f => (f.ReceiverId == userId || f.SenderId == userId) && f.Status == "Pending")
                 .ToListAsync();
         }
 
+        public async Task<Friend> GetFriendRequestByIdAsync(int id)
+        {
+            // Retrieve friend request by its ID
+            var friendRequest = await _context.Friends.FindAsync(id);
+            
+            if (friendRequest == null)
+            {
+                throw new KeyNotFoundException($"Friend request with ID {id} not found.");
+            }
+
+            return friendRequest;
+        }
+
         public async Task<bool> AcceptFriendRequestAsync(int id)
         {
-            var request = await _context.Friends.FindAsync(id);
-            if (request == null) return false; // Forespørsel ikke funnet
+            var request = await GetFriendRequestByIdAsync(id);
+            if (request == null) return false; // Request not found
 
-            // Oppdater statusen til "Accepted"
+            // Update status to "Accepted"
             request.Status = "Accepted";
             await _context.SaveChangesAsync();
-            return true; // Vennforespørsel akseptert
+            return true; // Friend request accepted
         }
 
         public async Task<bool> RejectFriendRequestAsync(int id)
         {
-            var request = await _context.Friends.FindAsync(id);
-            if (request == null) return false; // Forespørsel ikke funnet
+            var request = await GetFriendRequestByIdAsync(id);
+            if (request == null) return false; // Request not found
 
-            // Fjern vennforespørselen fra databasen
+            // Remove the friend request from the database
             _context.Friends.Remove(request);
             await _context.SaveChangesAsync();
-            return true; // Vennforespørsel avvist
+            return true; // Friend request rejected
         }
 
         public async Task<IEnumerable<Friend>> GetFriendsAsync(int userId)
         {
-            // Hent alle venner for brukeren
+            // Retrieve all friends for the user
             return await _context.Friends
                 .Where(f => (f.SenderId == userId || f.ReceiverId == userId) && f.Status == "Accepted")
                 .ToListAsync();
@@ -86,12 +99,12 @@ namespace RAYS.Repositories
                     (f.SenderId == friendId && f.ReceiverId == userId) &&
                     f.Status == "Accepted");
 
-            if (friendRelationship == null) return false; // Vennforhold ikke funnet
+            if (friendRelationship == null) return false; // Friendship not found
 
-            // Fjern vennforholdet fra databasen
+            // Remove the friendship from the database
             _context.Friends.Remove(friendRelationship);
             await _context.SaveChangesAsync();
-            return true; // Venn slettet
+            return true; // Friend deleted
         }
     }
 }
