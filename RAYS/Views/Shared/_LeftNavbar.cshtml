@@ -63,15 +63,18 @@
                 </div>
             </button>
 
-            <button  
-                href="/logout" 
-                class="px-2 transition-colors duration-200 @(activeButton == "logout" ? "border-b-2 border-emerald-300 border-t-2 border-b-2 bg-emerald-50 font-semibold" : "510px:hover:bg-emerald-100 md:hover:bg-emerald-100")"
-            >
-                <div class="flex items-center space-x-3 rounded-lg py-2 870px:py-3 w-full">
-                    <span class="material-icons text-3xl md:text-lg 870px:text-2xl pl-2 text-black">logout</span>
-                    <span class="text-sm 870px:text-lg hidden md:inline transition duration-300 ease-in-out text-black">Logout</span>
-                </div>
-            </button>
+            <!-- Logout Button -->
+            <form asp-controller="User" asp-action="Logout" method="post" class="w-full">
+                <button 
+                    type="submit"
+                    class="px-2 transition-colors duration-200 @(activeButton == "logout" ? "border-b-2 border-emerald-300 border-t-2 border-b-2 bg-emerald-50 font-semibold" : "510px:hover:bg-emerald-100 md:hover:bg-emerald-100") w-full"
+                >
+                    <div class="flex items-center space-x-3 rounded-lg py-2 870px:py-3">
+                        <span class="material-icons text-3xl md:text-lg 870px:text-2xl pl-2 text-black">logout</span>
+                        <span class="text-sm 870px:text-lg hidden md:inline transition duration-300 ease-in-out text-black">Logout</span>
+                    </div>
+                </button>
+            </form>
         </div>
     </nav>       
 </div>

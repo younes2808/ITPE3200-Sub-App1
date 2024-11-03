@@ -1,56 +1,54 @@
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using RAYS.DAL;
 using RAYS.Repositories;
 using RAYS.Services;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Konfigurer database
+// Configure database
 builder.Services.AddDbContext<ServerAPIContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Legg til servicer og repository
+// Add services and repositories
 builder.Services.AddControllersWithViews();
-builder.Services.AddScoped<ICommentRepository, CommentRepository>();
-builder.Services.AddScoped<CommentService>(); // Legg til CommentService
-builder.Services.AddScoped<UserService>();    // Legg til UserService
-builder.Services.AddScoped<IUserRepository, UserRepository>(); // Legg til UserRepository med IUserRepository-grensesnittet
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<UserService>();
 
-// Konfigurer session
-builder.Services.AddDistributedMemoryCache();
-builder.Services.AddSession(options =>
-{
-    options.IdleTimeout = TimeSpan.FromMinutes(30); // Sett timeout for session
-    options.Cookie.HttpOnly = true;
-    options.Cookie.IsEssential = true;
-});
+// Configure authentication
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.LoginPath = "/user/login"; // Redirect to login if not authenticated
+        options.AccessDeniedPath = "/user/accessdenied"; // Redirect if access is denied
+    });
 
-// Konfigurer logging i henhold til appsettings.json eller egne standarder
-builder.Logging.ClearProviders();  // Rens default-providers for å unngå duplikater
-builder.Logging.AddConsole();      // Legg til Console-logging
-builder.Logging.AddDebug();        // Legg til Debug-logging (spesielt nyttig i VS)
-builder.Logging.AddConfiguration(builder.Configuration.GetSection("Logging"));  // Bruker loggnivåer fra appsettings.json
+// Configure logging
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
+builder.Logging.AddDebug();
+builder.Logging.AddConfiguration(builder.Configuration.GetSection("Logging"));
 
 var app = builder.Build();
 
-// Konfigurer HTTP-pipeline
+// Configure HTTPS redirection and static files
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-    app.UseHsts();
+    app.UseHsts(); // Enable HTTP Strict Transport Security (HSTS)
 }
 
-app.UseHttpsRedirection();
-app.UseStaticFiles();
+app.UseHttpsRedirection(); // Redirect HTTP requests to HTTPS
+app.UseStaticFiles(); // Enable static file serving
+app.UseRouting(); // Enable routing
+app.UseAuthentication(); // Enable authentication middleware
+app.UseAuthorization();  // Enable authorization middleware
 
-app.UseRouting();
-app.UseAuthorization();
-app.UseSession(); // Legg til session-middleware
-
-// Konfigurer standardrute
+// Configure default route
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
+// Run the application
 app.Run();
