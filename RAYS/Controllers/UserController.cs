@@ -87,7 +87,7 @@ namespace RAYS.Controllers
                     await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity), authProperties);
 
                     // Redirect to the home page after successful login
-                    return RedirectToAction("Index", "Home");
+                    return RedirectToAction("Index", "Post");
                 }
             }
             catch (System.Exception ex)

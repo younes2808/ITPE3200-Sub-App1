@@ -1,16 +1,16 @@
-using Microsoft.AspNetCore.Http;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.Claims;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using RAYS.Models;
 using RAYS.Services;
 using RAYS.ViewModels;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Threading.Tasks;
+using RAYS.Models;
 
 namespace RAYS.Controllers
 {
-    [Route("posts")]
+    [Authorize]
     public class PostController : Controller
     {
         private readonly PostService _postService;
@@ -20,139 +20,140 @@ namespace RAYS.Controllers
             _postService = postService;
         }
 
-        // GET: posts
-        [HttpGet]
         public async Task<IActionResult> Index()
         {
-            var posts = await _postService.GetLatestPostsAsync(10); // Example: Get the latest 10 posts
-            return View(posts); // Return the view with the posts
-        }
+            var userId = int.Parse(User.FindFirst("UserId")?.Value ?? "0");
 
-        // GET: posts/create
-        [HttpGet("create")]
-        public IActionResult Create()
-        {
-            return View(); // Return the create view
-        }
-
-        // POST: posts/create
-        [HttpPost("create")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([FromForm] PostViewModel model)
-        {
-            if (!ModelState.IsValid)
-            {
-                return View(model); // Return the view with validation errors
-            }
-
-            var post = new Post
-            {
-                Content = model.Content,
-                ImagePath = model.Image != null ? await SaveImage(model.Image) : null,
-                VideoUrl = model.VideoUrl,
-                Location = model.Location,
-                UserId = model.UserId
-            };
-
-            await _postService.AddAsync(post);
-            return RedirectToAction(nameof(Index)); // Redirect to the list of posts
-        }
-
-        // GET: posts/{id}
-        [HttpGet("{id}")]
-        public async Task<IActionResult> Details(int id)
-        {
-            var post = await _postService.GetByIdAsync(id);
-            if (post == null)
-            {
-                return NotFound(); // Return a 404 if the post is not found
-            }
-            return View(post); // Return the details view with the post
-        }
-
-        // GET: posts/edit/{id}
-        [HttpGet("edit/{id}")]
-        public async Task<IActionResult> Edit(int id)
-        {
-            var post = await _postService.GetByIdAsync(id);
-            if (post == null)
-            {
-                return NotFound(); // Return a 404 if the post is not found
-            }
-
-            var model = new PostViewModel
+            var posts = await _postService.GetLatestPostsAsync(20);
+            var postViewModels = posts.Select(post => new PostViewModel
             {
                 Id = post.Id,
                 Content = post.Content,
+                ImagePath = post.ImagePath,
                 VideoUrl = post.VideoUrl,
                 Location = post.Location,
-                UserId = post.UserId
-                // ImagePath is typically not set here, as it's not user input
-            };
+                CreatedAt = post.CreatedAt,
+                UserId = post.UserId,
+                IsLikedByUser = _postService.IsPostLikedByUserAsync(userId, post.Id).Result
+            }).ToList();
 
-            return View(model); // Return the edit view with the post
+            return View(postViewModels);
         }
 
-        // POST: posts/edit/{id}
-        [HttpPost("edit/{id}")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [FromForm] PostViewModel model)
+        [HttpPost]
+        public async Task<IActionResult> Create(PostViewModel model, IFormFile? image)
         {
-            if (id != model.Id)
-            {
-                return BadRequest(); // Return bad request if IDs do not match
-            }
-
             if (!ModelState.IsValid)
-            {
-                return View(model); // Return the view with validation errors
-            }
+                return RedirectToAction("Index");
+
+            var userId = int.Parse(User.FindFirst("UserId")?.Value ?? "0");
+            
+            // Save the uploaded image if it exists
+            var imagePath = await SaveImage(image);
 
             var post = new Post
             {
-                Id = model.Id,
                 Content = model.Content,
-                ImagePath = model.Image != null ? await SaveImage(model.Image) : null,
+                ImagePath = imagePath,
                 VideoUrl = model.VideoUrl,
                 Location = model.Location,
-                UserId = model.UserId
+                CreatedAt = DateTime.Now,
+                UserId = userId
             };
 
-            await _postService.UpdateAsync(post);
-            return RedirectToAction(nameof(Index)); // Redirect to the list of posts
+            await _postService.AddAsync(post);
+            return RedirectToAction("Index");
         }
 
-        // POST: posts/delete/{id}
-        [HttpPost("delete/{id}")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Delete(int id)
-        {
-            await _postService.DeleteAsync(id);
-            return RedirectToAction(nameof(Index)); // Redirect to the list of posts
-        }
-
-        private async Task<string?> SaveImage(IFormFile image)
+        //method for saving photos
+        private async Task<string?> SaveImage(IFormFile? image)
         {
             if (image == null || image.Length == 0) return null;
 
-            // Define the path to save the image
             var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images");
             var uniqueFileName = Guid.NewGuid().ToString() + Path.GetExtension(image.FileName);
             var filePath = Path.Combine(uploadsFolder, uniqueFileName);
 
-            // Ensure the directory exists
             if (!Directory.Exists(uploadsFolder))
             {
                 Directory.CreateDirectory(uploadsFolder);
             }
 
-            // Save the file asynchronously
             using (var fileStream = new FileStream(filePath, FileMode.Create))
             {
                 await image.CopyToAsync(fileStream);
             }
 
-            return $"/images/{uniqueFileName}"; // Return the relative path to access the image
+            return $"/images/{uniqueFileName}";
+        }
+        
+
+        [HttpPost]
+        [Authorize]  // Ensure only authenticated users can access this
+        public async Task<IActionResult> Update(PostViewModel model)
+        {
+            // Get the current logged-in user's ID
+            var userId = int.Parse(User.FindFirst("UserId")?.Value ?? "0");
+
+            if (model.UserId != userId)
+                return Forbid();
+
+            // Retrieve the post to be updated
+            var post = await _postService.GetByIdAsync(model.Id);
+            if (post == null)
+                return NotFound();
+
+            // Update fields (excluding ImagePath)
+            post.Content = model.Content;
+            post.VideoUrl = model.VideoUrl;
+            post.Location = model.Location;
+
+            try
+            {
+                await _postService.UpdateAsync(post);
+                return RedirectToAction("Index");
+            }
+            catch (Exception)
+            {
+            
+                return View("Index", model); // Return to Index with error feedback
+            }
+        }
+
+
+        [HttpPost]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var userId = int.Parse(User.FindFirst("UserId")?.Value ?? "0");
+
+            var post = await _postService.GetByIdAsync(id);
+            if (post == null || post.UserId != userId)
+                return Forbid();
+
+            await _postService.DeleteAsync(id);
+            return RedirectToAction("Index");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Like(int postId)
+        {
+            var userId = int.Parse(User.FindFirst("UserId")?.Value ?? "0");
+
+            if (!await _postService.IsPostLikedByUserAsync(userId, postId))
+                await _postService.LikePostAsync(userId, postId);
+
+            return RedirectToAction("Index");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Unlike(int postId)
+        {
+            var userId = int.Parse(User.FindFirst("UserId")?.Value ?? "0");
+
+            if (await _postService.IsPostLikedByUserAsync(userId, postId))
+                await _postService.UnlikePostAsync(userId, postId);
+
+            return RedirectToAction("Index");
         }
     }
 }

@@ -1,0 +1,107 @@
+@model IEnumerable<RAYS.ViewModels.PostViewModel>
+
+<h2>Post Feed</h2>
+<div class="w-[10%]">
+    <!-- Create new post form -->
+    <form asp-action="Create" method="post" enctype="multipart/form-data">
+        <textarea name="Content" placeholder="What's on your mind?" required></textarea>
+
+        <!-- Image upload field -->
+        <label for="Image">Upload Image:</label>
+        <input type="file" name="Image" />
+
+        <!-- Video URL input -->
+        <label for="VideoUrl">Video URL:</label>
+        <input type="url" name="VideoUrl" placeholder="Add a video URL" />
+
+        <!-- Location input -->
+        <label for="Location">Location:</label>
+        <input type="text" name="Location" placeholder="Enter a location" />
+
+        <button type="submit">Post</button>
+    </form>
+</div>
+<hr />
+
+@foreach (var post in Model)
+{
+    <div class="post" id="post-@post.Id">
+        
+        <!-- Post content display -->
+        <p id="content-@post.Id">@post.Content</p>
+
+        <!-- Display image if available -->
+        @if (!string.IsNullOrEmpty(post.ImagePath))
+        {
+            <img src="@post.ImagePath" alt="Post image" />
+        }
+
+        <!-- Display video link if available -->
+        @if (!string.IsNullOrEmpty(post.VideoUrl))
+        {
+            <a href="@post.VideoUrl" target="_blank">Watch Video</a>
+        }
+
+        <!-- Display location and timestamp -->
+        <small>@post.Location</small>
+        <small>@post.CreatedAt.ToString("f")</small>
+
+        <!-- Like/Unlike button based on user's action -->
+        <form asp-action="@(post.IsLikedByUser ? "Unlike" : "Like")" method="post">
+            <input type="hidden" name="postId" value="@post.Id" />
+            <button type="submit">
+                @(post.IsLikedByUser ? "Unlike" : "Like")
+            </button>
+        </form>
+
+        <!-- Edit/Delete options for posts owned by the user -->
+        @if (post.UserId == int.Parse(User.FindFirst("UserId")?.Value ?? "0"))
+        {
+            <!-- Edit button to toggle the edit form -->
+            <button id="edit-button-@post.Id" onclick="toggleEdit(@post.Id)">Edit</button>
+
+            <!-- Edit form (hidden by default) -->
+            <form asp-action="Update" method="post" id="edit-form-@post.Id" style="display: none;">
+                <input type="hidden" name="Id" value="@post.Id" />
+                <input type="hidden" name="UserId" value="@post.UserId" /> <!-- Ensure UserId is included -->
+                
+                <!-- Textarea for editing content -->
+                <textarea name="Content">@post.Content</textarea>
+
+                <!-- Optional fields for editing other data -->
+                <input type="text" name="VideoUrl" value="@post.VideoUrl" placeholder="Video URL" />
+                <input type="text" name="Location" value="@post.Location" placeholder="Location" />
+
+                <!-- Update and cancel buttons -->
+                <button type="submit">Save</button>
+                <button type="button" onclick="toggleEdit(@post.Id)">Cancel</button>
+            </form>
+
+            <!-- Delete button for user's own posts -->
+            <form asp-action="Delete" method="post">
+                <input type="hidden" name="id" value="@post.Id" />
+                <button type="submit">Delete</button>
+            </form>
+        }
+    </div>
+}
+
+<!-- JavaScript function to toggle the edit form -->
+<script>
+    function toggleEdit(postId) {
+        var content = document.getElementById("content-" + postId);
+        var editForm = document.getElementById("edit-form-" + postId);
+        var editButton = document.getElementById("edit-button-" + postId);
+        
+        // Toggle the visibility of the content and edit form
+        if (editForm.style.display === "none") {
+            content.style.display = "none";  // Hide post content
+            editForm.style.display = "block";  // Show edit form
+            editButton.style.display = "none"; // Hide edit button
+        } else {
+            content.style.display = "block";  // Show post content
+            editForm.style.display = "none";   // Hide edit form
+            editButton.style.display = "inline"; // Show edit button again
+        }
+    }
+</script>

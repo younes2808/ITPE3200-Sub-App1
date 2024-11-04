@@ -1,25 +1,24 @@
-using Microsoft.AspNetCore.Http;
-using System.Collections.Generic;
+using System;
 using System.ComponentModel.DataAnnotations;
-using RAYS.Models;
 
 namespace RAYS.ViewModels
 {
     public class PostViewModel
-    {
-        public int Id { get; set; } // For editing existing posts
+{
+    public int Id { get; set; }
 
-        [Required(ErrorMessage = "Content is required.")]
-        public required string Content { get; set; } // Content of the post
+    [Required(ErrorMessage = "Content is required")]
+    [StringLength(2000, ErrorMessage = "Content cannot exceed 2000 characters.")]
+    public string Content { get; set; } = string.Empty;
 
-        public IFormFile? Image { get; set; } // For image uploads
+    public string? ImagePath { get; set; }
+    public IFormFile? Image { get; set; } // Image file for upload
+    public string? VideoUrl { get; set; }
+    public string? Location { get; set; }
 
-        [Url(ErrorMessage = "Invalid URL format.")]
-        public string? VideoUrl { get; set; } // URL for the video
+    public DateTime CreatedAt { get; set; }
+    public int UserId { get; set; }
+    public bool IsLikedByUser { get; set; }
+}
 
-        [StringLength(100, ErrorMessage = "Location cannot exceed 100 characters.")]
-        public string? Location { get; set; } // Location related to the post
-
-        public int UserId { get; set; } // ID of the user creating the post
-    }
 }
