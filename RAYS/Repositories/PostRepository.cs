@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using RAYS.DAL;
 using RAYS.Models;
@@ -10,10 +11,12 @@ namespace RAYS.Repositories
     public class PostRepository : IPostRepository
     {
         private readonly ServerAPIContext _context;
+        private readonly IWebHostEnvironment _webHostEnvironment;
 
-        public PostRepository(ServerAPIContext context)
+        public PostRepository(ServerAPIContext context, IWebHostEnvironment webHostEnvironment)
         {
             _context = context;
+            _webHostEnvironment = webHostEnvironment;
         }
 
         public async Task<Post?> GetByIdAsync(int id)
@@ -61,14 +64,29 @@ namespace RAYS.Repositories
         }
 
         public async Task DeleteAsync(int id)
+    {
+        var post = await GetByIdAsync(id);
+        if (post != null)
         {
-            var post = await GetByIdAsync(id);
-            if (post != null)
+            // Construct the file path to delete the image
+            if (!string.IsNullOrEmpty(post.ImagePath))
             {
-                _context.Posts.Remove(post);
-                await _context.SaveChangesAsync();
+                var uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "images");
+                var filePath = Path.Combine(uploadsFolder, post.ImagePath);
+                
+                // Check if the file exists before trying to delete
+                if (System.IO.File.Exists(filePath))
+                {
+                    System.IO.File.Delete(filePath);
+                }
             }
+
+            // Now delete the post from the database
+            _context.Posts.Remove(post);
+            await _context.SaveChangesAsync();
         }
+    }
+
 
         // Method to like a post
         public async Task AddLikeAsync(Like like)
