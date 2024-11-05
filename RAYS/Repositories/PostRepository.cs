@@ -70,23 +70,33 @@ namespace RAYS.Repositories
         var post = await GetByIdAsync(id);
         if (post != null)
         {
-            // Construct the file path to delete the image
             if (!string.IsNullOrEmpty(post.ImagePath))
-            {
-                var uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "wwwroot");
-                var filePath = Path.Combine(uploadsFolder, post.ImagePath);
-                _logger.LogInformation("Image-Path:");
-                _logger.LogInformation(post.ImagePath);
-                // Check if the file exists before trying to delete
-                if (System.IO.File.Exists(filePath))
-                {
-                    System.IO.File.Delete(filePath);
-                }
-            }
+        {
+            var uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "images");
 
-            // Now delete the post from the database
-            _context.Posts.Remove(post);
-            await _context.SaveChangesAsync();
+            // Check if post.ImagePath contains "/images/" and remove it
+            var relativeImagePath = post.ImagePath.Replace("/images/", "");
+            var filePath = Path.Combine(uploadsFolder, relativeImagePath);
+
+            _logger.LogInformation("Full file path for deletion:");
+            _logger.LogInformation(filePath);
+
+            // Check if the file exists before trying to delete
+            if (System.IO.File.Exists(filePath))
+            {
+                System.IO.File.Delete(filePath);
+                _logger.LogInformation("Image file deleted successfully.");
+            }
+            else
+            {
+                _logger.LogWarning("Image file not found at path: " + filePath);
+            }
+        }
+
+        // Now delete the post from the database
+        _context.Posts.Remove(post);
+        await _context.SaveChangesAsync();
+
         }
     }
 
