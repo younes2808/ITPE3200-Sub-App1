@@ -12,11 +12,13 @@ namespace RAYS.Repositories
     {
         private readonly ServerAPIContext _context;
         private readonly IWebHostEnvironment _webHostEnvironment;
+        private readonly ILogger<PostRepository> _logger;
 
-        public PostRepository(ServerAPIContext context, IWebHostEnvironment webHostEnvironment)
+        public PostRepository(ServerAPIContext context, IWebHostEnvironment webHostEnvironment, ILogger<PostRepository> logger)
         {
             _context = context;
             _webHostEnvironment = webHostEnvironment;
+            _logger = logger;
         }
 
         public async Task<Post?> GetByIdAsync(int id)
@@ -71,9 +73,10 @@ namespace RAYS.Repositories
             // Construct the file path to delete the image
             if (!string.IsNullOrEmpty(post.ImagePath))
             {
-                var uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "images");
+                var uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "wwwroot");
                 var filePath = Path.Combine(uploadsFolder, post.ImagePath);
-                
+                _logger.LogInformation("Image-Path:");
+                _logger.LogInformation(post.ImagePath);
                 // Check if the file exists before trying to delete
                 if (System.IO.File.Exists(filePath))
                 {
