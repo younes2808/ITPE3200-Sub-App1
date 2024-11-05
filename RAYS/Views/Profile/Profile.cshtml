@@ -1,0 +1,176 @@
+@model RAYS.ViewModels.UserViewModel
+
+<h1>@Model.Username's Profile</h1>
+
+<div>
+    <button onclick="location.href='@Url.Action("Profile", new { userId = Model.UserId, viewType = "Posts" })'">Posts</button>
+    <button onclick="location.href='@Url.Action("Profile", new { userId = Model.UserId, viewType = "LikedPosts" })'">Liked Posts</button>
+    <button onclick="location.href='@Url.Action("Profile", new { userId = Model.UserId, viewType = "Friends" })'">Friends</button>
+</div>
+
+<hr />
+
+@if (ViewBag.ViewType == "Posts")
+{
+    <h2>Posts</h2>
+
+    @foreach (var post in Model.Posts)
+    {
+        <div class="post" id="post-@post.Id">
+            
+            <!-- Post content display -->
+            <p id="content-@post.Id">@post.Content</p>
+
+            <!-- Display image if available -->
+            @if (!string.IsNullOrEmpty(post.ImagePath))
+            {
+                <img src="@post.ImagePath" alt="Post image" />
+            }
+
+            <!-- Display video link if available -->
+            @if (!string.IsNullOrEmpty(post.VideoUrl))
+            {
+                <a href="@post.VideoUrl" target="_blank">Watch Video</a>
+            }
+
+            <!-- Display location and timestamp -->
+            <small>@post.Location</small>
+            <small>@post.CreatedAt.ToString("f")</small>
+
+            <!-- Like/Unlike button based on user's action -->
+            <form asp-action="@(post.IsLikedByUser ? "Unlike" : "Like")" method="post">
+                <input type="hidden" name="postId" value="@post.Id" />
+                <input type="hidden" name="viewType" value="Posts" />
+                <button type="submit">
+                    @(post.IsLikedByUser ? "Unlike" : "Like")
+                </button>
+            </form>
+
+            <!-- Edit/Delete options for posts owned by the user -->
+            @if (post.UserId == int.Parse(User.FindFirst("UserId")?.Value ?? "0"))
+            {
+                <!-- Edit button to toggle the edit form -->
+                <button id="edit-button-@post.Id" onclick="toggleEdit(@post.Id)">Edit</button>
+
+                <!-- Edit form (hidden by default) -->
+                <form asp-action="Update" method="post" id="edit-form-@post.Id" style="display: none;">
+                    <input type="hidden" name="Id" value="@post.Id" />
+                    <input type="hidden" name="UserId" value="@post.UserId" /> <!-- Ensure UserId is included -->
+                    
+                    <!-- Textarea for editing content -->
+                    <textarea name="Content">@post.Content</textarea>
+
+                    <!-- Optional fields for editing other data -->
+                    <input type="text" name="VideoUrl" value="@post.VideoUrl" placeholder="Video URL" />
+                    <input type="text" name="Location" value="@post.Location" placeholder="Location" />
+
+                    <!-- Update and cancel buttons -->
+                    <button type="submit">Save</button>
+                    <button type="button" onclick="toggleEdit(@post.Id)">Cancel</button>
+                </form>
+
+                <!-- Delete button for user's own posts -->
+                <form asp-action="Delete" method="post">
+                    <input type="hidden" name="id" value="@post.Id" />
+                    <input type="hidden" name="viewType" value="Posts" />
+                    <button type="submit">Delete</button>
+                </form>
+            }
+        </div>
+    }
+}
+else if (ViewBag.ViewType == "LikedPosts")
+{
+    <h2>Liked Posts</h2>
+    @foreach (var likedPost in Model.LikedPosts)
+    {
+        <div class="post" id="post-@likedPost.Id">
+            
+            <!-- Liked post content display -->
+            <p id="content-@likedPost.Id">@likedPost.Content</p>
+
+            <!-- Display image if available -->
+            @if (!string.IsNullOrEmpty(likedPost.ImagePath))
+            {
+                <img src="@likedPost.ImagePath" alt="Post Image" />
+            }
+
+            <!-- Display video link if available -->
+            @if (!string.IsNullOrEmpty(likedPost.VideoUrl))
+            {
+                <a href="@likedPost.VideoUrl" target="_blank">Watch Video</a>
+            }
+
+            <!-- Display location and timestamp -->
+            <small>@likedPost.Location</small>
+            <small>@likedPost.CreatedAt.ToString("f")</small>
+
+            <!-- Unlike button since these are liked posts -->
+            <form asp-action="Unlike" method="post">
+                <input type="hidden" name="postId" value="@likedPost.Id" />
+                <input type="hidden" name="viewType" value="LikedPosts" />
+                <button type="submit">Unlike</button>
+            </form>
+
+            <!-- Edit/Delete options for liked posts owned by the user -->
+            @if (likedPost.UserId == int.Parse(User.FindFirst("UserId")?.Value ?? "0"))
+            {
+                <!-- Edit button to toggle the edit form -->
+                <button id="edit-button-@likedPost.Id" onclick="toggleEdit(@likedPost.Id)">Edit</button>
+
+                <!-- Edit form (hidden by default) -->
+                <form asp-action="Update" method="post" id="edit-form-@likedPost.Id" style="display: none;">
+                    <input type="hidden" name="Id" value="@likedPost.Id" />
+                    <input type="hidden" name="UserId" value="@likedPost.UserId" /> <!-- Ensure UserId is included -->
+                    
+                    <!-- Textarea for editing content -->
+                    <textarea name="Content">@likedPost.Content</textarea>
+
+                    <!-- Optional fields for editing other data -->
+                    <input type="text" name="VideoUrl" value="@likedPost.VideoUrl" placeholder="Video URL" />
+                    <input type="text" name="Location" value="@likedPost.Location" placeholder="Location" />
+
+                    <!-- Update and cancel buttons -->
+                    <button type="submit">Save</button>
+                    <button type="button" onclick="toggleEdit(@likedPost.Id)">Cancel</button>
+                </form>
+
+                <!-- Delete button for liked posts owned by the user -->
+                <form asp-action="Delete" method="post">
+                    <input type="hidden" name="id" value="@likedPost.Id" />
+                    <input type="hidden" name="viewType" value="LikedPosts" />
+                    <button type="submit">Delete</button>
+                </form>
+            }
+        </div>
+    }
+}
+else if (ViewBag.ViewType == "Friends")
+{
+    <h2>Friends</h2>
+    <ul>
+        @foreach (var friend in Model.Friends)
+        {
+            <li>@friend.Username</li>
+        }
+    </ul>
+}
+<!-- JavaScript function to toggle the edit form -->
+<script>
+    function toggleEdit(postId) {
+        var content = document.getElementById("content-" + postId);
+        var editForm = document.getElementById("edit-form-" + postId);
+        var editButton = document.getElementById("edit-button-" + postId);
+        
+        // Toggle the visibility of the content and edit form
+        if (editForm.style.display === "none" || editForm.style.display === "") {
+            content.style.display = "none";  // Hide post content
+            editForm.style.display = "block";  // Show edit form
+            editButton.style.display = "none"; // Hide edit button
+        } else {
+            content.style.display = "block";  // Show post content
+            editForm.style.display = "none";   // Hide edit form
+            editButton.style.display = "inline"; // Show edit button again
+        }
+    }
+</script>
