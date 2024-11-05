@@ -1,13 +1,14 @@
 @{
-    var activeButton = "home"; // Set default active button
+    // Retrieve the user ID from claims if available, default to 0 if not found
+   var userId = int.Parse(User.FindFirst("UserId")?.Value ?? "0");
+    var activeButton = "home"; // Set default active button if you use it in layout
 }
 
 <div class="fixed w-full hidden 200px:w-8 510px:w-16 510px:items-center md:items-start md:w-32 870px:w-36 1150px:w-52 bg-white text-black h-screen 510px:flex flex-col border-r-2 border-gray-200">
     <h1 class="hidden absolute top-4 pt-3 left-0 right-0 text-3xl 510px:block 510px:text-xl md:text-3xl 870px:text-4xl 1150px:text-5xl font-light text-center px-2">RAYS</h1> <!-- Application Title -->
 
     <!-- Clickable Profile Section -->
-    <button 
-        href="/profile/staticUserId"
+    <a href="@Url.Action("Profile", "Profile", new { userId = userId })"
         class="flex items-center space-x-0 pt-8 p-4 mt-24 md:space-x-4 hover:bg-emerald-50 rounded-lg transition-colors duration-200 w-full">
         <div class="flex items-center justify-center w-10 h-10 md:w-14 md:h-14 870px:w-16 870px:h-12 1150px:w-16 1150px:h-16 rounded-full bg-emerald-200"> <!-- Circle for the profile picture -->
             <span class="text-2xl 870px:text-3xl 1150px:text-4xl font-semibold text-black">U</span> <!-- Static first letter of the username -->
@@ -17,51 +18,47 @@
             <br/>
             <p class="text-xs hidden md:-ml-2 md:inline 870px:-ml-0 870px:text-xs 1150px:text-md font-clash text-gray-400 ">username</p> <!-- Static username as handle -->
         </div>
-    </button>
+    </a>
 
     <!-- Navigation Menu -->
     <nav class="flex-col flex-grow transition-all duration-300 mt-6 w-full">
         <div class="flex flex-col space-y-4 mb-2">
             <!-- Navigation Links -->
-            <button 
-                href="/feed" 
+            <a href="/post" 
                 class="px-2 transition-colors duration-200 @(activeButton == "home" ? "border-emerald-200 border-t-2 border-b-2 bg-emerald-50 font-semibold" : "510px:hover:bg-emerald-100 md:hover:bg-emerald-100")"
             >
                 <div class="flex items-center space-x-3 rounded-lg py-2 870px:py-3">
                     <span class="material-icons text-3xl md:text-lg 870px:text-2xl pl-2 text-black">home</span>
                     <span class="text-sm 870px:text-lg hidden md:inline transition duration-300 ease-in-out text-black">Home</span>
                 </div>
-            </button>
+            </a>
 
-            <button  
-                href="/conversation/staticUserId" 
+            <a href="/conversation/@userId" 
                 class="px-2 transition-colors duration-200 @(activeButton == "messages" ? "border-emerald-300 border-t-2 border-b-2 bg-emerald-50 font-semibold" : "510px:hover:bg-emerald-100 md:hover:bg-emerald-100")"
             >
                 <div class="flex items-center space-x-3 rounded-lg py-2 870px:py-3">
                     <span class="material-icons text-3xl md:text-lg 870px:text-2xl pl-2 text-black">message</span>
                     <span class="text-sm 870px:text-lg hidden md:inline transition duration-300 ease-in-out text-black">Messages</span>
                 </div>
-            </button>
+            </a>
 
-            <button  
-                href="/friend-requests" 
+            <a href="/friend-requests" 
                 class="px-2 transition-colors duration-200 @(activeButton == "people" ? "border-emerald-300 border-t-2 border-b-2 bg-emerald-50 font-semibold" : "510px:hover:bg-emerald-100 md:hover:bg-emerald-100")"
             >
                 <div class="flex items-center space-x-3 rounded-lg py-2 870px:py-3">
                     <span class="material-icons text-3xl md:text-lg 870px:text-2xl pl-2 text-black">people</span>
                     <span class="text-sm 870px:text-lg hidden md:inline transition duration-300 ease-in-out text-black">Requests</span>
                 </div>
-            </button>
+            </a>
 
-            <button  
-                href="/search" 
+            <a href="/search" 
                 class="px-2 transition-colors duration-200 @(activeButton == "search" ? "border-emerald-300 border-t-2 border-b-2 bg-emerald-50 font-semibold" : "510px:hover:bg-emerald-100 md:hover:bg-emerald-100")"
             >
                 <div class="flex items-center space-x-3 rounded-lg py-2 870px:py-3">
                     <span class="material-icons text-3xl md:text-lg 870px:text-2xl pl-2 text-black">search</span>
                     <span class="text-sm 870px:text-lg hidden md:inline transition duration-300 ease-in-out text-black">Search</span>
                 </div>
-            </button>
+            </a>
 
             <!-- Logout Button -->
             <form asp-controller="User" asp-action="Logout" method="post" class="w-full">
@@ -77,4 +74,4 @@
             </form>
         </div>
     </nav>       
-</div>
+</div> 
