@@ -1,15 +1,14 @@
 using Microsoft.AspNetCore.Mvc;
 using RAYS.Models;
 using RAYS.Services;
-using RAYS.ViewModels; // Make sure to include this namespace for your view models
+using RAYS.ViewModels; // Husk å inkludere dette namespace for View Models
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace RAYS.Controllers
 {
-    [Route("api/[controller]")]
-    [ApiController]
+    [Route("Friend")]
     public class FriendController : Controller
     {
         private readonly FriendService _friendService;
@@ -19,22 +18,30 @@ namespace RAYS.Controllers
             _friendService = friendService;
         }
 
-        // POST: api/friend/request
-        [HttpPost("request")]
-        public async Task<IActionResult> SendFriendRequest([FromBody] Friend friendRequest)
+        // Send friend request view
+        [HttpGet("RequestForm")]
+        public IActionResult RequestForm()
+        {
+            return View(); // Viser skjemaet for å sende en venneforespørsel
+        }
+
+        // POST: /Friend/Request
+        [HttpPost("Request")]
+        public async Task<IActionResult> SendFriendRequest([FromForm] Friend friendRequest)
         {
             if (await _friendService.SendFriendRequestAsync(friendRequest))
             {
-                return Ok("Friend request sent successfully.");
+                TempData["SuccessMessage"] = "Friend request sent successfully.";
+                return RedirectToAction("Requests", new { userId = friendRequest.SenderId });
             }
-            return BadRequest("Failed to send friend request.");
+            TempData["ErrorMessage"] = "Failed to send friend request.";
+            return View("RequestForm");
         }
 
-        // GET: api/friend/requests/{userId}
-        [HttpGet("requests/{userId}")]
+        // GET: /Friend/Requests/{userId}
+        [HttpGet("Requests/{userId}")]
         public async Task<IActionResult> GetFriendRequests(int userId)
         {
-            // Fetch friend requests using the service
             var requests = await _friendService.GetFriendRequestsAsync(userId);
 
             // Map the requests to the FriendRequestViewModel
@@ -46,41 +53,44 @@ namespace RAYS.Controllers
                 Status = request.Status
             }).ToList();
 
-            // Return the list of requests as a JSON response
-            return Ok(requestViewModels); // or return View("FriendRequests", requestViewModels) if you are using a view
+            return View("FriendRequests", requestViewModels);
         }
 
-        // PUT: api/friend/accept/{id}
-        [HttpPut("accept/{id}")]
+        // Accept friend request
+        [HttpPost("Accept/{id}")]
         public async Task<IActionResult> AcceptFriendRequest(int id)
         {
             if (await _friendService.AcceptFriendRequestAsync(id))
             {
-                return NoContent(); // Return no content on successful acceptance
+                TempData["SuccessMessage"] = "Friend request accepted.";
+                return RedirectToAction("Requests", new { userId = id });
             }
-            return NotFound("Friend request not found.");
+            TempData["ErrorMessage"] = "Friend request not found.";
+            return RedirectToAction("Requests", new { userId = id });
         }
 
-        // PUT: api/friend/reject/{id}
-        [HttpPut("reject/{id}")]
+        // Reject friend request
+        [HttpPost("Reject/{id}")]
         public async Task<IActionResult> RejectFriendRequest(int id)
         {
             if (await _friendService.RejectFriendRequestAsync(id))
             {
-                return NoContent(); // Return no content on successful rejection
+                TempData["SuccessMessage"] = "Friend request rejected.";
+                return RedirectToAction("Requests", new { userId = id });
             }
-            return NotFound("Friend request not found.");
+            TempData["ErrorMessage"] = "Friend request not found.";
+            return RedirectToAction("Requests", new { userId = id });
         }
 
-        // GET: api/friend/list/{userId}
-        [HttpGet("list/{userId}")]
+        // GET: /Friend/List/{userId}
+        [HttpGet("List/{userId}")]
         public async Task<IActionResult> GetFriends(int userId)
         {
             var friends = await _friendService.GetFriendsAsync(userId);
             var friendViewModels = friends.Select(friend => new FriendViewModel
             {
                 FriendId = friend.ReceiverId == userId ? friend.SenderId : friend.ReceiverId,
-                FriendName = "Get Friend's Name Here" // You would replace this with actual name fetching logic
+                FriendName = "Friend's Name" // Erstatt med faktisk logikk for navn hvis nødvendig
             }).ToList();
 
             var friendListViewModel = new FriendListViewModel
@@ -88,18 +98,20 @@ namespace RAYS.Controllers
                 Friends = friendViewModels
             };
 
-            return Ok(friendListViewModel); // or return View("FriendsList", friendListViewModel) if you are using a view
+            return View("FriendsList", friendListViewModel);
         }
 
-        // DELETE: api/friend/delete/{userId}/{friendId}
-        [HttpDelete("delete/{userId}/{friendId}")]
+        // DELETE: /Friend/Delete/{userId}/{friendId}
+        [HttpPost("Delete/{userId}/{friendId}")]
         public async Task<IActionResult> DeleteFriend(int userId, int friendId)
         {
             if (await _friendService.DeleteFriendAsync(userId, friendId))
             {
-                return NoContent(); // Return no content on successful deletion
+                TempData["SuccessMessage"] = "Friend deleted successfully.";
+                return RedirectToAction("List", new { userId });
             }
-            return NotFound("Friend not found.");
+            TempData["ErrorMessage"] = "Friend not found.";
+            return RedirectToAction("List", new { userId });
         }
     }
 }

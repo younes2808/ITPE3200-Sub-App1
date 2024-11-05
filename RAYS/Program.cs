@@ -15,6 +15,8 @@ builder.Services.AddDbContext<ServerAPIContext>(options =>
 builder.Services.AddControllersWithViews();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<UserService>();
+builder.Services.AddScoped<IUserSearchRepository, UserSearchRepository>(); // Legger til UserSearchRepository
+builder.Services.AddScoped<UserSearchService>(); // Legger til UserSearchService
 builder.Services.AddScoped<IPostRepository, PostRepository>();
 builder.Services.AddScoped<PostService>();
 

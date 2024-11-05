@@ -1,28 +1,50 @@
 @model IEnumerable<RAYS.ViewModels.PostViewModel>
 
-<h2>Post Feed</h2>
-<div class="w-full">
+
+<div class="flex justify-center p-0">
     <!-- Create new post form -->
-    <form asp-action="Create" method="post" enctype="multipart/form-data" class="bg-emerald-200 rounded-lg p-5 shadow-md">
+    <form asp-action="Create" method="post" enctype="multipart/form-data"
+        class="bg-emerald-200 rounded-lg min-w-full p-5 mt-5 510px:mt-3 shadow-md">
         <div class="flex items-center mb-4">
-            <span class="flex items-center justify-center w-10 h-10 rounded-full mr-4 bg-white text-lg font-medium text-black">@User.Identity.Name?.First().ToString().ToUpper()</span> <!-- Display the first letter of the username -->
-            <textarea name="Content" placeholder="What's happening?" required class="post-textarea w-full p-4 bg-white focus:ring-emerald-500 focus:ring-2 text-black rounded-lg resize-none h-28"></textarea>
+            @{
+                // Hold User.Identity i en lokal variabel for null-sjekk
+                var identity = User.Identity;
+                var userNameInitial = string.Empty;
+
+                // Sjekk om identiteten er tilgjengelig og autentisert
+                if (identity != null && identity.IsAuthenticated && !string.IsNullOrEmpty(identity.Name))
+                {
+                    userNameInitial = identity.Name[0].ToString().ToUpper();
+                }
+            }
+            <span
+                class="flex items-center justify-center w-10 h-10 rounded-full mr-4 bg-white text-lg font-medium text-black">@userNameInitial</span>
+            <textarea name="Content" placeholder="What's happening?" required
+                class="post-textarea w-full p-4 bg-white focus:ring-emerald-500 focus:ring-2 text-black rounded-lg resize-none h-28"></textarea>
         </div>
 
         <!-- Image upload field -->
-        <label for="Image" class="block mb-2">Upload Image:</label>
-        <input type="file" name="Image" accept="image/*,video/*" class="mb-4" />
+        <div class="my-4">
+            <input type="file" name="Image"
+                class="w-full p-3 bg-white focus:ring-emerald-500 focus:ring-2 text-black rounded-lg focus:outline-none" />
+        </div>
 
         <!-- Video URL input -->
-        <label for="VideoUrl" class="block mb-2">Video URL:</label>
-        <input type="url" name="VideoUrl" placeholder="Add a video URL" class="w-full p-2 bg-white focus:ring-emerald-500 focus:ring-2 text-black rounded-lg mb-4" />
+        <div class="my-4">
+            <input type="url" name="VideoUrl" placeholder="Add a video URL"
+                class="w-full p-3 bg-white focus:ring-emerald-500 focus:ring-2 text-black rounded-lg focus:outline-none" />
+        </div>
 
         <!-- Location input -->
-        <label for="Location" class="block mb-2">Location:</label>
-        <input type="text" name="Location" placeholder="Enter a location" class="w-full p-2 bg-white focus:ring-emerald-500 focus:ring-2 text-black rounded-lg mb-4" />
+        <div class="my-4">
+            <input type="text" name="Location" placeholder="Enter a location"
+                class="w-full p-3 bg-white focus:ring-emerald-500 focus:ring-2 text-black rounded-lg focus:outline-none" />
+        </div>
 
-        <button type="submit" class="flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-500 transition-colors duration-300">
+        <button type="submit"
+            class="flex items-center justify-center px-2 py-1 bg-blue-600 text-white rounded-full hover:bg-blue-500 transition-colors duration-300 text-sm font-general">
             Post
+            <span class="material-icons ml-1">send</span>
         </button>
     </form>
 </div>
@@ -31,8 +53,9 @@
 
 @foreach (var post in Model)
 {
-    <div class="post bg-white p-4 shadow rounded-lg mt-4" id="post-@post.Id">
-        
+
+    <div class="bg-white shadow-md rounded-lg p-5 mt-4">
+
         <!-- Post content display -->
         <p id="content-@post.Id">@post.Content</p>
 
@@ -45,17 +68,21 @@
         <!-- Display video link if available -->
         @if (!string.IsNullOrEmpty(post.VideoUrl))
         {
-            <a href="@post.VideoUrl" target="_blank" class="text-blue-500">Watch Video</a>
+
+            <a href="@post.VideoUrl" target="_blank" class="text-blue-600 hover:underline">Watch Video</a>
+
         }
 
         <!-- Display location and timestamp -->
-        <small>@post.Location</small>
-        <small>@post.CreatedAt.ToString("f")</small>
+        <small class="text-gray-500">@post.Location</small>
+        <small class="text-gray-400">@post.CreatedAt.ToString("f")</small>
 
         <!-- Like/Unlike button based on user's action -->
         <form asp-action="@(post.IsLikedByUser ? "Unlike" : "Like")" method="post" class="mt-2">
             <input type="hidden" name="postId" value="@post.Id" />
-            <button type="submit" class="bg-gray-200 hover:bg-gray-300 rounded px-2 py-1">
+
+            <button type="submit" class="text-blue-600 hover:underline">
+
                 @(post.IsLikedByUser ? "Unlike" : "Like")
             </button>
         </form>
@@ -64,25 +91,37 @@
         @if (post.UserId == int.Parse(User.FindFirst("UserId")?.Value ?? "0"))
         {
             <!-- Edit button to toggle the edit form -->
-            <button id="edit-button-@post.Id" onclick="toggleEdit(@post.Id)" class="bg-yellow-300 rounded px-2 py-1">Edit</button>
+            <button id="edit-button-@post.Id" onclick="toggleEdit(@post.Id)"
+                class="text-blue-600 hover:underline mt-2">Edit</button>
+
 
             <!-- Edit form (hidden by default) -->
             <form asp-action="Update" method="post" id="edit-form-@post.Id" style="display: none;" class="mt-2">
                 <input type="hidden" name="Id" value="@post.Id" />
-                <input type="hidden" name="UserId" value="@post.UserId" />
-                
-                <textarea name="Content" class="w-full h-24">@post.Content</textarea>
-                <input type="text" name="VideoUrl" value="@post.VideoUrl" placeholder="Video URL" class="w-full p-2 mb-2 bg-white focus:ring-emerald-500 focus:ring-2 text-black rounded-lg" />
-                <input type="text" name="Location" value="@post.Location" placeholder="Location" class="w-full p-2 mb-2 bg-white focus:ring-emerald-500 focus:ring-2 text-black rounded-lg" />
 
-                <button type="submit" class="bg-blue-600 text-white rounded px-4 py-1">Save</button>
-                <button type="button" onclick="toggleEdit(@post.Id)" class="bg-red-500 text-white rounded px-4 py-1">Cancel</button>
+                <input type="hidden" name="UserId" value="@post.UserId" /> <!-- Ensure UserId is included -->
+
+                <!-- Textarea for editing content -->
+                <textarea name="Content" class="w-full p-2 border rounded">@post.Content</textarea>
+
+                <!-- Optional fields for editing other data -->
+                <input type="text" name="VideoUrl" value="@post.VideoUrl" placeholder="Video URL"
+                    class="w-full p-2 border rounded" />
+                <input type="text" name="Location" value="@post.Location" placeholder="Location"
+                    class="w-full p-2 border rounded" />
+
+                <!-- Update and cancel buttons -->
+                <button type="submit" class="bg-blue-600 text-white rounded px-2 py-1 mt-2">Save</button>
+                <button type="button" onclick="toggleEdit(@post.Id)" class="bg-gray-300 rounded px-2 py-1 mt-2">Cancel</button>
+
             </form>
 
             <!-- Delete button for user's own posts -->
             <form asp-action="Delete" method="post" class="mt-2">
                 <input type="hidden" name="id" value="@post.Id" />
-                <button type="submit" class="bg-red-600 text-white rounded px-2 py-1">Delete</button>
+
+                <button type="submit" class="text-red-600 hover:underline mt-2">Delete</button>
+
             </form>
         }
     </div>
@@ -94,7 +133,7 @@
         var content = document.getElementById("content-" + postId);
         var editForm = document.getElementById("edit-form-" + postId);
         var editButton = document.getElementById("edit-button-" + postId);
-        
+
         // Toggle the visibility of the content and edit form
         if (editForm.style.display === "none") {
             content.style.display = "none";  // Hide post content
