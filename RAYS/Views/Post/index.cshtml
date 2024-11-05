@@ -1,5 +1,6 @@
 @model IEnumerable<RAYS.ViewModels.PostViewModel>
 
+
 <div class="flex justify-center p-0">
     <!-- Create new post form -->
     <form asp-action="Create" method="post" enctype="multipart/form-data"
@@ -47,11 +48,14 @@
         </button>
     </form>
 </div>
+
 <hr />
 
 @foreach (var post in Model)
 {
+
     <div class="bg-white shadow-md rounded-lg p-5 mt-4">
+
         <!-- Post content display -->
         <p id="content-@post.Id">@post.Content</p>
 
@@ -64,7 +68,9 @@
         <!-- Display video link if available -->
         @if (!string.IsNullOrEmpty(post.VideoUrl))
         {
+
             <a href="@post.VideoUrl" target="_blank" class="text-blue-600 hover:underline">Watch Video</a>
+
         }
 
         <!-- Display location and timestamp -->
@@ -74,7 +80,9 @@
         <!-- Like/Unlike button based on user's action -->
         <form asp-action="@(post.IsLikedByUser ? "Unlike" : "Like")" method="post" class="mt-2">
             <input type="hidden" name="postId" value="@post.Id" />
+
             <button type="submit" class="text-blue-600 hover:underline">
+
                 @(post.IsLikedByUser ? "Unlike" : "Like")
             </button>
         </form>
@@ -86,9 +94,11 @@
             <button id="edit-button-@post.Id" onclick="toggleEdit(@post.Id)"
                 class="text-blue-600 hover:underline mt-2">Edit</button>
 
+
             <!-- Edit form (hidden by default) -->
-            <form asp-action="Update" method="post" id="edit-form-@post.Id" style="display: none;">
+            <form asp-action="Update" method="post" id="edit-form-@post.Id" style="display: none;" class="mt-2">
                 <input type="hidden" name="Id" value="@post.Id" />
+
                 <input type="hidden" name="UserId" value="@post.UserId" /> <!-- Ensure UserId is included -->
 
                 <!-- Textarea for editing content -->
@@ -103,12 +113,15 @@
                 <!-- Update and cancel buttons -->
                 <button type="submit" class="bg-blue-600 text-white rounded px-2 py-1 mt-2">Save</button>
                 <button type="button" onclick="toggleEdit(@post.Id)" class="bg-gray-300 rounded px-2 py-1 mt-2">Cancel</button>
+
             </form>
 
             <!-- Delete button for user's own posts -->
-            <form asp-action="Delete" method="post">
+            <form asp-action="Delete" method="post" class="mt-2">
                 <input type="hidden" name="id" value="@post.Id" />
+
                 <button type="submit" class="text-red-600 hover:underline mt-2">Delete</button>
+
             </form>
         }
     </div>
@@ -132,4 +145,4 @@
             editButton.style.display = "inline"; // Show edit button again
         }
     }
-</script>
+</script> 

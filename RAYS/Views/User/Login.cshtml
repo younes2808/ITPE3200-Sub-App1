@@ -2,20 +2,53 @@
     Layout = null;
 }
 
-
 @model RAYS.ViewModels.LoginViewModel
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - RAYS</title>
+    <link rel="stylesheet" href="~/css/app.css" />
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-emerald-200 flex items-center justify-center min-h-screen">
+    <div class="flex flex-col md:flex-row bg-white rounded-2xl shadow-lg overflow-hidden max-w-5xl">
+        
+        <div class="flex flex-col justify-center p-8 md:p-14">
+            <span class="mb-3 text-5xl font-mono">RAYS</span>
+            <span class="font-light text-zinc-500 mb-8 border-b-black border-b-2">
+                Welcome Back! Please enter your details:
+            </span>
 
-<form asp-controller="User" asp-action="Login" method="post">
-    <div>
-        <label asp-for="Username"></label>
-        <input asp-for="Username" />
-        <span asp-validation-for="Username"></span>
+            @if (!string.IsNullOrEmpty(ViewBag.Error))
+            {
+                <div class="text-red-500 mb-4">@ViewBag.Error</div>
+            }
+
+            <form asp-controller="User" asp-action="Login" method="post">
+                <div class="py-3">
+                    <span class="mb-2 text-md">Username</span>
+                    <input type="text" class="w-full p-2 border border-gray-200 rounded-md placeholder:font-light placeholder:text-gray-500" asp-for="Username" />
+                    <span asp-validation-for="Username" class="text-red-500"></span>
+                </div>
+                <div class="py-4">
+                    <span class="mb-2 text-md">Password</span>
+                        <input type="password" class="w-full p-2 border border-gray-200 rounded-md placeholder:font-light placeholder:text-gray-500" asp-for="Password" />
+                        <span asp-validation-for="Password" class="text-red-500"></span>
+                </div>
+                    <button type="submit" class="w-full bg-black text-white p-2 rounded-lg mb-6 hover:bg-white hover:text-black hover:border hover:border-gray-400">
+                        Sign in
+                    </button>
+            </form>
+            <a asp-controller="User" asp-action="Register" class="font-bold text-gray-600 hover:text-gray-300">
+                Sign up for free
+            </a>
+        </div>
+        <div class="relative max-w-[100px]">
+            <img src="~/images/Login.jpg" alt="Login-page bilde" class="w-full h-auto object-cover rounded-r-2xl" />
+        </div>
     </div>
-    <div>
-        <label asp-for="Password"></label>
-        <input asp-for="Password" type="password" />
-        <span asp-validation-for="Password"></span>
-    </div>
-    <button type="submit">Log In</button>
-    <a asp-controller="User" asp-action="Register">Don't have an account? Register here.</a>
-</form>
+</body>
+</html>
+

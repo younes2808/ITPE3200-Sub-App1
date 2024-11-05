@@ -3,29 +3,71 @@
 }
 
 @model RAYS.ViewModels.RegistrationViewModel
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registration - RAYS</title>
+    <link rel="stylesheet" href="~/css/app.css" />
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-emerald-200 flex items-center justify-center min-h-screen">
+    <div class="flex flex-col md:flex-row bg-white rounded-2xl shadow-lg overflow-hidden max-w-5xl"> <!-- Increased max width -->
+        
+        <!-- Form Section -->
+        <div class="p-10 md:p-14 flex-1"> <!-- Added padding for larger form section -->
+            <h2 class="text-4xl font-semibold mb-2">RAYS</h2>
+            
+            <!-- Create Account Text with Bold Line -->
+            <div class="mb-8"> <!-- Increased margin below text -->
+                <p class="text-lg font-light">Create Your Account:</p> <!-- Keep text normal weight -->
+                <div class="w-full h-1 bg-black mt-1"></div> <!-- Bold line under text -->
+            </div>
 
-<h2>Register</h2>
+            <!-- Registration Form -->
+            <form asp-controller="User" asp-action="Register" method="post" class="space-y-6"> <!-- Increased spacing between inputs -->
+                <div asp-validation-summary="ModelOnly" class="text-red-500 mb-4"></div> <!-- Display validation summary -->
 
-<form asp-controller="User" asp-action="Register" method="post">
-    <div>
-        <label asp-for="Username"></label>
-        <input asp-for="Username" />
-        <span asp-validation-for="Username" class="text-danger"></span>
-    </div>
-    <div>
-        <label asp-for="Email"></label>
-        <input asp-for="Email" />
-        <span asp-validation-for="Email" class="text-danger"></span>
-    </div>
-    <div>
-        <label asp-for="Password"></label>
-        <input asp-for="Password" type="password" />
-        <span asp-validation-for="Password" class="text-danger"></span>
-    </div>
-    <button type="submit">Register</button>
-    <a asp-controller="User" asp-action="Login">Already have an account? Log in here.</a>
-</form>
+                <div>
+                    <label for="email" class="block text-base font-normal">Email</label>
+                    <input type="email" id="email" name="email" placeholder="Enter your email" 
+                           class="w-full p-3 mt-1 border border-gray-300 rounded focus:outline-none focus:ring focus:ring-opacity-50" asp-for="Email" />
+                    <span asp-validation-for="Email" class="text-red-500"></span> <!-- Validation for Email -->
+                </div>
+                <div>
+                    <label for="username" class="block text-base font-normal">Username</label>
+                    <input type="text" id="username" name="username" placeholder="Choose a username" 
+                           class="w-full p-3 mt-1 border border-gray-300 rounded focus:outline-none focus:ring focus:ring-opacity-50" asp-for="Username" />
+                    <span asp-validation-for="Username" class="text-red-500"></span> <!-- Validation for Username -->
+                </div>
+                <div>
+                    <label for="password" class="block text-base font-normal">Password</label>
+                    <input type="password" id="password" name="password" placeholder="Create a password" 
+                           class="w-full p-3 mt-1 border border-gray-300 rounded focus:outline-none focus:ring focus:ring-opacity-50" asp-for="Password" />
+                    <span asp-validation-for="Password" class="text-red-500"></span> <!-- Validation for Password -->
+                </div>
+                
+                <!-- Sign-Up Button -->
+                <button type="submit" class="w-full mt-6 bg-black text-white py-3 rounded hover:bg-gray-800 transition">
+                    Sign up
+                </button>
+            </form>
+            
+            <p class="text-sm mt-6 text-center text-gray-600"> <!-- Added margin above link -->
+                Already have an account? <a href="/user/login" class="text-black font-semibold">Sign in here</a>
+            </p>
+        </div>
 
-@section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
-}
+        <!-- Image Section -->
+        <div class="hidden md:block flex-1">
+            <img src="~/images/Login.jpg" alt="Register page background" 
+                 class="w-full h-full object-cover rounded-r-2xl">
+        </div>
+    </div>
+
+    @section Scripts {
+        @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    }
+</body>
+</html>
