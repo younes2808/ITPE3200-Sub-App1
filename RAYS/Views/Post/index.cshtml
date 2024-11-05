@@ -1,31 +1,37 @@
 @model IEnumerable<RAYS.ViewModels.PostViewModel>
 
 <h2>Post Feed</h2>
-<div class="w-[10%]">
+<div class="w-full">
     <!-- Create new post form -->
-    <form asp-action="Create" method="post" enctype="multipart/form-data">
-        <textarea name="Content" placeholder="What's on your mind?" required></textarea>
+    <form asp-action="Create" method="post" enctype="multipart/form-data" class="bg-emerald-200 rounded-lg p-5 shadow-md">
+        <div class="flex items-center mb-4">
+            <span class="flex items-center justify-center w-10 h-10 rounded-full mr-4 bg-white text-lg font-medium text-black">@User.Identity.Name?.First().ToString().ToUpper()</span> <!-- Display the first letter of the username -->
+            <textarea name="Content" placeholder="What's happening?" required class="post-textarea w-full p-4 bg-white focus:ring-emerald-500 focus:ring-2 text-black rounded-lg resize-none h-28"></textarea>
+        </div>
 
         <!-- Image upload field -->
-        <label for="Image">Upload Image:</label>
-        <input type="file" name="Image" />
+        <label for="Image" class="block mb-2">Upload Image:</label>
+        <input type="file" name="Image" accept="image/*,video/*" class="mb-4" />
 
         <!-- Video URL input -->
-        <label for="VideoUrl">Video URL:</label>
-        <input type="url" name="VideoUrl" placeholder="Add a video URL" />
+        <label for="VideoUrl" class="block mb-2">Video URL:</label>
+        <input type="url" name="VideoUrl" placeholder="Add a video URL" class="w-full p-2 bg-white focus:ring-emerald-500 focus:ring-2 text-black rounded-lg mb-4" />
 
         <!-- Location input -->
-        <label for="Location">Location:</label>
-        <input type="text" name="Location" placeholder="Enter a location" />
+        <label for="Location" class="block mb-2">Location:</label>
+        <input type="text" name="Location" placeholder="Enter a location" class="w-full p-2 bg-white focus:ring-emerald-500 focus:ring-2 text-black rounded-lg mb-4" />
 
-        <button type="submit">Post</button>
+        <button type="submit" class="flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-500 transition-colors duration-300">
+            Post
+        </button>
     </form>
 </div>
+
 <hr />
 
 @foreach (var post in Model)
 {
-    <div class="post" id="post-@post.Id">
+    <div class="post bg-white p-4 shadow rounded-lg mt-4" id="post-@post.Id">
         
         <!-- Post content display -->
         <p id="content-@post.Id">@post.Content</p>
@@ -33,13 +39,13 @@
         <!-- Display image if available -->
         @if (!string.IsNullOrEmpty(post.ImagePath))
         {
-            <img src="@post.ImagePath" alt="Post image" />
+            <img src="@post.ImagePath" alt="Post image" class="w-full max-h-60 object-cover rounded-lg mt-2" />
         }
 
         <!-- Display video link if available -->
         @if (!string.IsNullOrEmpty(post.VideoUrl))
         {
-            <a href="@post.VideoUrl" target="_blank">Watch Video</a>
+            <a href="@post.VideoUrl" target="_blank" class="text-blue-500">Watch Video</a>
         }
 
         <!-- Display location and timestamp -->
@@ -47,9 +53,9 @@
         <small>@post.CreatedAt.ToString("f")</small>
 
         <!-- Like/Unlike button based on user's action -->
-        <form asp-action="@(post.IsLikedByUser ? "Unlike" : "Like")" method="post">
+        <form asp-action="@(post.IsLikedByUser ? "Unlike" : "Like")" method="post" class="mt-2">
             <input type="hidden" name="postId" value="@post.Id" />
-            <button type="submit">
+            <button type="submit" class="bg-gray-200 hover:bg-gray-300 rounded px-2 py-1">
                 @(post.IsLikedByUser ? "Unlike" : "Like")
             </button>
         </form>
@@ -58,29 +64,25 @@
         @if (post.UserId == int.Parse(User.FindFirst("UserId")?.Value ?? "0"))
         {
             <!-- Edit button to toggle the edit form -->
-            <button id="edit-button-@post.Id" onclick="toggleEdit(@post.Id)">Edit</button>
+            <button id="edit-button-@post.Id" onclick="toggleEdit(@post.Id)" class="bg-yellow-300 rounded px-2 py-1">Edit</button>
 
             <!-- Edit form (hidden by default) -->
-            <form asp-action="Update" method="post" id="edit-form-@post.Id" style="display: none;">
+            <form asp-action="Update" method="post" id="edit-form-@post.Id" style="display: none;" class="mt-2">
                 <input type="hidden" name="Id" value="@post.Id" />
-                <input type="hidden" name="UserId" value="@post.UserId" /> <!-- Ensure UserId is included -->
+                <input type="hidden" name="UserId" value="@post.UserId" />
                 
-                <!-- Textarea for editing content -->
-                <textarea name="Content">@post.Content</textarea>
+                <textarea name="Content" class="w-full h-24">@post.Content</textarea>
+                <input type="text" name="VideoUrl" value="@post.VideoUrl" placeholder="Video URL" class="w-full p-2 mb-2 bg-white focus:ring-emerald-500 focus:ring-2 text-black rounded-lg" />
+                <input type="text" name="Location" value="@post.Location" placeholder="Location" class="w-full p-2 mb-2 bg-white focus:ring-emerald-500 focus:ring-2 text-black rounded-lg" />
 
-                <!-- Optional fields for editing other data -->
-                <input type="text" name="VideoUrl" value="@post.VideoUrl" placeholder="Video URL" />
-                <input type="text" name="Location" value="@post.Location" placeholder="Location" />
-
-                <!-- Update and cancel buttons -->
-                <button type="submit">Save</button>
-                <button type="button" onclick="toggleEdit(@post.Id)">Cancel</button>
+                <button type="submit" class="bg-blue-600 text-white rounded px-4 py-1">Save</button>
+                <button type="button" onclick="toggleEdit(@post.Id)" class="bg-red-500 text-white rounded px-4 py-1">Cancel</button>
             </form>
 
             <!-- Delete button for user's own posts -->
-            <form asp-action="Delete" method="post">
+            <form asp-action="Delete" method="post" class="mt-2">
                 <input type="hidden" name="id" value="@post.Id" />
-                <button type="submit">Delete</button>
+                <button type="submit" class="bg-red-600 text-white rounded px-2 py-1">Delete</button>
             </form>
         }
     </div>
@@ -104,4 +106,4 @@
             editButton.style.display = "inline"; // Show edit button again
         }
     }
-</script>
+</script> 
