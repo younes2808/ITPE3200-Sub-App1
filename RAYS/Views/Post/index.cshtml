@@ -1,51 +1,55 @@
 @model IEnumerable<RAYS.ViewModels.PostViewModel>
 
-
 <div class="flex justify-center p-0">
     <!-- Create new post form -->
     <form asp-action="Create" method="post" enctype="multipart/form-data"
         class="bg-emerald-200 rounded-lg min-w-full p-5 mt-5 510px:mt-3 shadow-md">
         <div class="flex items-center mb-4">
             @{
-                // Hold User.Identity i en lokal variabel for null-sjekk
                 var identity = User.Identity;
                 var userNameInitial = string.Empty;
 
-                // Sjekk om identiteten er tilgjengelig og autentisert
                 if (identity != null && identity.IsAuthenticated && !string.IsNullOrEmpty(identity.Name))
                 {
                     userNameInitial = identity.Name[0].ToString().ToUpper();
                 }
             }
             <span
-                class="flex items-center justify-center w-10 h-10 rounded-full mr-4 bg-white text-lg font-medium text-black">@userNameInitial</span>
+                class="flex items-center justify-center w-10 h-10 rounded-full mr-4 bg-gray-300 text-lg font-medium text-black">@userNameInitial</span>
             <textarea name="Content" placeholder="What's happening?" required
-                class="post-textarea w-full p-4 bg-white focus:ring-emerald-500 focus:ring-2 text-black rounded-lg resize-none h-28"></textarea>
+                class="post-textarea w-full p-4 bg-white text-black rounded-lg resize-none h-28 focus:outline-none focus:ring-2 focus:ring-gray-300"></textarea>
         </div>
 
-        <!-- Image upload field -->
-        <div class="my-4">
+        <div class="flex items-center justify-between my-4">
+            <!-- Buttons for Media, Hyperlink, Location, and Post -->
+            <div class="flex space-x-4">
+                <button type="button" id="uploadImageButton" class="bg-white text-black border border-gray-300 rounded-full px-4 py-2">Medie</button>
+                <button type="button" id="addVideoUrlButton" class="bg-white text-black border border-gray-300 rounded-full px-4 py-2">Hyperlink</button>
+                <button type="button" id="addLocationButton" class="bg-white text-black border border-gray-300 rounded-full px-4 py-2">Location</button>
+            </div>
+
+            <!-- Post button aligned to the right -->
+            <button type="submit"
+                class="bg-blue-600 text-white rounded-full px-4 py-2 hover:bg-blue-500 transition-colors duration-300">
+                Post
+            </button>
+        </div>
+
+        <!-- Hidden input fields for Image, Video URL, and Location -->
+        <div id="imageUpload" class="hidden mt-2">
             <input type="file" name="Image"
-                class="w-full p-3 bg-white focus:ring-emerald-500 focus:ring-2 text-black rounded-lg focus:outline-none" />
+                class="w-full p-3 bg-white text-black rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-300" />
         </div>
 
-        <!-- Video URL input -->
-        <div class="my-4">
+        <div id="videoUrlInput" class="hidden mt-2">
             <input type="url" name="VideoUrl" placeholder="Add a video URL"
-                class="w-full p-3 bg-white focus:ring-emerald-500 focus:ring-2 text-black rounded-lg focus:outline-none" />
+                class="w-full p-3 bg-white text-black rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-300" />
         </div>
 
-        <!-- Location input -->
-        <div class="my-4">
+        <div id="locationInput" class="hidden mt-2">
             <input type="text" name="Location" placeholder="Enter a location"
-                class="w-full p-3 bg-white focus:ring-emerald-500 focus:ring-2 text-black rounded-lg focus:outline-none" />
+                class="w-full p-3 bg-white text-black rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-300" />
         </div>
-
-        <button type="submit"
-            class="flex items-center justify-center px-2 py-1 bg-blue-600 text-white rounded-full hover:bg-blue-500 transition-colors duration-300 text-sm font-general">
-            Post
-            <span class="material-icons ml-1">send</span>
-        </button>
     </form>
 </div>
 
@@ -53,11 +57,9 @@
 
 @foreach (var post in Model)
 {
-
     <div class="bg-white shadow-md rounded-lg p-5 mt-4">
-
         <!-- Post content display -->
-        <p id="content-@post.Id">@post.Content</p>
+        <p id="content-@post.Id" class="text-black">@post.Content</p>
 
         <!-- Display image if available -->
         @if (!string.IsNullOrEmpty(post.ImagePath))
@@ -68,9 +70,7 @@
         <!-- Display video link if available -->
         @if (!string.IsNullOrEmpty(post.VideoUrl))
         {
-
             <a href="@post.VideoUrl" target="_blank" class="text-blue-600 hover:underline">Watch Video</a>
-
         }
 
         <!-- Display location and timestamp -->
@@ -80,9 +80,7 @@
         <!-- Like/Unlike button based on user's action -->
         <form asp-action="@(post.IsLikedByUser ? "Unlike" : "Like")" method="post" class="mt-2">
             <input type="hidden" name="postId" value="@post.Id" />
-
             <button type="submit" class="text-blue-600 hover:underline">
-
                 @(post.IsLikedByUser ? "Unlike" : "Like")
             </button>
         </form>
@@ -94,11 +92,9 @@
             <button id="edit-button-@post.Id" onclick="toggleEdit(@post.Id)"
                 class="text-blue-600 hover:underline mt-2">Edit</button>
 
-
             <!-- Edit form (hidden by default) -->
             <form asp-action="Update" method="post" id="edit-form-@post.Id" style="display: none;" class="mt-2">
                 <input type="hidden" name="Id" value="@post.Id" />
-
                 <input type="hidden" name="UserId" value="@post.UserId" /> <!-- Ensure UserId is included -->
 
                 <!-- Textarea for editing content -->
@@ -113,15 +109,12 @@
                 <!-- Update and cancel buttons -->
                 <button type="submit" class="bg-blue-600 text-white rounded px-2 py-1 mt-2">Save</button>
                 <button type="button" onclick="toggleEdit(@post.Id)" class="bg-gray-300 rounded px-2 py-1 mt-2">Cancel</button>
-
             </form>
 
             <!-- Delete button for user's own posts -->
             <form asp-action="Delete" method="post" class="mt-2">
                 <input type="hidden" name="id" value="@post.Id" />
-
                 <button type="submit" class="text-red-600 hover:underline mt-2">Delete</button>
-
             </form>
         }
     </div>
@@ -145,4 +138,20 @@
             editButton.style.display = "inline"; // Show edit button again
         }
     }
-</script> 
+
+    // JavaScript to handle button clicks for showing/hiding inputs
+    document.getElementById("uploadImageButton").addEventListener("click", function() {
+        var imageUpload = document.getElementById("imageUpload");
+        imageUpload.classList.toggle("hidden");
+    });
+
+    document.getElementById("addVideoUrlButton").addEventListener("click", function() {
+        var videoUrlInput = document.getElementById("videoUrlInput");
+        videoUrlInput.classList.toggle("hidden");
+    });
+
+    document.getElementById("addLocationButton").addEventListener("click", function() {
+        var locationInput = document.getElementById("locationInput");
+        locationInput.classList.toggle("hidden");
+    });
+</script>

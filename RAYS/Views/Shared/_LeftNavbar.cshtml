@@ -1,6 +1,6 @@
 @{
     // Retrieve the user ID from claims if available, default to 0 if not found
-   var userId = int.Parse(User.FindFirst("UserId")?.Value ?? "0");
+    var userId = int.Parse(User.FindFirst("UserId")?.Value ?? "0");
     // Få controller-navn fra ruten og håndtere mulig null-verdi
     var controllerName = (ViewContext.RouteData.Values["controller"] as string)?.ToLower() ?? string.Empty;
     var activeButton = controllerName switch
@@ -33,29 +33,30 @@
 
 
     <!-- Clickable Profile Section -->
-    <a href="@Url.Action("Profile", "Profile", new { userId = userId })"
-        class="flex items-center space-x-0 pt-8 p-4 mt-24 md:space-x-4 hover:bg-emerald-50 rounded-lg transition-colors duration-200 w-full">
-        <div
-            class="flex items-center justify-center w-10 h-10 md:w-14 md:h-14 870px:w-16 870px:h-12 1150px:w-16 1150px:h-16 rounded-full bg-emerald-200">
-            <!-- Dynamisk forbokstav av brukernavnet -->
-            <span class="text-2xl 870px:text-3xl 1150px:text-4xl font-semibold text-black">@userInitial</span>
-        </div>
-        <div>
-            <h2
-                class="text-xs hidden md:-ml-2 md:inline 870px:-ml-0 870px:text-sm 1150px:text-lg font-lexend font-normal text-black">
-                @userName</h2> <!-- Dynamisk brukernavn -->
-            <br />
-            <p
-                class="text-xs hidden md:-ml-2 md:inline 870px:-ml-0 870px:text-xs 1150px:text-md font-clash text-gray-400">
-                @("@" + userName)</p> <!-- Dynamisk brukernavn som handle -->
-        </div>
-    </a>
+    <form asp-action="Profile" asp-controller="Profile" method="get" class="w-full">
+        <input type="hidden" name="userId" value="@userId" />
+        <button type="submit"
+            class="flex items-center space-x-0 pt-8 p-4 mt-24 md:space-x-4 hover:bg-emerald-50 rounded-lg transition-colors duration-200 w-full">
+            <div
+                class="flex items-center justify-center w-10 h-10 md:w-14 md:h-14 870px:w-16 870px:h-12 1150px:w-20 1150px:h-14 rounded-full bg-emerald-200 border-2 border-emerald-300">
+                <span class="text-2xl 870px:text-3xl 1150px:text-4xl font-semibold text-black">@userInitial</span>
+            </div>
+            <div>
+                <h2
+                    class="text-xs hidden md:-ml-2 md:inline 870px:-ml-0 870px:text-sm 1150px:text-lg font-lexend font-normal text-black">
+                    @userName</h2>
+                <p
+                    class="text-xs hidden md:-ml-2 md:inline 870px:-ml-0 870px:text-xs 1150px:text-md font-clash text-gray-400">
+                    @("@" + userName)</p>
+            </div>
+        </button>
+    </form>
 
     <!-- Navigasjonsmeny -->
     <nav class="flex-col flex-grow transition-all duration-300 mt-4 w-full">
         <div class="flex flex-col space-y-4 mb-2">
             <!-- Navigasjonslenker -->
-            <form asp-controller="Home" asp-action="Index" method="get" class="w-full">
+            <form asp-controller="Post" asp-action="Index" method="get" class="w-full">
                 <button type="submit"
                     class="px-2 transition-colors duration-200 @(activeButton == "home" ? "border-emerald-200 border-t-2 border-b-2 bg-emerald-50 font-semibold" : "510px:hover:bg-emerald-100 md:hover:bg-emerald-100") w-full">
                     <div class="flex items-center space-x-3 rounded-lg py-2 870px:py-3">
