@@ -1,0 +1,68 @@
+@model IEnumerable<RAYS.ViewModels.FriendRequestViewModel>
+
+@{
+    ViewData["Title"] = "Friend Requests";
+}
+
+<h1>Friend Requests</h1>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["SuccessMessage"]
+    </div>
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">
+        @TempData["ErrorMessage"]
+    </div>
+}
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Sender</th>
+            <th>Receiver</th>
+            <th>Status</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var request in Model)
+        {
+            <tr>
+                <!-- Sender's username as a clickable link -->
+                <td>
+                    <a href="@Url.Action("Profile", "Profile", new { userId = request.SenderId })">
+                        @request.SenderUsername
+                    </a>
+                </td>
+
+                <!-- Receiver's username as a clickable link -->
+                <td>
+                    <a href="@Url.Action("Profile", "Profile", new { userId = request.ReceiverId })">
+                        @request.ReceiverUsername
+                    </a>
+                </td>
+
+                <td>@request.Status</td>
+
+                <td>
+                    <!-- Accept button -->
+                    <form asp-action="AcceptRequest" method="post" style="display:inline;">
+                        <input type="hidden" name="friendRequestId" value="@request.Id" />
+                        <button type="submit" class="btn btn-success">Accept</button>
+                    </form>
+
+                    <!-- Reject button -->
+                    <form asp-action="RejectRequest" method="post" style="display:inline;">
+                        <input type="hidden" name="friendRequestId" value="@request.Id" />
+                        <button type="submit" class="btn btn-danger">Reject</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

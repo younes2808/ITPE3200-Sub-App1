@@ -1,6 +1,55 @@
 @model RAYS.ViewModels.UserViewModel
+@{
+    var currentUserId = int.Parse(User.FindFirst("UserId")?.Value ?? "0");
+}
 
 <h1>@Model.Username's Profile</h1>
+
+@if (Model.UserId != currentUserId)
+{
+    @if (Model.IsFriend)
+    {
+        <p>You are friends with @Model.Username</p>
+
+        <!-- Add the button to delete the friend -->
+        <form asp-action="DeleteFriend" method="post">
+            <input type="hidden" name="friendId" value="@Model.UserId" />
+            <button type="submit">Delete Friend</button>
+        </form>
+    }
+    else if (Model.HasPendingRequest)
+    {
+        <p>A friend request is pending with @Model.Username</p>
+    }
+    else
+    {
+        <!-- Show "Send Friend Request" button only if no friendship or pending request exists -->
+        <form asp-action="SendFriendRequest" method="post">
+            <input type="hidden" name="receiverId" value="@Model.UserId" />
+            <button type="submit">Send Friend Request</button>
+        </form>
+    }
+}
+
+<!-- Only display friend requests if you're viewing someone else's profile -->
+@if (Model.UserId != currentUserId && Model.FriendRequests.Any())
+{
+    <h3>Friend Requests</h3>
+    @foreach (var request in Model.FriendRequests)
+    {
+        <div>
+            <span>User @request.SenderId has sent you a friend request</span>
+            <form asp-action="AcceptFriendRequest" method="post" style="display:inline;">
+                <input type="hidden" name="requestId" value="@request.Id" />
+                <button type="submit">Accept</button>
+            </form>
+            <form asp-action="RejectFriendRequest" method="post" style="display:inline;">
+                <input type="hidden" name="requestId" value="@request.Id" />
+                <button type="submit">Reject</button>
+            </form>
+        </div>
+    }
+}
 
 <div>
     <button onclick="location.href='@Url.Action("Profile", new { userId = Model.UserId, viewType = "Posts" })'">Posts</button>
@@ -145,16 +194,19 @@ else if (ViewBag.ViewType == "LikedPosts")
         </div>
     }
 }
-else if (ViewBag.ViewType == "Friends")
+else @if (ViewBag.ViewType == "Friends")
 {
     <h2>Friends</h2>
     <ul>
         @foreach (var friend in Model.Friends)
         {
-            <li>@friend.Username</li>
+            <li>
+                <a href="@Url.Action("Profile", "Profile", new { userId = friend.UserId })">@friend.Username</a>
+            </li>
         }
     </ul>
 }
+
 <!-- JavaScript function to toggle the edit form -->
 <script>
     function toggleEdit(postId) {

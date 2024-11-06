@@ -21,7 +21,7 @@
                 @foreach (var user in Model.Results)
                 {
                     <li class="border-b text-center border-gray-600 py-2">
-                        <a href="@Url.Action("Profile", "User", new { id = user.Id })"
+                        <a href="@Url.Action("Profile", "Profile", new { userId = user.Id})"
                             class="text-blue-400 hover:underline font-general">
                             @user.Username
                         </a>

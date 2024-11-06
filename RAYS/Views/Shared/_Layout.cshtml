@@ -34,9 +34,8 @@
             </main>
         </div>
 
-        <!-- Høyre Navbar -->
         <div class="flex-none">
-            <partial name="_RightNavbar" />
+        @await Html.PartialAsync("_RightNavbar", ViewData)
         </div>
     </div>
 
