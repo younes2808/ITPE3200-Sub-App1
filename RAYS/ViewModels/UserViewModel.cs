@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using RAYS.Models;
+
 namespace RAYS.ViewModels
 {
     public class UserViewModel
@@ -15,5 +16,4 @@ namespace RAYS.ViewModels
     public bool IsFriend { get; set; }
     public bool HasPendingRequest { get; set; }
 }
-
 }
