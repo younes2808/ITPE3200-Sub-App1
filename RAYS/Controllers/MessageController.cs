@@ -19,47 +19,49 @@ namespace RAYS.Controllers
             _context = context;
         }
 
-        // GET: message/send
-        [HttpGet("send")]
-        public IActionResult SendMessageView()
+        // GET: message/send/{senderId}/{receiverId}
+        [HttpGet("send/{senderId}/{receiverId}")]
+        public IActionResult SendMessageView(int senderId, int receiverId)
         {
-            // Return a view for sending a message
-            return View();
+            var messageRequest = new MessageRequest
+            {
+                SenderId = senderId,
+                ReceiverId = receiverId
+            };
+
+            return View(messageRequest); // Sender messageRequest til visningen
         }
+
 
         // POST: message/send
         [HttpPost("send")]
-        public async Task<IActionResult> SendMessage([FromBody] MessageRequest messageRequest)
+        public async Task<IActionResult> SendMessage([FromForm] MessageRequest messageRequest)
         {
-            // Check if the message request is null
             if (messageRequest == null)
             {
                 ModelState.AddModelError("", "Message cannot be null");
                 return View("SendMessageView", messageRequest);
             }
 
-            // Validate that SenderId and ReceiverId are not the same
             if (messageRequest.SenderId == messageRequest.ReceiverId)
             {
-                ModelState.AddModelError("", "Sender and receiver cannot be the same user.");
+                ModelState.AddModelError("", "Sender and receiver cannot be the same.");
                 return View("SendMessageView", messageRequest);
             }
 
-            // Create a new Message instance from the MessageRequest
             var message = new Message
             {
                 SenderId = messageRequest.SenderId,
                 ReceiverId = messageRequest.ReceiverId,
                 Content = messageRequest.Content,
-                Timestamp = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("Europe/Oslo")),
+                Timestamp = DateTime.UtcNow
             };
 
-            // Add the new message
             _context.Messages.Add(message);
             await _context.SaveChangesAsync();
 
-            // Redirect to a view showing the conversation
-            return RedirectToAction(nameof(GetMessages), new { senderId = message.SenderId, receiverId = message.ReceiverId });
+            // Redirect to the conversation page after message is sent
+            return RedirectToAction("GetMessages", new { senderId = messageRequest.SenderId, receiverId = messageRequest.ReceiverId });
         }
 
         // GET: message/conversations/{userId}
