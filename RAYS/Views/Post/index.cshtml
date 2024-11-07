@@ -4,6 +4,15 @@
     <!-- Create new post form -->
     <form asp-action="Create" method="post" enctype="multipart/form-data"
         class="bg-emerald-200 rounded-lg min-w-full py-4 px-5 mt-2 shadow-md">
+
+        <!-- Display TempData error message -->
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="bg-red-500 text-white p-2 mb-4 rounded-lg">
+                @TempData["ErrorMessage"]
+            </div>
+        }
+
         <div class="flex items-center mb-4">
             @{
                 var identity = User.Identity;
@@ -14,14 +23,12 @@
                     userNameInitial = identity.Name[0].ToString().ToUpper();
                 }
             }
-            <span
-                class="flex items-center justify-center w-10 h-10 rounded-full mr-4 bg-white text-lg font-medium text-black">@userNameInitial</span>
-            <textarea name="Content" placeholder="What's happening?" required
+            <span class="flex items-center justify-center w-10 h-10 rounded-full mr-4 bg-white text-lg font-medium text-black">@userNameInitial</span>
+            <textarea name="Content" placeholder="What's happening?"
                 class="post-textarea w-full p-4 bg-white text-black rounded-lg resize-none h-28 focus:outline-none focus:ring-2 focus:ring-gray-300"></textarea>
         </div>
 
         <div class="flex items-center justify-between">
-            <!-- Ikon-knapper for Media, Hyperlink og Show Map -->
             <div class="flex space-x-2">
                 <button type="button" id="uploadImageButton" class="flex items-center bg-white text-black border border-gray-300 rounded-lg px-2 py-1">
                     <span class="material-icons mr-1">photo</span> Media
@@ -34,7 +41,6 @@
                 </button>
             </div>
 
-            <!-- Post-knapp, plassert til høyre -->
             <button type="submit" class="flex items-center bg-blue-600 text-white rounded-lg px-2 py-1 hover:bg-blue-500 transition-colors duration-300">
                 Post <span class="material-icons ml-1">send</span>
             </button>
@@ -43,8 +49,7 @@
         <!-- Image Preview Section -->
         <div id="imageUploadPreview" class="relative hidden mt-2">
             <img id="imagePreview" class="w-full max-h-60 object-contain rounded-lg" alt="Image Preview" />
-            <button type="button" id="removeImageButton"
-                class="absolute top-2 right-2 bg-red-500 text-white rounded-full px-2 py-1">X</button>
+            <button type="button" id="removeImageButton" class="absolute top-2 right-2 bg-red-500 text-white rounded-full px-2 py-1">X</button>
         </div>
 
         <!-- Hidden input fields for Image, Video URL, and Location -->
@@ -64,98 +69,100 @@
         </div>
     </form>
 </div>
- 
+
 @foreach (var post in Model)
 {
-   <div class="bg-emerald-200 shadow-md rounded-lg py-4 px-5 mt-6 mx-auto">
-    <!-- Bruker-ID, tidsstempel og lokasjon -->
-    <div class="mb-2">
-        <h3 class="text-black font-semibold">User @post.UserId</h3>
-        <small class="text-gray-500 block">@post.CreatedAt.ToString("f")</small>
-        @if (!string.IsNullOrEmpty(post.Location))
-        {
-            <small class="text-gray-500 block">Location: @post.Location</small>
-        }
-    </div>
-
-    <!-- Innholdet i posten -->
-    <p id="content-@post.Id" class="text-gray-800 mt-2">@post.Content</p>
-
-    <!-- Redigeringsskjema (skjult som standard) -->
-    <form asp-action="Update" method="post" id="edit-form-@post.Id" style="display: none;" class="mt-2">
-        <input type="hidden" name="Id" value="@post.Id" />
-        <input type="hidden" name="UserId" value="@post.UserId" />
-
-        <!-- Textarea for editing content -->
-        <textarea name="Content" class="w-full p-2 border rounded-lg">@post.Content</textarea>
-
-        <!-- Optional fields for editing other data -->
-        <input type="text" name="VideoUrl" value="@post.VideoUrl" placeholder="Video URL"
-            class="w-full p-2 border rounded-lg mt-3" />
-        <input type="text" name="Location" value="@post.Location" placeholder="Location"
-            class="w-full p-2 border rounded-lg mt-3" />
-
-        <!-- Update and cancel buttons -->
-        <div class="flex justify-end space-x-4 mt-4">
-            <button type="submit" class="bg-blue-600 text-white rounded-lg px-5 py-2">Save</button>
-            <button type="button" onclick="toggleEdit(@post.Id)" class="bg-gray-300 rounded-lg px-5 py-2">Cancel</button>
+    <div class="bg-emerald-200 shadow-md rounded-lg py-4 px-5 mt-6 mx-auto">
+        <!-- Post metadata -->
+        <div class="mb-2">
+            <h3 class="text-black font-semibold">Username</h3>
+            <small class="text-gray-500 block">@post.CreatedAt.ToString("f")</small>
+            @if (!string.IsNullOrEmpty(post.Location))
+            {
+                <small class="text-gray-500 block">Location: @post.Location</small>
+            }
         </div>
-    </form>
 
-    <!-- Bildevisning -->
-    @if (!string.IsNullOrEmpty(post.ImagePath))
-    {
-        <img src="@post.ImagePath" alt="Post image" class="w-full max-h-96 object-contain rounded-lg mt-4 mb-4" />
-    }
-
-    <!-- Videolenke -->
-    @if (!string.IsNullOrEmpty(post.VideoUrl))
-    {
-        <a href="@post.VideoUrl" target="_blank" class="text-blue-600 hover:underline">@post.VideoUrl</a>
-    }
-
-    <!-- Handlinger -->
-    <div class="flex justify-start items-center space-x-14 mt-4">
-        <!-- Like/Unlike-knapp -->
-        <form asp-action="@(post.IsLikedByUser ? "Unlike" : "Like")" method="post">
-            <input type="hidden" name="postId" value="@post.Id" />
-            <button type="submit" class="flex items-center space-x-1 text-blue-600 hover:text-blue-800">
-                <span class="material-icons">thumb_up</span>
-                <span>@(post.IsLikedByUser ? "Unlike" : "Like")</span>
-            </button>
-        </form>
-
-        <!-- Kommenter-knapp -->
-        <form asp-controller="Comment" asp-action="Index" asp-route-postId="@post.Id" method="get" class="inline">
-        <button type="submit" class="flex items-center space-x-1 text-gray-600 hover:text-gray-800">
-            <span class="material-icons">comment</span>
-            <span>Comment</span>
-        </button>
-        </form>
-
-        <!-- Rediger- og slett-knapper (kun for eier) -->
-        @if (post.UserId == int.Parse(User.FindFirst("UserId")?.Value ?? "0"))
+        <!-- Display error message specific to content if this is the post being updated -->
+        @if (TempData["ErrorPostId"] is int errorPostId && errorPostId == post.Id)
         {
-            <!-- Rediger-knapp -->
-            <button id="edit-button-@post.Id" onclick="toggleEdit(@post.Id)"
-                class="flex items-center space-x-1 text-yellow-600 hover:text-yellow-800">
-                <span class="material-icons">edit</span>
-                <span>Edit</span>
-            </button>
+            <div class="bg-red-500 text-white p-2 mb-1 rounded-lg">
+                @TempData["ContentErrorMessage"]
+            </div>
+        }
+        
+        <!-- Post content -->
+        <p id="content-@post.Id" class="text-gray-800 mt-2">@post.Content</p>
 
-            <!-- Slett-knapp -->
-            <form asp-action="Delete" method="post">
-                <input type="hidden" name="id" value="@post.Id" />
-                <button type="submit"
-                    class="flex items-center space-x-1 text-red-600 hover:text-red-800">
-                    <span class="material-icons">delete</span>
-                    <span>Delete</span>
+        <!-- Edit Form -->
+        <form asp-action="Update" method="post" id="edit-form-@post.Id" style="display: none;" class="mt-2">
+            <input type="hidden" name="Id" value="@post.Id" />
+            <input type="hidden" name="UserId" value="@post.UserId" />
+
+
+
+            <!-- Editable content -->
+            <textarea name="Content" class="w-full p-2 border rounded-lg">@post.Content</textarea>
+
+            <!-- Optional fields for editing other data -->
+            <input type="text" name="VideoUrl" value="@post.VideoUrl" placeholder="Video URL"
+                class="w-full p-2 border rounded-lg mt-3" />
+            <input type="text" name="Location" value="@post.Location" placeholder="Location"
+                class="w-full p-2 border rounded-lg mt-3" />
+
+            <!-- Action buttons -->
+            <div class="flex justify-end space-x-4 mt-4">
+                <button type="submit" class="bg-blue-600 text-white rounded-lg px-5 py-2">Save</button>
+                <button type="button" onclick="toggleEdit(@post.Id)" class="bg-gray-300 rounded-lg px-5 py-2">Cancel</button>
+            </div>
+        </form>
+
+        <!-- Display other post data (image/video/like actions) -->
+        @if (!string.IsNullOrEmpty(post.ImagePath))
+        {
+            <img src="@post.ImagePath" alt="Post image" class="w-full max-h-96 object-contain rounded-lg mt-4 mb-4" />
+        }
+        @if (!string.IsNullOrEmpty(post.VideoUrl))
+        {
+            <a href="@post.VideoUrl" target="_blank" class="text-blue-600 hover:underline">@post.VideoUrl</a>
+        }
+
+        <!-- Like/Comment/Edit/Delete actions -->
+        <div class="flex justify-start items-center space-x-14 mt-4">
+            <form asp-action="@(post.IsLikedByUser ? "Unlike" : "Like")" method="post">
+                <input type="hidden" name="postId" value="@post.Id" />
+                <button type="submit" class="flex items-center space-x-1 text-blue-600 hover:text-blue-800">
+                    <span class="material-icons">thumb_up</span>
+                    <span>@(post.IsLikedByUser ? "Unlike" : "Like")</span>
                 </button>
             </form>
-        }
+
+            <form asp-controller="Comment" asp-action="Index" asp-route-postId="@post.Id" method="get" class="inline">
+                <button type="submit" class="flex items-center space-x-1 text-gray-600 hover:text-gray-800">
+                    <span class="material-icons">comment</span>
+                    <span>Comment</span>
+                </button>
+            </form>
+
+            <!-- Show edit and delete options for the post owner -->
+            @if (post.UserId == int.Parse(User.FindFirst("UserId")?.Value ?? "0"))
+            {
+                <button id="edit-button-@post.Id" onclick="toggleEdit(@post.Id)"
+                        class="flex items-center space-x-1 text-yellow-600 hover:text-yellow-800">
+                    <span class="material-icons">edit</span> <span>Edit</span>
+                </button>
+                <form asp-action="Delete" method="post">
+                    <input type="hidden" name="id" value="@post.Id" />
+                    <button type="submit" class="flex items-center space-x-1 text-red-600 hover:text-red-800">
+                        <span class="material-icons">delete</span> <span>Delete</span>
+                    </button>
+                </form>
+            }
+        </div>
     </div>
-</div>
 }
+
+
 
 <!-- JavaScript function to toggle the edit form -->
 <script>

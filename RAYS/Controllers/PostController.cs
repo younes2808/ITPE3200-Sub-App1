@@ -14,10 +14,13 @@ namespace RAYS.Controllers
     public class PostController : Controller
     {
         private readonly PostService _postService;
+        private readonly ILogger<PostController> _logger;
 
-        public PostController(PostService postService)
+
+        public PostController(PostService postService, ILogger<PostController> logger)
         {
             _postService = postService;
+             _logger = logger;
         }
 
         public async Task<IActionResult> Index()
@@ -42,34 +45,83 @@ namespace RAYS.Controllers
             return View(postViewModels);
         }
 
-
         [HttpPost]
         public async Task<IActionResult> Create(PostViewModel model, IFormFile? image)
-        {
+        {            
+            // Check if content is empty or null
+            if (string.IsNullOrWhiteSpace(model.Content))
+            {
+                TempData["ErrorMessage"] = "Please enter some text before posting.";
+                return RedirectToAction("Index");
+            }
+
+            // Check if ModelState is valid before any other checks
             if (!ModelState.IsValid)
                 return RedirectToAction("Index");
 
-            var userId = int.Parse(User.FindFirst("UserId")?.Value ?? "0");
-            
-            // Save the uploaded image using the service method
-            var imagePath = await _postService.SaveImageAsync(image);
-
-            var post = new Post
+            // Check if an image file was provided
+            if (image != null && image.Length > 0)
             {
-                Content = model.Content,
-                ImagePath = imagePath,
-                VideoUrl = model.VideoUrl,
-                Location = model.Location,
-                CreatedAt = DateTime.Now,
-                UserId = userId
-            };
+                // Define a list of allowed image MIME types
+                var allowedMimeTypes = new[] { "image/jpeg", "image/png", "image/gif", "image/bmp", "image/webp" };
 
-            await _postService.AddAsync(post);
-            return RedirectToAction("Index");
+                // Check if the uploaded file is an image based on MIME type
+                if (!allowedMimeTypes.Contains(image.ContentType))
+                {
+                    // Store the error message in TempData
+                    TempData["ErrorMessage"] = "Please upload a valid image (JPEG, PNG, GIF, BMP, WebP).";
+
+                    // Log the invalid file type for debugging purposes
+                    _logger.LogWarning("Invalid file type uploaded. MIME Type: {MimeType}, FileName: {FileName}", image.ContentType, image.FileName);
+
+                    // Redirect back to the page with the error message
+                    return RedirectToAction("Index");
+                }
+
+                // Optional: Check if the file extension matches the allowed image extensions (as a secondary check)
+                var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp" };
+                var fileExtension = Path.GetExtension(image.FileName)?.ToLower();
+                if (fileExtension == null || !allowedExtensions.Contains(fileExtension))
+                {
+                    TempData["ErrorMessage"] = "Please upload a valid image file.";
+                    return RedirectToAction("Index");
+                }
+            }
+
+            // If the content is valid (not empty), continue with saving and processing the post
+            var userId = int.Parse(User.FindFirst("UserId")?.Value ?? "0");
+
+            try
+            {
+                // Save the uploaded image using the service method, if an image was provided
+                var imagePath = image != null ? await _postService.SaveImageAsync(image) : null;
+
+                // Create and save the post object
+                var post = new Post
+                {
+                    Content = model.Content,
+                    ImagePath = imagePath, // If no image, it will be null
+                    VideoUrl = model.VideoUrl,
+                    Location = model.Location,
+                    CreatedAt = DateTime.Now,
+                    UserId = userId
+                };
+
+                await _postService.AddAsync(post);
+                return RedirectToAction("Index");
+            }
+            catch (Exception ex)
+            {
+                // Log the exception and show a general error message
+                _logger.LogError(ex, "An error occurred while saving the image or creating the post.");
+                TempData["ErrorMessage"] = "An unexpected error occurred. Please try again later.";
+                return RedirectToAction("Index");
+            }
         }
 
+
         [HttpPost]
-        [Authorize]  // Ensure only authenticated users can access this
+        [Authorize]
         public async Task<IActionResult> Update(PostViewModel model)
         {
             // Get the current logged-in user's ID
@@ -77,6 +129,20 @@ namespace RAYS.Controllers
 
             if (model.UserId != userId)
                 return Forbid();
+
+            // Check if the content is empty
+            if (string.IsNullOrEmpty(model.Content))
+            {
+                // Store the postId for the post being updated in TempData to show error on the correct post
+                TempData["ErrorPostId"] = model.Id;
+                _logger.LogInformation("iden til post med feil: ");
+                _logger.LogInformation(model.Id.ToString());
+                // Store content-specific error message in TempData
+                TempData["ContentErrorMessage"] = "Updated Content cannot be empty";
+
+                // Return to the same page with the posts
+                return RedirectToAction("Index");
+            }
 
             // Retrieve the post to be updated
             var post = await _postService.GetByIdAsync(model.Id);
@@ -95,9 +161,15 @@ namespace RAYS.Controllers
             }
             catch (Exception)
             {
-                return View("Index", model); // Return to Index with error feedback
+                // Store the postId and error message in TempData
+                TempData["ErrorPostId"] = model.Id;
+                TempData["ContentErrorMessage"] = "An error occurred while updating the post. Please try again.";
+
+                // Return to the same page with the posts
+                return RedirectToAction("Index");
             }
         }
+
 
         [HttpPost]
         public async Task<IActionResult> Delete(int id)
