@@ -25,7 +25,9 @@ namespace RAYS.Controllers
             var userId = int.Parse(User.FindFirst("UserId")?.Value ?? "0");
 
             var posts = await _postService.GetLatestPostsAsync(20);
-            var postViewModels = posts.Select(post => new PostViewModel
+            
+            // Collect all the tasks to check if the post is liked by the user
+            var postViewModels = await Task.WhenAll(posts.Select(async post => new PostViewModel
             {
                 Id = post.Id,
                 Content = post.Content,
@@ -34,11 +36,12 @@ namespace RAYS.Controllers
                 Location = post.Location,
                 CreatedAt = post.CreatedAt,
                 UserId = post.UserId,
-                IsLikedByUser = _postService.IsPostLikedByUserAsync(userId, post.Id).Result
-            }).ToList();
+                IsLikedByUser = await _postService.IsPostLikedByUserAsync(userId, post.Id)
+            }));
 
             return View(postViewModels);
         }
+
 
         [HttpPost]
         public async Task<IActionResult> Create(PostViewModel model, IFormFile? image)
@@ -48,8 +51,8 @@ namespace RAYS.Controllers
 
             var userId = int.Parse(User.FindFirst("UserId")?.Value ?? "0");
             
-            // Save the uploaded image if it exists
-            var imagePath = await SaveImage(image);
+            // Save the uploaded image using the service method
+            var imagePath = await _postService.SaveImageAsync(image);
 
             var post = new Post
             {
@@ -64,29 +67,6 @@ namespace RAYS.Controllers
             await _postService.AddAsync(post);
             return RedirectToAction("Index");
         }
-
-        //method for saving photos
-        private async Task<string?> SaveImage(IFormFile? image)
-        {
-            if (image == null || image.Length == 0) return null;
-
-            var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images");
-            var uniqueFileName = Guid.NewGuid().ToString() + Path.GetExtension(image.FileName);
-            var filePath = Path.Combine(uploadsFolder, uniqueFileName);
-
-            if (!Directory.Exists(uploadsFolder))
-            {
-                Directory.CreateDirectory(uploadsFolder);
-            }
-
-            using (var fileStream = new FileStream(filePath, FileMode.Create))
-            {
-                await image.CopyToAsync(fileStream);
-            }
-
-            return $"/images/{uniqueFileName}";
-        }
-        
 
         [HttpPost]
         [Authorize]  // Ensure only authenticated users can access this
@@ -115,11 +95,9 @@ namespace RAYS.Controllers
             }
             catch (Exception)
             {
-            
                 return View("Index", model); // Return to Index with error feedback
             }
         }
-
 
         [HttpPost]
         public async Task<IActionResult> Delete(int id)
