@@ -29,6 +29,12 @@
             <button type="submit">Send Friend Request</button>
         </form>
     }
+
+    <!-- Button to send a message -->
+    <a href="@Url.Action("SendMessageView", "Message", new { senderId = currentUserId, receiverId = Model.UserId })"
+        class="btn btn-primary">
+        Send Message
+    </a>
 }
 
 <!-- Only display friend requests if you're viewing someone else's profile -->
@@ -52,9 +58,13 @@
 }
 
 <div>
-    <button onclick="location.href='@Url.Action("Profile", new { userId = Model.UserId, viewType = "Posts" })'">Posts</button>
-    <button onclick="location.href='@Url.Action("Profile", new { userId = Model.UserId, viewType = "LikedPosts" })'">Liked Posts</button>
-    <button onclick="location.href='@Url.Action("Profile", new { userId = Model.UserId, viewType = "Friends" })'">Friends</button>
+    <button
+        onclick="location.href='@Url.Action("Profile", new { userId = Model.UserId, viewType = "Posts" })'">Posts</button>
+    <button
+        onclick="location.href='@Url.Action("Profile", new { userId = Model.UserId, viewType = "LikedPosts" })'">Liked
+        Posts</button>
+    <button
+        onclick="location.href='@Url.Action("Profile", new { userId = Model.UserId, viewType = "Friends" })'">Friends</button>
 </div>
 
 <hr />
@@ -66,7 +76,7 @@
     @foreach (var post in Model.Posts)
     {
         <div class="post" id="post-@post.Id">
-            
+
             <!-- Post content display -->
             <p id="content-@post.Id">@post.Content</p>
 
@@ -105,7 +115,7 @@
                 <form asp-action="Update" method="post" id="edit-form-@post.Id" style="display: none;">
                     <input type="hidden" name="Id" value="@post.Id" />
                     <input type="hidden" name="UserId" value="@post.UserId" /> <!-- Ensure UserId is included -->
-                    
+
                     <!-- Textarea for editing content -->
                     <textarea name="Content">@post.Content</textarea>
 
@@ -126,10 +136,10 @@
                 </form>
             }
             <form asp-controller="Comment" asp-action="Index" asp-route-postId="@post.Id" method="get" class="inline">
-            <button type="submit" class="flex items-center space-x-1 text-gray-600 hover:text-gray-800">
-                <span class="material-icons">comment</span>
-                <span>Comment</span>
-            </button>
+                <button type="submit" class="flex items-center space-x-1 text-gray-600 hover:text-gray-800">
+                    <span class="material-icons">comment</span>
+                    <span>Comment</span>
+                </button>
             </form>
         </div>
     }
@@ -140,7 +150,7 @@ else if (ViewBag.ViewType == "LikedPosts")
     @foreach (var likedPost in Model.LikedPosts)
     {
         <div class="post" id="post-@likedPost.Id">
-            
+
             <!-- Liked post content display -->
             <p id="content-@likedPost.Id">@likedPost.Content</p>
 
@@ -177,7 +187,7 @@ else if (ViewBag.ViewType == "LikedPosts")
                 <form asp-action="Update" method="post" id="edit-form-@likedPost.Id" style="display: none;">
                     <input type="hidden" name="Id" value="@likedPost.Id" />
                     <input type="hidden" name="UserId" value="@likedPost.UserId" /> <!-- Ensure UserId is included -->
-                    
+
                     <!-- Textarea for editing content -->
                     <textarea name="Content">@likedPost.Content</textarea>
 
@@ -199,12 +209,12 @@ else if (ViewBag.ViewType == "LikedPosts")
             }
 
             <form asp-controller="Comment" asp-action="Index" asp-route-postId="@likedPost.Id" method="get" class="inline">
-            <button type="submit" class="flex items-center space-x-1 text-gray-600 hover:text-gray-800">
-                <span class="material-icons">comment</span>
-                <span>Comment</span>
-            </button>
+                <button type="submit" class="flex items-center space-x-1 text-gray-600 hover:text-gray-800">
+                    <span class="material-icons">comment</span>
+                    <span>Comment</span>
+                </button>
             </form>
-        
+
         </div>
     }
 }
@@ -227,7 +237,7 @@ else @if (ViewBag.ViewType == "Friends")
         var content = document.getElementById("content-" + postId);
         var editForm = document.getElementById("edit-form-" + postId);
         var editButton = document.getElementById("edit-button-" + postId);
-        
+
         // Toggle the visibility of the content and edit form
         if (editForm.style.display === "none" || editForm.style.display === "") {
             content.style.display = "none";  // Hide post content
