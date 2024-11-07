@@ -52,10 +52,23 @@ namespace RAYS.Services
 
         public async Task<IEnumerable<CommentViewModel>> GetCommentsForPost(int postId)
         {
+            // Log the request
             _logger.LogInformation("Retrieving comments for post ID {PostId}.", postId);
+
+            // Check if the post exists
+            var post = await _postRepository.GetByIdAsync(postId);
+            if (post == null) 
+            {
+                _logger.LogInformation("Post not found");
+                // If the post does not exist, throw a KeyNotFoundException
+                throw new KeyNotFoundException($"Post with ID {postId} not found.");
+            }
+
+            // If the post exists, retrieve the comments
             var comments = await _commentRepository.GetAllAsync(postId);
             var commentsWithUsernames = new List<CommentViewModel>();
 
+            // Process each comment
             foreach (var comment in comments)
             {
                 var user = await _userRepository.GetUserByIdAsync(comment.UserId);
@@ -66,13 +79,17 @@ namespace RAYS.Services
                     CreatedAt = comment.CreatedAt,
                     UserId = comment.UserId,
                     PostId = comment.PostId,
-                    UserName = user?.Username ?? "Unknown"
+                    UserName = user?.Username ?? "Unknown" // Handle null user
                 });
             }
 
+            // Log the number of comments retrieved
             _logger.LogInformation("Retrieved {Count} comments for post ID {PostId}.", commentsWithUsernames.Count, postId);
+
+            // Return the list of comments with usernames
             return commentsWithUsernames;
         }
+
 
         public async Task<Comment> GetCommentByIdAsync(int commentId)
         {
