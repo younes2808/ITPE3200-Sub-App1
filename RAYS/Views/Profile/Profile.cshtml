@@ -58,6 +58,13 @@
             </div>
         }
     </div>
+
+    <!-- Button to send a message -->
+    <a href="@Url.Action("GetMessages", "Message", new { senderId = currentUserId, receiverId = Model.UserId })"
+        class="btn btn-primary">
+        Send Message
+    </a>
+
 }
 
 <!-- Only display friend requests if you're viewing someone else's profile -->

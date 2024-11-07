@@ -19,13 +19,15 @@
         @foreach (var conversation in Model)
         {
             <tr>
-                <td>@conversation.UserId</td>
+                <td>@conversation.CorrespondentId</td> <!-- ID til samtalepartneren -->
                 <td>@conversation.Content</td>
                 <td>@conversation.Timestamp.ToString("g")</td>
                 <td>@(conversation.IsResponded ? "Responded" : "Not Responded")</td>
                 <td>
-                    <a asp-action="GetMessages" asp-route-senderId="@conversation.UserId"
-                        asp-route-receiverId="@conversation.UserId">View Conversation</a>
+                    <a asp-action="GetMessages" asp-route-senderId="@conversation.CorrespondentId"
+                        asp-route-receiverId="@User.FindFirst("UserId")?.Value">
+                        View Conversation
+                    </a>
                 </td>
             </tr>
         }

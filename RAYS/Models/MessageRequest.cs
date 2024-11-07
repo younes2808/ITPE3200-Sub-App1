@@ -12,6 +12,6 @@ namespace RAYS.Models
 
         [Required(ErrorMessage = "Message content is required.")]
         [StringLength(1000, ErrorMessage = "Message content cannot exceed 1000 characters.")]
-        public string Content { get; set; } // The content of the message
+        public required string Content { get; set; } // The content of the message
     }
 }

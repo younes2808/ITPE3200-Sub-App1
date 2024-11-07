@@ -32,11 +32,19 @@ namespace RAYS.Repositories
                 .Where(m => m.ReceiverId == userId)
                 .ToListAsync();
 
-            return sentMessages.Concat(receivedMessages)
+            var allMessages = sentMessages.Concat(receivedMessages)
+                .Where(m => m != null);  // Ensure no nulls are included
+
+            return allMessages
                 .GroupBy(m => m.SenderId == userId ? m.ReceiverId : m.SenderId)
                 .Select(g => g.OrderByDescending(m => m.Timestamp).FirstOrDefault())
+                .Where(m => m != null)  // Ensure that FirstOrDefault() didn't return null
+                .Cast<Message>()  // Cast to Message to remove nullable
                 .ToList();
         }
+
+
+
 
         public async Task<IEnumerable<Message>> GetMessagesAsync(int senderId, int receiverId)
         {
