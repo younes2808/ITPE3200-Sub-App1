@@ -1,6 +1,6 @@
 using RAYS.Models;
 using RAYS.Repositories;
-using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 
 namespace RAYS.Services
@@ -63,6 +63,28 @@ namespace RAYS.Services
         public async Task<bool> IsPostLikedByUserAsync(int userId, int postId)
         {
             return await _postRepository.HasUserLikedPostAsync(userId, postId);
+        }
+
+        // Move SaveImage logic here
+        public async Task<string?> SaveImageAsync(IFormFile? image)
+        {
+            if (image == null || image.Length == 0) return null;
+
+            var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images");
+            var uniqueFileName = Guid.NewGuid().ToString() + Path.GetExtension(image.FileName);
+            var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+            if (!Directory.Exists(uploadsFolder))
+            {
+                Directory.CreateDirectory(uploadsFolder);
+            }
+
+            using (var fileStream = new FileStream(filePath, FileMode.Create))
+            {
+                await image.CopyToAsync(fileStream);
+            }
+
+            return $"/images/{uniqueFileName}";
         }
     }
 }
