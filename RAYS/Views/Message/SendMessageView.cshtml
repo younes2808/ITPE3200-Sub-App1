@@ -1,0 +1,45 @@
+@model RAYS.Models.MessageRequest
+
+@{
+    ViewData["Title"] = "Send Message";
+}
+
+<h2>Send Message</h2>
+
+<!-- Form for sending message -->
+<form asp-action="SendMessage" method="post">
+    <div class="form-group">
+        <label for="SenderId">Sender ID:</label>
+        <input asp-for="SenderId" type="number" class="form-control" />
+        <span asp-validation-for="SenderId" class="text-danger"></span> <!-- Validation message for SenderId -->
+    </div>
+
+    <div class="form-group">
+        <label for="ReceiverId">Receiver ID:</label>
+        <input asp-for="ReceiverId" type="number" class="form-control" />
+        <span asp-validation-for="ReceiverId" class="text-danger"></span> <!-- Validation message for ReceiverId -->
+    </div>
+
+    <div class="form-group">
+        <label for="Content">Message:</label>
+        <textarea asp-for="Content" class="form-control"></textarea>
+        <span asp-validation-for="Content" class="text-danger"></span> <!-- Validation message for Content -->
+    </div>
+
+    <button type="submit" class="btn btn-primary">Send</button>
+</form>
+
+<!-- Error message if model state is not valid -->
+@if (!ViewData.ModelState.IsValid)
+{
+    <div class="alert alert-danger">
+        <strong>Error:</strong> There were some issues with your submission.
+    </div>
+}
+
+<!-- Make sure client-side validation works -->
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

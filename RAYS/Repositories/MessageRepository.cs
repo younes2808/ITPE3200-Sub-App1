@@ -1,48 +1,49 @@
 using RAYS.Models;
-using RAYS.DAL;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using RAYS.DAL;
 
 namespace RAYS.Repositories
 {
     public class MessageRepository : IMessageRepository
     {
-        private readonly ServerAPIContext _context; 
+        private readonly ServerAPIContext _context;
 
         public MessageRepository(ServerAPIContext context)
         {
             _context = context;
         }
 
-        public async Task<Message> AddAsync(Message message)
+        public async Task AddMessageAsync(Message message)
         {
-            await _context.Messages.AddAsync(message);
+            _context.Messages.Add(message);
             await _context.SaveChangesAsync();
-            return message;
         }
 
-        public async Task<IEnumerable<Message>> GetConversationsByUserIdAsync(int userId)
+        public async Task<IEnumerable<Message>> GetConversationsAsync(int userId)
         {
-            var lastMessages = await _context.Messages
-                .Where(m => m.SenderId == userId || m.ReceiverId == userId)
+            var sentMessages = await _context.Messages
+                .Where(m => m.SenderId == userId)
+                .ToListAsync();
+
+            var receivedMessages = await _context.Messages
+                .Where(m => m.ReceiverId == userId)
+                .ToListAsync();
+
+            return sentMessages.Concat(receivedMessages)
                 .GroupBy(m => m.SenderId == userId ? m.ReceiverId : m.SenderId)
                 .Select(g => g.OrderByDescending(m => m.Timestamp).FirstOrDefault())
-                .ToListAsync();
-
-            return lastMessages.Where(m => m != null).Cast<Message>();
+                .ToList();
         }
 
-        public async Task<IEnumerable<Message>> GetMessagesBetweenUsersAsync(int userId1, int userId2)
+        public async Task<IEnumerable<Message>> GetMessagesAsync(int senderId, int receiverId)
         {
-            var messages = await _context.Messages
-                .Where(m => (m.SenderId == userId1 && m.ReceiverId == userId2) ||
-                             (m.SenderId == userId2 && m.ReceiverId == userId1))
-                .OrderBy(m => m.Timestamp)
+            return await _context.Messages
+                .Where(m => (m.SenderId == senderId && m.ReceiverId == receiverId) ||
+                            (m.SenderId == receiverId && m.ReceiverId == senderId))
                 .ToListAsync();
-
-            return messages.Where(m => m != null).Cast<Message>();
         }
     }
 }

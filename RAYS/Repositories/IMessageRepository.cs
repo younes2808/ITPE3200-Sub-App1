@@ -1,15 +1,13 @@
 using RAYS.Models;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace RAYS.Repositories
 {
     public interface IMessageRepository
     {
-        Task<Message> AddAsync(Message message);
-        Task<IEnumerable<Message>> GetConversationsByUserIdAsync(int userId);
-        Task<IEnumerable<Message>> GetMessagesBetweenUsersAsync(int userId1, int userId2);
+        Task AddMessageAsync(Message message);
+        Task<IEnumerable<Message>> GetConversationsAsync(int userId);
+        Task<IEnumerable<Message>> GetMessagesAsync(int senderId, int receiverId);
     }
-
 }

@@ -175,11 +175,23 @@
                 <input type="text" name="Location" value="@post.Location" placeholder="Location"
                     class="w-full p-2 border rounded-lg mt-3" />
 
-                <!-- Update and cancel buttons -->
-                <div class="flex justify-end space-x-4 mt-4">
-                    <button type="submit" class="bg-blue-600 text-white rounded-lg px-5 py-2">Save</button>
-                    <button type="button" onclick="toggleEdit(@post.Id)" class="bg-gray-300 rounded-lg px-5 py-2">Cancel</button>
-                </div>
+                    <!-- Update and cancel buttons -->
+                    <button type="submit">Save</button>
+                    <button type="button" onclick="toggleEdit(@post.Id)">Cancel</button>
+                </form>
+
+                <!-- Delete button for user's own posts -->
+                <form asp-action="Delete" method="post">
+                    <input type="hidden" name="id" value="@post.Id" />
+                    <input type="hidden" name="viewType" value="Posts" />
+                    <button type="submit">Delete</button>
+                </form>
+            }
+            <form asp-controller="Comment" asp-action="Index" asp-route-postId="@post.Id" method="get" class="inline">
+            <button type="submit" class="flex items-center space-x-1 text-gray-600 hover:text-gray-800">
+                <span class="material-icons">comment</span>
+                <span>Comment</span>
+            </button>
             </form>
         </div>
     }
@@ -241,12 +253,26 @@ else if (ViewBag.ViewType == "LikedPosts")
                 <input type="text" name="Location" value="@likedPost.Location" placeholder="Location"
                     class="w-full p-2 border rounded-lg mt-3" />
 
-                <!-- Update and cancel buttons -->
-                <div class="flex justify-end space-x-4 mt-4">
-                    <button type="submit" class="bg-blue-600 text-white rounded-lg px-5 py-2">Save</button>
-                    <button type="button" onclick="toggleEdit(@likedPost.Id)" class="bg-gray-300 rounded-lg px-5 py-2">Cancel</button>
-                </div>
+                    <!-- Update and cancel buttons -->
+                    <button type="submit">Save</button>
+                    <button type="button" onclick="toggleEdit(@likedPost.Id)">Cancel</button>
+                </form>
+
+                <!-- Delete button for liked posts owned by the user -->
+                <form asp-action="Delete" method="post">
+                    <input type="hidden" name="id" value="@likedPost.Id" />
+                    <input type="hidden" name="viewType" value="LikedPosts" />
+                    <button type="submit">Delete</button>
+                </form>
+            }
+
+            <form asp-controller="Comment" asp-action="Index" asp-route-postId="@likedPost.Id" method="get" class="inline">
+            <button type="submit" class="flex items-center space-x-1 text-gray-600 hover:text-gray-800">
+                <span class="material-icons">comment</span>
+                <span>Comment</span>
+            </button>
             </form>
+        
         </div>
     }
 }

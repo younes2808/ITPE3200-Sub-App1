@@ -126,10 +126,12 @@
         </form>
 
         <!-- Kommenter-knapp -->
-        <button class="flex items-center space-x-1 text-gray-600 hover:text-gray-800">
+        <form asp-controller="Comment" asp-action="Index" asp-route-postId="@post.Id" method="get" class="inline">
+        <button type="submit" class="flex items-center space-x-1 text-gray-600 hover:text-gray-800">
             <span class="material-icons">comment</span>
             <span>Comment</span>
         </button>
+        </form>
 
         <!-- Rediger- og slett-knapper (kun for eier) -->
         @if (post.UserId == int.Parse(User.FindFirst("UserId")?.Value ?? "0"))
