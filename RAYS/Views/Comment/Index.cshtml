@@ -10,6 +10,14 @@
 <!-- Back to Posts Button -->
 <button onclick="window.location.href='/Post'">Back to Posts</button>
 
+<!-- Display error message if present in TempData -->
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="bg-red-500 text-white p-2 mb-4 rounded-lg">
+        @TempData["ErrorMessage"]
+    </div>
+}
+
 <!-- Comment Form -->
 <form asp-action="Add" asp-controller="Comment" method="post" id="commentForm">
     <input type="hidden" name="PostId" value="@postId" />
@@ -22,6 +30,7 @@
 </form>
 
 <hr />
+
 
 <!-- List of Comments -->
 @foreach (var comment in Model)
