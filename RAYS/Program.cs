@@ -19,15 +19,18 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<IUserSearchRepository, UserSearchRepository>();
 builder.Services.AddScoped<UserSearchService>();
-
 // Post related services
 builder.Services.AddScoped<IPostRepository, PostRepository>();
 builder.Services.AddScoped<PostService>();
-
-// Message related services
+// Mesage related services
 builder.Services.AddScoped<IMessageRepository, MessageRepository>();
 builder.Services.AddScoped<MessageService>();  // `ILogger<MessageService>` blir automatisk injisert
-
+// Friend related services
+builder.Services.AddScoped<IFriendRepository, FriendRepository>();
+builder.Services.AddScoped<FriendService>();
+// Comment related services
+builder.Services.AddScoped<ICommentRepository, CommentRepository>();
+builder.Services.AddScoped<CommentService>();
 // Configure authentication
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
