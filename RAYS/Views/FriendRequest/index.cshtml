@@ -4,65 +4,64 @@
     ViewData["Title"] = "Friend Requests";
 }
 
-<h1>Friend Requests</h1>
 
-@if (TempData["SuccessMessage"] != null)
-{
-    <div class="alert alert-success">
-        @TempData["SuccessMessage"]
-    </div>
-}
+    <!-- Main content -->
+    <div class="w-full bg-white shadow-lg rounded-lg p-8 h-[90vh]">
+        <!-- Title -->
+        <h1 class="text-3xl font-extrabold text-gray-900 mb-6">Friend Requests</h1>
 
-@if (TempData["ErrorMessage"] != null)
-{
-    <div class="alert alert-danger">
-        @TempData["ErrorMessage"]
-    </div>
-}
-
-<table class="table">
-    <thead>
-        <tr>
-            <th>Sender</th>
-            <th>Receiver</th>
-            <th>Status</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var request in Model)
+        <!-- Success or Error Messages -->
+        @if (TempData["SuccessMessage"] != null)
         {
-            <tr>
-                <!-- Sender's username as a clickable link -->
-                <td>
-                    <a href="@Url.Action("Profile", "Profile", new { userId = request.SenderId })">
-                        @request.SenderUsername
-                    </a>
-                </td>
-
-                <!-- Receiver's username as a clickable link -->
-                <td>
-                    <a href="@Url.Action("Profile", "Profile", new { userId = request.ReceiverId })">
-                        @request.ReceiverUsername
-                    </a>
-                </td>
-
-                <td>@request.Status</td>
-
-                <td>
-                    <!-- Accept button -->
-                    <form asp-action="AcceptRequest" method="post" style="display:inline;">
-                        <input type="hidden" name="friendRequestId" value="@request.Id" />
-                        <button type="submit" class="btn btn-success">Accept</button>
-                    </form>
-
-                    <!-- Reject button -->
-                    <form asp-action="RejectRequest" method="post" style="display:inline;">
-                        <input type="hidden" name="friendRequestId" value="@request.Id" />
-                        <button type="submit" class="btn btn-danger">Reject</button>
-                    </form>
-                </td>
-            </tr>
+            <div class="bg-green-100 text-green-800 px-4 py-2 rounded mb-4">
+                @TempData["SuccessMessage"]
+            </div>
         }
-    </tbody>
-</table>
+
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="bg-red-100 text-red-800 px-4 py-2 rounded mb-4">
+                @TempData["ErrorMessage"]
+            </div>
+        }
+
+        <!-- Table Section -->
+        <div>
+            <table class="w-full border-collapse">
+                <thead class="bg-emerald-200 text-gray-800 font-semibold">
+                    <tr>
+                        <th class="border-b border-gray-300 px-4 py-2 text-left">Sender</th>
+                        <th class="border-b border-gray-300 px-4 py-2 text-left">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var request in Model)
+                    {
+                        <tr class="hover:bg-gray-100">
+                            <td class="border-b border-gray-300 px-4 py-2">
+                                <a href="@Url.Action("Profile", "Profile", new { userId = request.SenderId })" class="text-blue-600 hover:underline">
+                                    @request.SenderUsername
+                                </a>
+                            </td>
+                            <td class="border-b border-gray-300 px-4 py-2 flex space-x-4">
+                                <!-- Accept button -->
+                                <form asp-action="AcceptRequest" method="post" style="display:inline;">
+                                    <input type="hidden" name="friendRequestId" value="@request.Id" />
+                                    <button type="submit" class="bg-green-500 text-white px-2 py-1 rounded hover:bg-green-700">Accept</button>
+                                </form>
+
+                                <!-- Reject button -->
+                                <form asp-action="RejectRequest" method="post" style="display:inline;">
+                                    <input type="hidden" name="friendRequestId" value="@request.Id" />
+                                    <button type="submit" class="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-700">Reject</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+
+
