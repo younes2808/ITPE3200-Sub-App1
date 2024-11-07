@@ -1,0 +1,84 @@
+@model RAYS.ViewModels.MessageViewModel
+
+@{
+    ViewData["Title"] = "Messages";
+    var receiverUsername = Model.ReceiverName;
+    var currentUserId = Model.CurrentUserId;
+    var senderId = Model.SenderId;
+    var receiverId = Model.ReceiverId;
+    var messages = Model.Messages;
+
+    // Definer norsk tidssone
+    var norwegianTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Central European Standard Time");
+}
+
+<div>
+    <div>
+        <a href="@Url.Action("GetConversations", "Message")">← Back to My Conversations</a>
+        <h2>@receiverUsername</h2>
+    </div>
+
+    <!-- Message container with scroll -->
+    <div id="messageContainer" style="overflow-y: auto; height: 400px; margin-bottom: 20px;">
+        @if (messages != null && messages.Any())
+        {
+            @foreach (var message in messages)
+            {
+                <div
+                    style="display: flex; justify-content: @(message.SenderId == currentUserId ? "flex-end" : "flex-start"); margin-bottom: 10px;">
+                    <div
+                        style="padding: 10px; border-radius: 8px; max-width: 60%; 
+                                @(message.SenderId == currentUserId ? "background-color: #cce5ff; text-align: right;" : "background-color: #e2e3e5; text-align: left;")">
+                        <!-- Innhold og informasjon om melding -->
+                        <p style="margin: 0; font-size: 1em;">@message.Content</p>
+                        <p style="margin: 0; font-size: 0.8em; color: #555;">
+                            <!-- Konverter tid til norsk tidssone -->
+                            @TimeZoneInfo.ConvertTimeFromUtc(message.Timestamp, norwegianTimeZone).ToString("g")
+                        </p>
+                        <p style="font-size: 0.7em; color: #999;">
+                            Sender ID: @message.SenderId, Receiver ID: @message.ReceiverId
+                        </p>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div style="color: gray; text-align: center;">No messages yet</div>
+        }
+    </div>
+
+    <!-- Meldingsskjemaet -->
+    <form method="post" action="@Url.Action("SendMessage", "Message")" style="margin-top: 20px;">
+        <div>
+            <input type="text" name="newMessage" placeholder="Type a message..."
+                style="width: 80%; padding: 8px; border-radius: 5px; border: 1px solid #ccc;" />
+            <input type="hidden" name="receiverId" value="@receiverId" />
+            <button type="submit"
+                style="padding: 8px 16px; border: none; border-radius: 5px; background-color: #007bff; color: white;">
+                Send
+            </button>
+        </div>
+    </form>
+</div>
+
+<!-- JavaScript to handle automatic scroll -->
+<script>
+    window.addEventListener('DOMContentLoaded', (event) => {
+        // Function to scroll the message container to the bottom
+        function scrollToBottom() {
+            var messageContainer = document.getElementById('messageContainer');
+            messageContainer.scrollTop = messageContainer.scrollHeight;
+        }
+
+        // Scroll to the bottom when the page loads
+        scrollToBottom();
+
+        // Set an interval to check for new messages (or trigger this on message send)
+        const observer = new MutationObserver(scrollToBottom);
+        observer.observe(document.getElementById('messageContainer'), {
+            childList: true, // Watch for added or removed child elements
+            subtree: true     // Watch all descendants
+        });
+    });
+</script>

@@ -31,7 +31,7 @@
     }
 
     <!-- Button to send a message -->
-    <a href="@Url.Action("SendMessageView", "Message", new { senderId = currentUserId, receiverId = Model.UserId })"
+    <a href="@Url.Action("GetMessages", "Message", new { senderId = currentUserId, receiverId = Model.UserId })"
         class="btn btn-primary">
         Send Message
     </a>
