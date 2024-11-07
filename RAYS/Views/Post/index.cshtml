@@ -1,17 +1,14 @@
 @model IEnumerable<RAYS.ViewModels.PostViewModel>
 
-
 <div class="flex justify-center p-0">
     <!-- Create new post form -->
     <form asp-action="Create" method="post" enctype="multipart/form-data"
-        class="bg-emerald-200 rounded-lg min-w-full p-5 mt-5 510px:mt-3 shadow-md">
+        class="bg-emerald-200 rounded-lg min-w-full py-4 px-5 mt-2 shadow-md">
         <div class="flex items-center mb-4">
             @{
-                // Hold User.Identity i en lokal variabel for null-sjekk
                 var identity = User.Identity;
                 var userNameInitial = string.Empty;
 
-                // Sjekk om identiteten er tilgjengelig og autentisert
                 if (identity != null && identity.IsAuthenticated && !string.IsNullOrEmpty(identity.Name))
                 {
                     userNameInitial = identity.Name[0].ToString().ToUpper();
@@ -20,111 +17,142 @@
             <span
                 class="flex items-center justify-center w-10 h-10 rounded-full mr-4 bg-white text-lg font-medium text-black">@userNameInitial</span>
             <textarea name="Content" placeholder="What's happening?" required
-                class="post-textarea w-full p-4 bg-white focus:ring-emerald-500 focus:ring-2 text-black rounded-lg resize-none h-28"></textarea>
+                class="post-textarea w-full p-4 bg-white text-black rounded-lg resize-none h-28 focus:outline-none focus:ring-2 focus:ring-gray-300"></textarea>
         </div>
 
-        <!-- Image upload field -->
-        <div class="my-4">
-            <input type="file" name="Image"
-                class="w-full p-3 bg-white focus:ring-emerald-500 focus:ring-2 text-black rounded-lg focus:outline-none" />
+        <div class="flex items-center justify-between">
+            <!-- Ikon-knapper for Media, Hyperlink og Show Map -->
+            <div class="flex space-x-2">
+                <button type="button" id="uploadImageButton" class="flex items-center bg-white text-black border border-gray-300 rounded-lg px-2 py-1">
+                    <span class="material-icons mr-1">photo</span> Media
+                </button>
+                <button type="button" id="addVideoUrlButton" class="flex items-center bg-white text-black border border-gray-300 rounded-lg px-2 py-1">
+                    <span class="material-icons mr-1">link</span> Hyperlink
+                </button>
+                <button type="button" id="addLocationButton" class="flex items-center bg-white text-black border border-gray-300 rounded-lg px-2 py-1">
+                    <span class="material-icons mr-1">location_on</span> Show Map
+                </button>
+            </div>
+
+            <!-- Post-knapp, plassert til høyre -->
+            <button type="submit" class="flex items-center bg-blue-600 text-white rounded-lg px-2 py-1 hover:bg-blue-500 transition-colors duration-300">
+                Post <span class="material-icons ml-1">send</span>
+            </button>
         </div>
 
-        <!-- Video URL input -->
-        <div class="my-4">
+        <!-- Image Preview Section -->
+        <div id="imageUploadPreview" class="relative hidden mt-2">
+            <img id="imagePreview" class="w-full max-h-60 object-contain rounded-lg" alt="Image Preview" />
+            <button type="button" id="removeImageButton"
+                class="absolute top-2 right-2 bg-red-500 text-white rounded-full px-2 py-1">X</button>
+        </div>
+
+        <!-- Hidden input fields for Image, Video URL, and Location -->
+        <div id="imageUpload" class="hidden mt-2">
+            <input type="file" name="Image" id="imageInput"
+                class="w-full p-3 bg-white text-black rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-300" />
+        </div>
+
+        <div id="videoUrlInput" class="hidden mt-2">
             <input type="url" name="VideoUrl" placeholder="Add a video URL"
-                class="w-full p-3 bg-white focus:ring-emerald-500 focus:ring-2 text-black rounded-lg focus:outline-none" />
+                class="w-full p-3 bg-white text-black rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-300" />
         </div>
 
-        <!-- Location input -->
-        <div class="my-4">
+        <div id="locationInput" class="hidden mt-2">
             <input type="text" name="Location" placeholder="Enter a location"
-                class="w-full p-3 bg-white focus:ring-emerald-500 focus:ring-2 text-black rounded-lg focus:outline-none" />
+                class="w-full p-3 bg-white text-black rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-300" />
         </div>
-
-        <button type="submit"
-            class="flex items-center justify-center px-2 py-1 bg-blue-600 text-white rounded-full hover:bg-blue-500 transition-colors duration-300 text-sm font-general">
-            Post
-            <span class="material-icons ml-1">send</span>
-        </button>
     </form>
 </div>
-
-<hr />
-
+ 
 @foreach (var post in Model)
 {
-
-    <div class="bg-white shadow-md rounded-lg p-5 mt-4">
-
-        <!-- Post content display -->
-        <p id="content-@post.Id">@post.Content</p>
-
-        <!-- Display image if available -->
-        @if (!string.IsNullOrEmpty(post.ImagePath))
+   <div class="bg-emerald-200 shadow-md rounded-lg py-4 px-5 mt-6 mx-auto">
+    <!-- Bruker-ID, tidsstempel og lokasjon -->
+    <div class="mb-2">
+        <h3 class="text-black font-semibold">Username</h3>
+        <small class="text-gray-500 block">@post.CreatedAt.ToString("f")</small>
+        @if (!string.IsNullOrEmpty(post.Location))
         {
-            <img src="@post.ImagePath" alt="Post image" class="w-full max-h-60 object-cover rounded-lg mt-2" />
+            <small class="text-gray-500 block">Location: @post.Location</small>
         }
+    </div>
 
-        <!-- Display video link if available -->
-        @if (!string.IsNullOrEmpty(post.VideoUrl))
-        {
+    <!-- Innholdet i posten -->
+    <p id="content-@post.Id" class="text-gray-800 mt-2">@post.Content</p>
 
-            <a href="@post.VideoUrl" target="_blank" class="text-blue-600 hover:underline">Watch Video</a>
+    <!-- Redigeringsskjema (skjult som standard) -->
+    <form asp-action="Update" method="post" id="edit-form-@post.Id" style="display: none;" class="mt-2">
+        <input type="hidden" name="Id" value="@post.Id" />
+        <input type="hidden" name="UserId" value="@post.UserId" />
 
-        }
+        <!-- Textarea for editing content -->
+        <textarea name="Content" class="w-full p-2 border rounded-lg">@post.Content</textarea>
 
-        <!-- Display location and timestamp -->
-        <small class="text-gray-500">@post.Location</small>
-        <small class="text-gray-400">@post.CreatedAt.ToString("f")</small>
+        <!-- Optional fields for editing other data -->
+        <input type="text" name="VideoUrl" value="@post.VideoUrl" placeholder="Video URL"
+            class="w-full p-2 border rounded-lg mt-3" />
+        <input type="text" name="Location" value="@post.Location" placeholder="Location"
+            class="w-full p-2 border rounded-lg mt-3" />
 
-        <!-- Like/Unlike button based on user's action -->
-        <form asp-action="@(post.IsLikedByUser ? "Unlike" : "Like")" method="post" class="mt-2">
+        <!-- Update and cancel buttons -->
+        <div class="flex justify-end space-x-4 mt-4">
+            <button type="submit" class="bg-blue-600 text-white rounded-lg px-5 py-2">Save</button>
+            <button type="button" onclick="toggleEdit(@post.Id)" class="bg-gray-300 rounded-lg px-5 py-2">Cancel</button>
+        </div>
+    </form>
+
+    <!-- Bildevisning -->
+    @if (!string.IsNullOrEmpty(post.ImagePath))
+    {
+        <img src="@post.ImagePath" alt="Post image" class="w-full max-h-96 object-contain rounded-lg mt-4 mb-4" />
+    }
+
+    <!-- Videolenke -->
+    @if (!string.IsNullOrEmpty(post.VideoUrl))
+    {
+        <a href="@post.VideoUrl" target="_blank" class="text-blue-600 hover:underline">@post.VideoUrl</a>
+    }
+
+    <!-- Handlinger -->
+    <div class="flex justify-start items-center space-x-14 mt-4">
+        <!-- Like/Unlike-knapp -->
+        <form asp-action="@(post.IsLikedByUser ? "Unlike" : "Like")" method="post">
             <input type="hidden" name="postId" value="@post.Id" />
-
-            <button type="submit" class="text-blue-600 hover:underline">
-
-                @(post.IsLikedByUser ? "Unlike" : "Like")
+            <button type="submit" class="flex items-center space-x-1 text-blue-600 hover:text-blue-800">
+                <span class="material-icons">thumb_up</span>
+                <span>@(post.IsLikedByUser ? "Unlike" : "Like")</span>
             </button>
         </form>
 
-        <!-- Edit/Delete options for posts owned by the user -->
+        <!-- Kommenter-knapp -->
+        <button class="flex items-center space-x-1 text-gray-600 hover:text-gray-800">
+            <span class="material-icons">comment</span>
+            <span>Comment</span>
+        </button>
+
+        <!-- Rediger- og slett-knapper (kun for eier) -->
         @if (post.UserId == int.Parse(User.FindFirst("UserId")?.Value ?? "0"))
         {
-            <!-- Edit button to toggle the edit form -->
+            <!-- Rediger-knapp -->
             <button id="edit-button-@post.Id" onclick="toggleEdit(@post.Id)"
-                class="text-blue-600 hover:underline mt-2">Edit</button>
+                class="flex items-center space-x-1 text-yellow-600 hover:text-yellow-800">
+                <span class="material-icons">edit</span>
+                <span>Edit</span>
+            </button>
 
-
-            <!-- Edit form (hidden by default) -->
-            <form asp-action="Update" method="post" id="edit-form-@post.Id" style="display: none;" class="mt-2">
-                <input type="hidden" name="Id" value="@post.Id" />
-
-                <input type="hidden" name="UserId" value="@post.UserId" /> <!-- Ensure UserId is included -->
-
-                <!-- Textarea for editing content -->
-                <textarea name="Content" class="w-full p-2 border rounded">@post.Content</textarea>
-
-                <!-- Optional fields for editing other data -->
-                <input type="text" name="VideoUrl" value="@post.VideoUrl" placeholder="Video URL"
-                    class="w-full p-2 border rounded" />
-                <input type="text" name="Location" value="@post.Location" placeholder="Location"
-                    class="w-full p-2 border rounded" />
-
-                <!-- Update and cancel buttons -->
-                <button type="submit" class="bg-blue-600 text-white rounded px-2 py-1 mt-2">Save</button>
-                <button type="button" onclick="toggleEdit(@post.Id)" class="bg-gray-300 rounded px-2 py-1 mt-2">Cancel</button>
-
-            </form>
-
-            <!-- Delete button for user's own posts -->
-            <form asp-action="Delete" method="post" class="mt-2">
+            <!-- Slett-knapp -->
+            <form asp-action="Delete" method="post">
                 <input type="hidden" name="id" value="@post.Id" />
-
-                <button type="submit" class="text-red-600 hover:underline mt-2">Delete</button>
-
+                <button type="submit"
+                    class="flex items-center space-x-1 text-red-600 hover:text-red-800">
+                    <span class="material-icons">delete</span>
+                    <span>Delete</span>
+                </button>
             </form>
         }
     </div>
+</div>
 }
 
 <!-- JavaScript function to toggle the edit form -->
@@ -145,4 +173,41 @@
             editButton.style.display = "inline"; // Show edit button again
         }
     }
-</script> 
+
+    // JavaScript for handling the buttons
+    document.getElementById('uploadImageButton').addEventListener('click', function () {
+        // Toggle visibility of the image upload input field
+        document.getElementById('imageUpload').classList.toggle('hidden');
+    });
+
+    document.getElementById('addVideoUrlButton').addEventListener('click', function () {
+        // Toggle visibility of the video URL input field
+        document.getElementById('videoUrlInput').classList.toggle('hidden');
+    });
+
+    document.getElementById('addLocationButton').addEventListener('click', function () {
+        // Toggle visibility of the location input field
+        document.getElementById('locationInput').classList.toggle('hidden');
+    });
+
+    // Handle image selection and preview
+    document.getElementById('imageInput').addEventListener('change', function (event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                document.getElementById('imagePreview').src = e.target.result; // Set the image preview source
+                document.getElementById('imageUploadPreview').classList.remove('hidden'); // Show the preview section
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    // Handle image removal
+    document.getElementById('removeImageButton').addEventListener('click', function () {
+        document.getElementById('imageInput').value = ''; // Clear the file input
+        document.getElementById('imageUploadPreview').classList.add('hidden'); // Hide the preview section
+        document.getElementById('imagePreview').src = ''; // Clear the preview image source
+    });
+</script>
+

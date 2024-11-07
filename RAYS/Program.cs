@@ -19,7 +19,8 @@ builder.Services.AddScoped<IUserSearchRepository, UserSearchRepository>(); // Le
 builder.Services.AddScoped<UserSearchService>(); // Legger til UserSearchService
 builder.Services.AddScoped<IPostRepository, PostRepository>();
 builder.Services.AddScoped<PostService>();
-
+builder.Services.AddScoped<IFriendRepository, FriendRepository>();
+builder.Services.AddScoped<FriendService>();
 // Configure authentication
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
