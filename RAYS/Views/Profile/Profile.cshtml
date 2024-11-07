@@ -86,7 +86,6 @@
     </div>
 }
 
-
 <!-- Navigation buttons (Posts, LikedPosts, Friends) -->
 <div class="mt-10 flex font-lexend justify-center space-x-4">
     <button
@@ -166,8 +165,6 @@
                     <button type="button" onclick="toggleEdit(@post.Id)" class="bg-gray-300 rounded-lg px-5 py-2">Cancel</button>
                 </div>
             </form>
-
-
             <!-- Handlinger -->
             <div class="flex justify-start items-center space-x-14 mt-4">
                 <!-- Like/Unlike-knapp -->
@@ -186,8 +183,6 @@
                         <span>Comment</span>
                     </button>
                 </form>
-
-
                 <!-- Rediger- og slett-knapper (kun for eier) -->
                 @if (post.UserId == int.Parse(User.FindFirst("UserId")?.Value ?? "0"))
                 {
@@ -208,8 +203,6 @@
                     </form>
                 }
             </div>
-
-            
         </div>
     }
 }
@@ -262,7 +255,6 @@ else if (ViewBag.ViewType == "LikedPosts")
                         <span>Comment</span>
                     </button>
                 </form>
-
 
                 <!-- Rediger- og slett-knapper (kun for eier) -->
                 @if (likedPost.UserId == int.Parse(User.FindFirst("UserId")?.Value ?? "0"))
