@@ -13,12 +13,20 @@ builder.Services.AddDbContext<ServerAPIContext>(options =>
 
 // Add services and repositories
 builder.Services.AddControllersWithViews();
+
+// User related services
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<UserService>();
-builder.Services.AddScoped<IUserSearchRepository, UserSearchRepository>(); // Legger til UserSearchRepository
-builder.Services.AddScoped<UserSearchService>(); // Legger til UserSearchService
+builder.Services.AddScoped<IUserSearchRepository, UserSearchRepository>();
+builder.Services.AddScoped<UserSearchService>();
+
+// Post related services
 builder.Services.AddScoped<IPostRepository, PostRepository>();
 builder.Services.AddScoped<PostService>();
+
+// Message related services
+builder.Services.AddScoped<IMessageRepository, MessageRepository>();
+builder.Services.AddScoped<MessageService>();  // `ILogger<MessageService>` blir automatisk injisert
 
 // Configure authentication
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
@@ -30,16 +38,16 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 
 // Configure logging
 builder.Logging.ClearProviders();
-builder.Logging.AddConsole();
-builder.Logging.AddDebug();
-builder.Logging.AddConfiguration(builder.Configuration.GetSection("Logging"));
+builder.Logging.AddConsole();         // Log to console
+builder.Logging.AddDebug();           // Log to debugger
+builder.Logging.AddConfiguration(builder.Configuration.GetSection("Logging"));  // Use config from appsettings.json
 
 var app = builder.Build();
 
 // Configure HTTPS redirection and static files
 if (!app.Environment.IsDevelopment())
 {
-    app.UseExceptionHandler("/Home/Error");
+    app.UseExceptionHandler("/Home/Error"); // Error page for production
     app.UseHsts(); // Enable HTTP Strict Transport Security (HSTS)
 }
 

@@ -1,0 +1,33 @@
+@model IEnumerable<dynamic>
+
+@{
+    ViewData["Title"] = "Conversations";
+}
+
+<h2>Conversations</h2>
+
+<table>
+    <thead>
+        <tr>
+            <th>Conversation with User ID</th>
+            <th>Last Message</th>
+            <th>Timestamp</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var conversation in Model)
+        {
+            <tr>
+                <td>@conversation.UserId</td>
+                <td>@conversation.Content</td>
+                <td>@conversation.Timestamp.ToString("g")</td>
+                <td>@(conversation.IsResponded ? "Responded" : "Not Responded")</td>
+                <td>
+                    <a asp-action="GetMessages" asp-route-senderId="@conversation.UserId"
+                        asp-route-receiverId="@conversation.UserId">View Conversation</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

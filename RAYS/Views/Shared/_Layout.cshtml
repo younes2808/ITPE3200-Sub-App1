@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] RAYS</title>
-    <link rel="stylesheet" href="~/css/app.css"/>
+    <link rel="stylesheet" href="~/css/app.css" />
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <!-- Legg til Material Icons hvis du bruker dem -->
@@ -25,11 +25,9 @@
         </div>
 
         <!-- Hovedinnhold -->
-
         <div
             class="flex-grow post-textarea-grey bg-gray-100 p-6 pr-2 pl-2 overflow-y-auto w-full 300px:mb-12 510px:mb-0 510px:pl-24 510px:pr-5 580px:pr-10 md:pl-44 md:pr-16 870px:pl-48 870px:pr-20 970px:pr-16 1150px:pl-64 1150px:pr-14">
             <main role="main">
-
                 @RenderBody()
             </main>
         </div>
@@ -45,12 +43,17 @@
         <!-- Her kan du legge til BottomNavbar-innhold, hvis du har det -->
     </div>
 
+    <!-- Script dependencies -->
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+
+    <!-- Add validation scripts -->
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+
+    <!-- Render validation scripts if present -->
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 
-
 </html>
-

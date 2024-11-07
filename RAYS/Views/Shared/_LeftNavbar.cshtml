@@ -66,7 +66,9 @@
                     </div>
                 </button>
             </form>
-            <form asp-controller="Conversations" asp-action="Conversations" method="get" class="w-full">
+
+            <form asp-controller="Message" asp-action="GetConversations" asp-route-userId="@userId" method="get"
+                class="w-full">
                 <button type="submit"
                     class="px-2 transition-colors duration-200 @(activeButton == "messages" ? "border-emerald-300 border-t-2 border-b-2 bg-emerald-50 font-semibold" : "510px:hover:bg-emerald-100 md:hover:bg-emerald-100") w-full">
                     <div class="flex items-center space-x-3 rounded-lg py-2 870px:py-3">
@@ -76,6 +78,8 @@
                     </div>
                 </button>
             </form>
+
+
 
             <form asp-controller="FriendRequest" asp-action="Requests" method="get" class="w-full">
                 <button type="submit"

@@ -1,9 +1,14 @@
-using System.Collections.Generic;
-
+// In RAYS/ViewModels/ConversationsViewModel.cs
 namespace RAYS.ViewModels
 {
-       public class ConversationsViewModel
+    public class ConversationsViewModel
     {
-        public List<ConversationSummaryViewModel> Conversations { get; set; } = new List<ConversationSummaryViewModel>(); // List of conversations
+        public int UserId { get; set; }
+        public string Username { get; set; }  // Add this property for username
+        public string LastMessage { get; set; }
+        public DateTime LastMessageTimestamp { get; set; }
+        public bool IsResponded { get; set; } // Add this property to track if the conversation has been responded to
+        public bool HasNewMessages { get; set; } // Optional: to track if there are unread messages
     }
+
 }
