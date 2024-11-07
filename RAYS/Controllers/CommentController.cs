@@ -1,14 +1,15 @@
 using Microsoft.AspNetCore.Mvc;
-using RAYS.Models;
 using RAYS.Services;
 using RAYS.ViewModels;
-using System;
-using System.Collections.Generic;
+using RAYS.Models;
+using System.Security.Claims;
 using System.Threading.Tasks;
+using System.Linq;
+using System;
 
 namespace RAYS.Controllers
 {
-    [Route("comments")]
+    [Route("[controller]")]
     public class CommentController : Controller
     {
         private readonly CommentService _commentService;
@@ -18,20 +19,96 @@ namespace RAYS.Controllers
             _commentService = commentService;
         }
 
-        // GET: comments/{postId} (Get all comments for a post)
+        // GET: /Comment/{postId}
         [HttpGet("{postId}")]
-        public async Task<IActionResult> GetCommentsForPost(int postId)
+        public async Task<IActionResult> Index(int postId)
         {
+            var userId = int.Parse(User.FindFirst("UserId")?.Value ?? "0");
             var comments = await _commentService.GetCommentsForPost(postId);
-            var model = new CommentsPageViewModel
-            {
-                PostId = postId,
-                Comments = comments // Now includes usernames
-            };
 
-            return View(model); // Return the view with comments
+            // Map comments to the ViewModel and set `IsEditable` for the current user
+            var viewModel = comments.Select(c => new CommentViewModel
+            {
+                Id = c.Id,
+                Text = c.Text,
+                CreatedAt = c.CreatedAt,
+                UserId = c.UserId,
+                PostId = c.PostId,
+                UserName = c.UserName,
+                IsEditable = c.UserId == userId
+            }).ToList();
+
+            ViewBag.PostId = postId;
+            return View(viewModel);
         }
 
-        // ... other methods remain unchanged
+        // POST: /Comment/Add
+        [HttpPost("Add")]
+        public async Task<IActionResult> Add(CommentViewModel commentViewModel)
+        {
+            var userId = int.Parse(User.FindFirst("UserId")?.Value ?? "0");
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            if (commentViewModel.Id == 0)
+            {
+                // Adding a new comment
+                var comment = new Comment
+                {
+                    Text = commentViewModel.Text,
+                    CreatedAt = DateTime.UtcNow,
+                    UserId = userId,
+                    PostId = commentViewModel.PostId
+                };
+
+                await _commentService.AddComment(comment);
+            }
+            else
+            {
+                // Updating an existing comment
+                await _commentService.UpdateComment(commentViewModel.Id, commentViewModel.Text, userId);
+            }
+
+            return RedirectToAction("Index", new { postId = commentViewModel.PostId });
+        }
+
+        // POST: /Comment/Update
+        [HttpPost("Update")]
+        public async Task<IActionResult> Update(CommentViewModel commentViewModel)
+        {
+            var userId = int.Parse(User.FindFirst("UserId")?.Value ?? "0");
+
+            try
+            {
+                await _commentService.UpdateComment(commentViewModel.Id, commentViewModel.Text, userId);
+                return RedirectToAction("Index", new { postId = commentViewModel.PostId });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                ModelState.AddModelError(string.Empty, ex.Message);
+                return View("Index", commentViewModel);
+            }
+        }
+
+        // POST: /Comment/Delete/{id}
+        [HttpPost("Delete")]
+        public async Task<IActionResult> Delete(int id, int postId)
+        {
+            var userId = int.Parse(User.FindFirst("UserId")?.Value ?? "0");
+
+            try
+            {
+                await _commentService.DeleteComment(id, userId);
+                return RedirectToAction("Index", new { postId });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                ModelState.AddModelError(string.Empty, ex.Message);
+                return RedirectToAction("Index", new { postId });
+            }
+        }
     }
 }

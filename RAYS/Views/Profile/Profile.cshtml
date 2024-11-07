@@ -125,6 +125,12 @@
                     <button type="submit">Delete</button>
                 </form>
             }
+            <form asp-controller="Comment" asp-action="Index" asp-route-postId="@post.Id" method="get" class="inline">
+            <button type="submit" class="flex items-center space-x-1 text-gray-600 hover:text-gray-800">
+                <span class="material-icons">comment</span>
+                <span>Comment</span>
+            </button>
+            </form>
         </div>
     }
 }
@@ -191,6 +197,14 @@ else if (ViewBag.ViewType == "LikedPosts")
                     <button type="submit">Delete</button>
                 </form>
             }
+
+            <form asp-controller="Comment" asp-action="Index" asp-route-postId="@likedPost.Id" method="get" class="inline">
+            <button type="submit" class="flex items-center space-x-1 text-gray-600 hover:text-gray-800">
+                <span class="material-icons">comment</span>
+                <span>Comment</span>
+            </button>
+            </form>
+        
         </div>
     }
 }
