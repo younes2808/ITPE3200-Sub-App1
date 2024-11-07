@@ -6,40 +6,15 @@
 
 <h2>Send Message</h2>
 
-<!-- Form for sending message -->
 <form asp-action="SendMessage" method="post">
-    <div class="form-group">
-        <label for="SenderId">Sender ID:</label>
-        <input asp-for="SenderId" type="number" class="form-control" />
-        <span asp-validation-for="SenderId" class="text-danger"></span> <!-- Validation message for SenderId -->
-    </div>
+    <!-- Hidden fields for SenderId and ReceiverId -->
+    <input asp-for="SenderId" type="hidden" />
+    <input asp-for="ReceiverId" type="hidden" />
 
-    <div class="form-group">
-        <label for="ReceiverId">Receiver ID:</label>
-        <input asp-for="ReceiverId" type="number" class="form-control" />
-        <span asp-validation-for="ReceiverId" class="text-danger"></span> <!-- Validation message for ReceiverId -->
-    </div>
-
-    <div class="form-group">
+    <div>
         <label for="Content">Message:</label>
-        <textarea asp-for="Content" class="form-control"></textarea>
-        <span asp-validation-for="Content" class="text-danger"></span> <!-- Validation message for Content -->
+        <textarea asp-for="Content" required placeholder="Write your message here..."></textarea>
     </div>
 
-    <button type="submit" class="btn btn-primary">Send</button>
+    <button type="submit" class="btn btn-success">Send</button>
 </form>
-
-<!-- Error message if model state is not valid -->
-@if (!ViewData.ModelState.IsValid)
-{
-    <div class="alert alert-danger">
-        <strong>Error:</strong> There were some issues with your submission.
-    </div>
-}
-
-<!-- Make sure client-side validation works -->
-@section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
-}
