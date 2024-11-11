@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using RAYS.Models;
 using RAYS.Services;
@@ -7,6 +8,7 @@ using System.Threading.Tasks;
 namespace RAYS.Controllers
 {
     [Route("like")]
+    [Authorize]
     [ApiController] // Du kan endre dette til ControllerBase hvis det ikke er en API-kontroller
     public class LikeController : Controller
     {

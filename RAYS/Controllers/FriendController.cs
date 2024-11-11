@@ -5,10 +5,12 @@ using RAYS.ViewModels; // Husk å inkludere dette namespace for View Models
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 
 namespace RAYS.Controllers
 {
     [Route("Friend")]
+    [Authorize]
     public class FriendController : Controller
     {
         private readonly FriendService _friendService;

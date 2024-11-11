@@ -2,9 +2,12 @@ using Microsoft.AspNetCore.Mvc;
 using RAYS.Models;
 using RAYS.Services;
 using RAYS.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 
 namespace RAYS.Controllers
 {
+
+    [Authorize]
     public class FriendRequestController : Controller
     {
         private readonly FriendService _friendService;
