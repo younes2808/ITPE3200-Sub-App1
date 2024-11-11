@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using RAYS.Models;
 using RAYS.Services;
@@ -6,6 +7,7 @@ using System.Threading.Tasks;
 
 namespace RAYS.Controllers
 {
+    [Authorize]
     public class UserSearchController : Controller
     {
         private readonly UserSearchService _userService;

@@ -6,9 +6,11 @@ using RAYS.ViewModels;
 using System.Linq;
 using System.Threading.Tasks;
 using System;
+using Microsoft.AspNetCore.Authorization;
 
 namespace RAYS.Controllers
 {
+    [Authorize]
     [Route("message")]
     public class MessageController : Controller
     {
