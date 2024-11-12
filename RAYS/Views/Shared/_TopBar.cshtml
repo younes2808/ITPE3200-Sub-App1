@@ -1,0 +1,56 @@
+@{
+    // Hent brukerens ID fra claims (eller session)
+    var userId = int.Parse(User.FindFirst("UserId")?.Value ?? "0");
+
+    // Hent brukerens identitet og initialer
+    var identity = User.Identity;
+    var userInitial = string.Empty;
+
+    if (identity != null && identity.IsAuthenticated && !string.IsNullOrEmpty(identity.Name))
+    {
+        userInitial = identity.Name[0].ToString().ToUpper(); // Første bokstav i navnet
+    }
+}
+
+<div class="fixed 510px:hidden border-b-2 border-emerald-200 top-0 left-0 right-0 bg-white text-black flex items-center justify-between px-6 py-2 z-50 transition-transform duration-300"
+    id="topBar">
+    <!-- Venstre side med "RAYS" -->
+    <div class="text-3xl font-light">RAYS</div>
+
+    <!-- Høyre side med profilbilde lenke -->
+    <div>
+        <!-- Endret fra en lenke til en form -->
+        <form asp-action="Profile" asp-controller="Profile" method="get"
+            class="flex items-center rounded-lg transition-colors duration-200">
+            <input type="hidden" name="userid" value="@userId" />
+            <button type="submit" class="flex items-center space-x-2 p-2">
+                <div class="text-center pt-1 w-12 h-12 cursor-pointer rounded-full hover:bg-emerald-300 bg-emerald-200">
+                    <span class="text-3xl font-semibold">@userInitial</span> <!-- Vist første bokstav i brukernavn -->
+                </div>
+            </button>
+        </form>
+    </div>
+</div>
+
+<script>
+    // JavaScript for å håndtere scroll og skjule/vis topbar på skjermer mindre enn 510px
+    let lastScrollY = window.scrollY; // Initialiserer sist scroll-posisjon
+    const topBar = document.getElementById('topBar'); // Referanse til top bar-elementet
+
+    // Event listener for scroll-hendelse
+    window.addEventListener('scroll', () => {
+        // Kun håndter scroll-effekten på skjermer mindre enn 510px
+        if (window.innerWidth < 510) {
+            if (window.scrollY > lastScrollY) {
+                // Hvis vi scroller ned, skjul topbaren
+                topBar.classList.add('-translate-y-full');
+            } else {
+                // Hvis vi scroller opp, vis topbaren
+                topBar.classList.remove('-translate-y-full');
+            }
+        }
+
+        // Oppdater sist scroll-posisjon
+        lastScrollY = window.scrollY;
+    });
+</script>

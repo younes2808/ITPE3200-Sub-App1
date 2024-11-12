@@ -40,16 +40,42 @@ namespace RAYS.Services
 
         public async Task<User> LoginUser(string usernameOrEmail, string password)
         {
-            var user = await _userRepository.GetUserByUsernameOrEmailAsync(usernameOrEmail);
-            if (user == null || !BCrypt.Net.BCrypt.Verify(password, user.PasswordHash))
+            try
             {
-                _logger.LogWarning("Failed login attempt for: {UsernameOrEmail}", usernameOrEmail);
-                throw new System.UnauthorizedAccessException("Invalid credentials.");
-            }
+                // Retrieve the user from the database (could be null if not found)
+                var user = await _userRepository.GetUserByUsernameOrEmailAsync(usernameOrEmail);
 
-            _logger.LogInformation("User logged in: {UsernameOrEmail}", usernameOrEmail);
-            return user;
+                if (user == null)
+                {
+                    // Log the failed login attempt with a warning
+                    _logger.LogWarning("Failed login attempt for: {UsernameOrEmail}. User not found.", usernameOrEmail);
+                    throw new InvalidOperationException("User not found.");
+                }
+
+                // Verify the password with the stored hash
+                bool passwordValid = BCrypt.Net.BCrypt.Verify(password, user.PasswordHash);
+
+                if (!passwordValid)
+                {
+                    // Log the failed login attempt due to invalid password
+                    _logger.LogWarning("Failed login attempt for: {UsernameOrEmail}. Invalid password.", usernameOrEmail);
+                    throw new InvalidOperationException("Invalid credentials.");
+                }
+
+                // Log successful login
+                _logger.LogInformation("User logged in successfully: {UsernameOrEmail}", usernameOrEmail);
+
+                // Return the user on successful login
+                return user;
+            }
+            catch (Exception ex)
+            {
+                // Log any unexpected errors with critical error level
+                _logger.LogError(ex, "An unexpected error occurred during login for: {UsernameOrEmail}", usernameOrEmail);
+                throw new SystemException("An unexpected error occurred. Please try again later.");
+            }
         }
+
 
         public async Task<User?> GetUserById(int id) // Endret til User? for å indikere at den kan være null
         {

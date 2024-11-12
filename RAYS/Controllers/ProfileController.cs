@@ -16,11 +16,14 @@ namespace RAYS.Controllers
         private readonly UserService _userService;
         private readonly FriendService _friendService;
 
-        public ProfileController(PostService postService, UserService userService, FriendService friendService)
+        private readonly LikeService _likeService;
+
+        public ProfileController(PostService postService, UserService userService, FriendService friendService, LikeService likeService)
         {
             _postService = postService;
             _userService = userService;
             _friendService = friendService;
+            _likeService = likeService;
         }
 
         public async Task<IActionResult> Profile(int userId, string viewType = "Posts")
@@ -166,6 +169,10 @@ namespace RAYS.Controllers
 
             foreach (var post in posts)
             {
+                // Fetch the user associated with the post
+                var user = await _userService.GetUserById(post.UserId);
+
+                // Add PostViewModel to the list with the user information
                 postViewModels.Add(new PostViewModel
                 {
                     Id = post.Id,
@@ -175,12 +182,15 @@ namespace RAYS.Controllers
                     Location = post.Location,
                     CreatedAt = post.CreatedAt,
                     UserId = post.UserId,
+                    Username = user?.Username ?? "Unknown",  // Use "Unknown" if user is null
+                    LikeCount = await _likeService.GetLikesForPostAsync(post.Id),
                     IsLikedByUser = await _postService.IsPostLikedByUserAsync(userId, post.Id)
                 });
             }
 
             return postViewModels;
         }
+
 
         private async Task<List<PostViewModel>> GetLikedPostsForUser(int userId)
         {
@@ -189,6 +199,10 @@ namespace RAYS.Controllers
 
             foreach (var post in likedPosts)
             {
+                // Fetch the user associated with the post
+                var user = await _userService.GetUserById(post.UserId);
+
+                // Add PostViewModel to the list with the user information
                 likedPostViewModels.Add(new PostViewModel
                 {
                     Id = post.Id,
@@ -198,12 +212,15 @@ namespace RAYS.Controllers
                     Location = post.Location,
                     CreatedAt = post.CreatedAt,
                     UserId = post.UserId,
+                    Username = user?.Username ?? "Unknown",  // Use "Unknown" if user is null
+                    LikeCount = await _likeService.GetLikesForPostAsync(post.Id),
                     IsLikedByUser = true // All liked posts are considered liked
                 });
             }
 
             return likedPostViewModels;
         }
+
 
         private async Task<List<UserViewModel>> GetFriends(int userId)
         {
