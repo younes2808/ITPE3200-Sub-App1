@@ -40,7 +40,6 @@ namespace RAYS.Services
         public async Task<IEnumerable<Friend>> GetFriendRequestsAsync(int userId)
         {
             var requests = await _friendRepository.GetFriendRequestsAsync(userId);
-            _logger.LogInformation($"Retrieved {requests.Count()} friend requests for user {userId}.");
             return requests;
         }
 
@@ -75,7 +74,8 @@ namespace RAYS.Services
         public async Task<IEnumerable<Friend>> GetFriendsAsync(int userId)
         {
             var friends = await _friendRepository.GetFriendsAsync(userId);
-            _logger.LogInformation($"Retrieved {friends.Count()} friends for user {userId}.");
+            //_logger.LogInformation($"Retrieved {requests.Count()} friend requests for user {userId}.");
+            // Dont want to use Logger here because this gets invoked often
             return friends;
         }
 

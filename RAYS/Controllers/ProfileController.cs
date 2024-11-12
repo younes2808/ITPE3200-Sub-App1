@@ -256,34 +256,39 @@ namespace RAYS.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Like(int postId, string viewType)
+        public async Task<IActionResult> Like(int postId, string viewType, int ViewId)
         {
             var userId = int.Parse(User.FindFirst("UserId")?.Value ?? "0");
 
             if (!await _postService.IsPostLikedByUserAsync(userId, postId))
             {
                 await _postService.LikePostAsync(userId, postId);
+            } else {
+                await _postService.UnlikePostAsync(userId, postId);
+                
             }
 
-            return RedirectToAction("Profile", new { userId = userId, viewType = viewType });
+            return RedirectToAction("Profile", new { userId = ViewId, viewType = viewType });
         }
 
         [HttpPost]
-        public async Task<IActionResult> Unlike(int postId, string viewType)
+        public async Task<IActionResult> Unlike(int postId, string viewType, int ViewId)
         {
             var userId = int.Parse(User.FindFirst("UserId")?.Value ?? "0");
 
             if (await _postService.IsPostLikedByUserAsync(userId, postId))
             {
                 await _postService.UnlikePostAsync(userId, postId);
+            } else {
+                await _postService.LikePostAsync(userId, postId);
             }
 
-            return RedirectToAction("Profile", new { userId = userId, viewType = viewType });
+            return RedirectToAction("Profile", new { userId = ViewId, viewType = viewType });
         }
 
         [HttpPost]
         [Authorize]
-        public async Task<IActionResult> Update(PostViewModel model, string viewType)
+        public async Task<IActionResult> Update(PostViewModel model, string viewType, int ViewId)
         {
             var userId = int.Parse(User.FindFirst("UserId")?.Value ?? "0");
 
@@ -309,19 +314,19 @@ namespace RAYS.Controllers
             try
             {
                 await _postService.UpdateAsync(post);
-                return RedirectToAction("Profile", new { userId = userId, viewType = viewType });
+                return RedirectToAction("Profile", new { userId = ViewId, viewType = viewType });
             }
             catch (Exception)
             {
                 TempData["ErrorPostId"] = model.Id;  // Store post ID for error display
                 TempData["ContentErrorMessage"] = "An error occurred while updating the post. Please try again."; // Store error message
-                return RedirectToAction("Profile", new { userId = userId, viewType = viewType });
+                return RedirectToAction("Profile", new { userId = ViewId, viewType = viewType });
             }
         }
 
 
         [HttpPost]
-        public async Task<IActionResult> Delete(int id, string viewType)
+        public async Task<IActionResult> Delete(int id, string viewType, int ViewId)
         {
             var userId = int.Parse(User.FindFirst("UserId")?.Value ?? "0");
 
@@ -330,7 +335,7 @@ namespace RAYS.Controllers
                 return Forbid();
 
             await _postService.DeleteAsync(id);
-            return RedirectToAction("Profile", new { userId = userId, viewType = viewType });
+            return RedirectToAction("Profile", new { userId = ViewId, viewType = viewType });
         }
     }
 }
