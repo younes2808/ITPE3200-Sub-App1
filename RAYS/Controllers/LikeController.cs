@@ -58,14 +58,5 @@ namespace RAYS.Controllers
 
             return RedirectToAction("PostDetails", "Post", new { id = like.PostId }); // Forutsatt at du har en PostController med en PostDetails-visning
         }
-
-        // GET: like/{postId} (To Get All Likes for a Post)
-        [HttpGet("{postId}")]
-        public async Task<IActionResult> GetLikesForPost(int postId)
-        {
-            var likes = await _likeService.GetLikesForPostAsync(postId);
-            var likeCount = likes.Count(); // Or just `await _likeService.GetLikeCountForPostAsync(postId);`
-            return Json(new { count = likeCount });
-        }
     }
 }

@@ -81,7 +81,9 @@
     <div class="bg-emerald-200 shadow-md rounded-lg py-4 px-5 mt-6 mx-auto">
         <!-- Post metadata -->
         <div class="mb-2">
-            <h3 class="text-black font-semibold">Username</h3>
+            <a class="text-black text-2xl" href="@Url.Action("Profile", "Profile", new { userId = post.UserId})">
+                @post.Username
+            </a>
             <small class="text-gray-500 block">@post.CreatedAt.ToString("f")</small>
             @if (!string.IsNullOrEmpty(post.Location))
             {
@@ -133,6 +135,10 @@
         {
             <a href="@post.VideoUrl" target="_blank" class="text-blue-600 hover:underline">@post.VideoUrl</a>
         }
+        <!--Like Count-->
+        <p class="text-red-700-">
+        @post.LikeCount ❤   
+        </p>
 
         <!-- Like/Comment/Edit/Delete actions -->
         <div class="flex justify-start items-center space-x-14 mt-4">

@@ -94,7 +94,7 @@ namespace RAYS.Controllers
             }
             catch (System.Exception ex)
             {
-                // Add the exception message to ModelState so it can be shown in the view
+                // Add exception message to ModelState, which will be displayed in the view
                 ModelState.AddModelError("", ex.Message);
             }
 
