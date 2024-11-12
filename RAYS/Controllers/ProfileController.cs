@@ -265,13 +265,21 @@ namespace RAYS.Controllers
         }
 
         [HttpPost]
-        [Authorize]  // Ensure only authenticated users can access this
+        [Authorize]
         public async Task<IActionResult> Update(PostViewModel model, string viewType)
         {
             var userId = int.Parse(User.FindFirst("UserId")?.Value ?? "0");
 
             if (model.UserId != userId)
                 return Forbid();
+
+            // Check if content is empty
+            if (string.IsNullOrEmpty(model.Content))
+            {
+                TempData["ErrorPostId"] = model.Id;  // Store post ID for error display
+                TempData["ContentErrorMessage"] = "Updated content cannot be empty."; // Store error message
+                return RedirectToAction("Profile", new { userId = userId, viewType = viewType });
+            }
 
             var post = await _postService.GetByIdAsync(model.Id);
             if (post == null)
@@ -288,9 +296,12 @@ namespace RAYS.Controllers
             }
             catch (Exception)
             {
-                return View("Index", model); // Handle error feedback as needed
+                TempData["ErrorPostId"] = model.Id;  // Store post ID for error display
+                TempData["ContentErrorMessage"] = "An error occurred while updating the post. Please try again."; // Store error message
+                return RedirectToAction("Profile", new { userId = userId, viewType = viewType });
             }
         }
+
 
         [HttpPost]
         public async Task<IActionResult> Delete(int id, string viewType)

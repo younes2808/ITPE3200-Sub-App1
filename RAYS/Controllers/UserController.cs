@@ -28,26 +28,28 @@ namespace RAYS.Controllers
             return View();
         }
 
-        // POST: user/register
         [HttpPost("register")]
         public async Task<IActionResult> Register(RegistrationViewModel request)
         {
             if (!ModelState.IsValid)
             {
-                return View(request); // Return the view with the model to show validation errors
+                // Validation failed, return the view with errors.
+                return View(request);
             }
 
             try
             {
                 await _userService.RegisterUser(request.Username, request.Email, request.Password);
-                return RedirectToAction("Login"); // Redirect to login page
+                return RedirectToAction("Login"); // Redirect to login page after successful registration
             }
             catch (System.Exception ex)
             {
+                // Add exception message to ModelState, which will be displayed in the view
                 ModelState.AddModelError("", ex.Message);
-                return View(request); // Return the view with the model to show validation errors
+                return View(request); // Return the view with the model and error messages
             }
         }
+
 
         // GET: user/login
         [HttpGet("login")]
@@ -56,13 +58,13 @@ namespace RAYS.Controllers
             return View();
         }
 
-        // POST: user/login
         [HttpPost("login")]
         public async Task<IActionResult> Login(LoginViewModel model)
         {
             if (!ModelState.IsValid)
             {
-                return View(model); // Return the view with the model to show validation errors
+                // If the model is invalid, return the view with model errors
+                return View(model);
             }
 
             try
@@ -92,11 +94,14 @@ namespace RAYS.Controllers
             }
             catch (System.Exception ex)
             {
+                // Add the exception message to ModelState so it can be shown in the view
                 ModelState.AddModelError("", ex.Message);
             }
 
-            return View(model); // Return the view with the model to show validation errors
+            // If there was an error or unsuccessful login, return the model with errors back to the view
+            return View(model);
         }
+
 
 
         // POST: user/logout

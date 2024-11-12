@@ -1,16 +1,20 @@
 @{
     // Retrieve the user ID from claims if available, default to 0 if not found
     var userId = int.Parse(User.FindFirst("UserId")?.Value ?? "0");
+
     // Få controller-navn fra ruten og håndtere mulig null-verdi
     var controllerName = (ViewContext.RouteData.Values["controller"] as string)?.ToLower() ?? string.Empty;
+
+    // Determine the active button based on the controller name
     var activeButton = controllerName switch
     {
-        "users" => "logout",
-        "usersearch" => "search",
-        "feed" => "home",
-        "conversation" => "messages",
-        "friendrequests" => "people",
-        _ => "home"
+        "user" => "logout", // For UserController (logout button)
+        "usersearch" => "search", // For UserSearchController (search button)
+        "feed" => "home", // For FeedController (home button)
+        "message" => "messages", // For MessageController (messages button)
+        "friendrequest" => "people", // For FriendRequestController (requests button)
+        "profile" => "profile", // For ProfileController (profile button)
+        _ => "home" // Default to home if no match
     };
 
     // Hent brukerens identitet og initialer for profilseksjonen
@@ -30,7 +34,6 @@
     <h1
         class="hidden absolute top-4 pt-3 left-0 right-0 text-3xl 510px:block 510px:text-xl md:text-3xl 870px:text-4xl 1150px:text-5xl font-light text-center px-2">
         RAYS</h1> <!-- Application Title -->
-
 
     <!-- Clickable Profile Section -->
     <form asp-action="Profile" asp-controller="Profile" method="get" class="w-full">
@@ -78,6 +81,7 @@
                     </div>
                 </button>
             </form>
+
             <form asp-controller="FriendRequest" asp-action="Index" method="get" class="w-full">
                 <button type="submit"
                     class="px-2 transition-colors duration-200 @(activeButton == "people" ? "border-emerald-300 border-t-2 border-b-2 bg-emerald-50 font-semibold" : "510px:hover:bg-emerald-100 md:hover:bg-emerald-100") w-full">

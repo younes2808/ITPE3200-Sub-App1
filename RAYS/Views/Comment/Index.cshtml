@@ -5,7 +5,7 @@
     int postId = ViewBag.PostId;
 }
 
-<div class="bg-emerald-200 shadow-lg rounded-lg p-8 h-full flex flex-col">
+<div class="bg-emerald-200 shadow-lg rounded-lg p-8 flex flex-col h-[90vh]">
     <!-- Back to Posts Button -->
     <button 
         class="text-gray-800 hover:text-slate-800 hover:font-extralight mb-4" 
@@ -14,7 +14,7 @@
     </button>
 
     <!-- Header displaying the post ID -->
-    <h1 class="text-gray-800 text-xl mb-6">Comments for Post @postId</h1>
+    <h1 class="text-gray-800 text-xl mb-4">Comments for Post @postId</h1>
 
     <!-- Comment Form -->
     <form asp-action="Add" asp-controller="Comment" method="post" class="mb-6">
@@ -46,21 +46,22 @@
     <!-- List of Comments -->
     @if (Model != null && Model.Any())
     {
-        <ul class="h-full overflow-y-auto border border-gray-800 p-4 rounded-lg bg-white">
+        <!-- Wrapper for comments with its own scrollbar -->
+        <ul class="flex-grow h-full overflow-y-auto border border-gray-800 p-2 rounded-lg bg-white">
             @foreach (var comment in Model)
             {
-                <li class="p-3 mb-2 border-b-2">
-                    <p class="font-medium text-lg text-gray-900">@comment.UserName</p>
-                    <p class="text-sm text-gray-500">
+                <li class="p-2 mb-1 border-b text-sm">
+                    <p class="font-medium text-base text-gray-900">@comment.UserName</p>
+                    <p class="text-xs text-gray-500">
                         @comment.CreatedAt.ToString("MMMM d, yyyy h:mm:ss tt")
                     </p>
-                    <p class="text-gray-800">@comment.Text</p>
+                    <p class="text-gray-800 text-sm">@comment.Text</p>
 
                     @if (comment.IsEditable)
                     {
-                        <div class="flex space-x-2 mt-2">
+                        <div class="flex space-x-2 mt-1">
                             <button 
-                                class="bg-yellow-500 text-white py-1 px-2 rounded hover:bg-yellow-600"
+                                class="bg-yellow-500 text-white py-1 px-2 text-xs rounded hover:bg-yellow-600"
                                 onclick="editComment(@comment.Id, '@comment.Text')">
                                 Update
                             </button>
@@ -69,7 +70,7 @@
                                 <input type="hidden" name="postId" value="@postId" />
                                 <button 
                                     type="submit" 
-                                    class="bg-red-500 text-white py-1 px-2 rounded hover:bg-red-700">
+                                    class="bg-red-500 text-white py-1 px-2 text-xs rounded hover:bg-red-700">
                                     Delete
                                 </button>
                             </form>
@@ -93,8 +94,8 @@
             document.getElementById('commentId').value = commentId;
             document.getElementById('commentText').value = text;
             document.getElementById('submitButton').textContent = "Update Comment";
-            document.getElementById('commentForm').action = '/Comment/Add';
         }
     </script>
 }
+
 

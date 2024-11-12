@@ -58,6 +58,13 @@
             </div>
         }
     </div>
+
+    <!-- Button to send a message -->
+    <a href="@Url.Action("GetMessages", "Message", new { senderId = currentUserId, receiverId = Model.UserId })"
+        class="btn btn-primary">
+        Send Message
+    </a>
+
 }
 
 <!-- Only display friend requests if you're viewing someone else's profile -->
@@ -120,7 +127,7 @@
     @foreach (var post in Model.Posts)
     {
         <div class="bg-emerald-200 shadow-md rounded-lg py-4 px-5 mt-6 mx-auto" id="post-@post.Id">
-            <!-- Bruker-ID, tidsstempel og lokasjon -->
+            <!-- User ID, timestamp, and location -->
             <div class="mb-2">
                 <h3 class="text-black font-semibold">@Model.Username</h3>
                 <small class="text-gray-500 block">@post.CreatedAt.ToString("f")</small>
@@ -129,23 +136,31 @@
                     <small class="text-gray-500 block">Location: @post.Location</small>
                 }
             </div>
+            <!-- Display error message specific to content if this is the post being updated -->
+            @if (TempData["ErrorPostId"] is int errorPostId && errorPostId == post.Id)
+            {
+                <div class="bg-red-500 text-white p-2 mb-1 rounded-lg">
+                    @TempData["ContentErrorMessage"]
+                </div>
+            }
+        
 
-            <!-- Innholdet i posten -->
+            <!-- Post content -->
             <p id="content-@post.Id" class="text-gray-800 mt-2">@post.Content</p>
 
-            <!-- Bildevisning -->
+            <!-- Image display -->
             @if (!string.IsNullOrEmpty(post.ImagePath))
             {
                 <img src="@post.ImagePath" alt="Post image" class="w-full max-h-96 object-contain rounded-lg mt-4 mb-4" />
             }
 
-            <!-- Videolenke -->
+            <!-- Video URL -->
             @if (!string.IsNullOrEmpty(post.VideoUrl))
             {
                 <a href="@post.VideoUrl" target="_blank" class="text-blue-600 hover:underline">@post.VideoUrl</a>
             }
 
-            <!-- Redigeringsskjema (skjult som standard) -->
+            <!-- Edit form (hidden by default) -->
             <form asp-action="Update" method="post" id="edit-form-@post.Id" style="display: none;" class="mt-2">
                 <input type="hidden" name="Id" value="@post.Id" />
                 <input type="hidden" name="UserId" value="@post.UserId" />
@@ -153,11 +168,9 @@
                 <!-- Textarea for editing content -->
                 <textarea name="Content" class="w-full p-2 border rounded-lg">@post.Content</textarea>
 
-                <!-- Optional fields for editing other data -->
-                <input type="text" name="VideoUrl" value="@post.VideoUrl" placeholder="Video URL"
-                    class="w-full p-2 border rounded-lg mt-3" />
-                <input type="text" name="Location" value="@post.Location" placeholder="Location"
-                    class="w-full p-2 border rounded-lg mt-3" />
+                <!-- Optional fields for editing -->
+                <input type="text" name="VideoUrl" value="@post.VideoUrl" placeholder="Video URL" class="w-full p-2 border rounded-lg mt-3" />
+                <input type="text" name="Location" value="@post.Location" placeholder="Location" class="w-full p-2 border rounded-lg mt-3" />
 
                 <!-- Update and cancel buttons -->
                 <div class="flex justify-end space-x-4 mt-4">
@@ -165,9 +178,10 @@
                     <button type="button" onclick="toggleEdit(@post.Id)" class="bg-gray-300 rounded-lg px-5 py-2">Cancel</button>
                 </div>
             </form>
-            <!-- Handlinger -->
+
+            <!-- Actions -->
             <div class="flex justify-start items-center space-x-14 mt-4">
-                <!-- Like/Unlike-knapp -->
+                <!-- Like/Unlike button -->
                 <form asp-action="@(post.IsLikedByUser ? "Unlike" : "Like")" method="post">
                     <input type="hidden" name="postId" value="@post.Id" />
                     <button type="submit" class="flex items-center space-x-1 text-blue-600 hover:text-blue-800">
@@ -176,24 +190,25 @@
                     </button>
                 </form>
 
-                <!-- Kommenter-knapp -->
+                <!-- Comment button -->
                 <form asp-controller="Comment" asp-action="Index" asp-route-postId="@post.Id" method="get" class="inline">
                     <button type="submit" class="flex items-center space-x-1 text-gray-600 hover:text-gray-800">
                         <span class="material-icons">comment</span>
                         <span>Comment</span>
                     </button>
                 </form>
-                <!-- Rediger- og slett-knapper (kun for eier) -->
+
+                <!-- Edit and delete buttons (only for owner) -->
                 @if (post.UserId == int.Parse(User.FindFirst("UserId")?.Value ?? "0"))
                 {
-                    <!-- Rediger-knapp -->
+                    <!-- Edit button -->
                     <button id="edit-button-@post.Id" onclick="toggleEdit(@post.Id)"
                         class="flex items-center space-x-1 text-yellow-600 hover:text-yellow-800">
                         <span class="material-icons">edit</span>
                         <span>Edit</span>
                     </button>
 
-                    <!-- Slett-knapp -->
+                    <!-- Delete button -->
                     <form asp-action="Delete" method="post">
                         <input type="hidden" name="id" value="@post.Id" />
                         <button type="submit" class="flex items-center space-x-1 text-red-600 hover:text-red-800">
@@ -212,9 +227,9 @@ else if (ViewBag.ViewType == "LikedPosts")
     @foreach (var likedPost in Model.LikedPosts)
     {
         <div class="bg-emerald-200 shadow-md rounded-lg py-4 px-5 mt-6 mx-auto" id="post-@likedPost.Id">
-            <!-- Bruker-ID, tidsstempel og lokasjon -->
+            <!-- User ID, timestamp, and location -->
             <div class="mb-2">
-                <h3 class="text-black font-semibold">Username</h3>
+                <h3 class="text-black font-semibold">Username</h3> <!-- Changed to dynamic username -->
                 <small class="text-gray-500 block">@likedPost.CreatedAt.ToString("f")</small>
                 @if (!string.IsNullOrEmpty(likedPost.Location))
                 {
@@ -222,24 +237,33 @@ else if (ViewBag.ViewType == "LikedPosts")
                 }
             </div>
 
-            <!-- Innholdet i posten -->
+            <!-- Display error message specific to content if this is the post being updated -->
+            @if (TempData["ErrorPostId"] is int errorPostId && errorPostId == likedPost.Id)
+            {
+                <div class="bg-red-500 text-white p-2 mb-1 rounded-lg">
+                    @TempData["ContentErrorMessage"]
+                </div>
+            }
+        
+
+            <!-- Post content -->
             <p id="content-@likedPost.Id" class="text-gray-800 mt-2">@likedPost.Content</p>
 
-            <!-- Bildevisning -->
+            <!-- Image display -->
             @if (!string.IsNullOrEmpty(likedPost.ImagePath))
             {
                 <img src="@likedPost.ImagePath" alt="Post image" class="w-full max-h-96 object-contain rounded-lg mt-4 mb-4" />
             }
 
-            <!-- Videolenke -->
+            <!-- Video URL -->
             @if (!string.IsNullOrEmpty(likedPost.VideoUrl))
             {
                 <a href="@likedPost.VideoUrl" target="_blank" class="text-blue-600 hover:underline">@likedPost.VideoUrl</a>
             }
 
-            <!-- Handlinger -->
+            <!-- Actions -->
             <div class="flex justify-start items-center space-x-14 mt-4">
-                <!-- Unlike-knapp -->
+                <!-- Unlike button -->
                 <form asp-action="Unlike" method="post">
                     <input type="hidden" name="postId" value="@likedPost.Id" />
                     <button type="submit" class="flex items-center space-x-1 text-blue-600 hover:text-blue-800">
@@ -248,7 +272,7 @@ else if (ViewBag.ViewType == "LikedPosts")
                     </button>
                 </form>
 
-                <!-- Kommentar-knapp -->
+                <!-- Comment button -->
                 <form asp-controller="Comment" asp-action="Index" asp-route-postId="@likedPost.Id" method="get" class="inline">
                     <button type="submit" class="flex items-center space-x-1 text-gray-600 hover:text-gray-800">
                         <span class="material-icons">comment</span>
@@ -256,17 +280,17 @@ else if (ViewBag.ViewType == "LikedPosts")
                     </button>
                 </form>
 
-                <!-- Rediger- og slett-knapper (kun for eier) -->
+                <!-- Edit and delete buttons (only for owner) -->
                 @if (likedPost.UserId == int.Parse(User.FindFirst("UserId")?.Value ?? "0"))
                 {
-                    <!-- Rediger-knapp -->
+                    <!-- Edit button -->
                     <button id="edit-button-@likedPost.Id" onclick="toggleEdit(@likedPost.Id)"
                         class="flex items-center space-x-1 text-yellow-600 hover:text-yellow-800">
                         <span class="material-icons">edit</span>
                         <span>Edit</span>
                     </button>
 
-                    <!-- Slett-knapp -->
+                    <!-- Delete button -->
                     <form asp-action="Delete" method="post">
                         <input type="hidden" name="id" value="@likedPost.Id" />
                         <button type="submit" class="flex items-center space-x-1 text-red-600 hover:text-red-800">
@@ -277,27 +301,25 @@ else if (ViewBag.ViewType == "LikedPosts")
                 }
             </div>
 
-
-            <!-- Redigeringsskjema (skjult som standard) -->
+            <!-- Edit form (hidden by default) -->
             <form asp-action="Update" method="post" id="edit-form-@likedPost.Id" style="display: none;" class="mt-2">
                 <input type="hidden" name="Id" value="@likedPost.Id" />
                 <input type="hidden" name="UserId" value="@likedPost.UserId" />
+                <!--Sending in ViewType as well-->
+                <input type="hidden" name="ViewType" value="@ViewBag.ViewType" />
 
                 <!-- Textarea for editing content -->
                 <textarea name="Content" class="w-full p-2 border rounded-lg">@likedPost.Content</textarea>
 
-                <!-- Optional fields for editing other data -->
-                <input type="text" name="VideoUrl" value="@likedPost.VideoUrl" placeholder="Video URL"
-                    class="w-full p-2 border rounded-lg mt-3" />
-                <input type="text" name="Location" value="@likedPost.Location" placeholder="Location"
-                    class="w-full p-2 border rounded-lg mt-3" />
+                <!-- Optional fields for editing -->
+                <input type="text" name="VideoUrl" value="@likedPost.VideoUrl" placeholder="Video URL" class="w-full p-2 border rounded-lg mt-3" />
+                <input type="text" name="Location" value="@likedPost.Location" placeholder="Location" class="w-full p-2 border rounded-lg mt-3" />
 
                 <!-- Update and cancel buttons -->
                 <button type="submit" class="bg-green-500 text-white rounded-full px-4 py-2 mt-2 hover:bg-green-600">Save</button>
                 <button type="button" onclick="toggleEdit(@likedPost.Id)" class="bg-gray-300 text-black rounded-full px-4 py-2 mt-2 hover:bg-gray-400">Cancel</button>
             </form>
         </div>
-
     }
 }
 else if (ViewBag.ViewType == "Friends")
