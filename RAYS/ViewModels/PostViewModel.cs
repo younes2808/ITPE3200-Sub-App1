@@ -17,7 +17,11 @@ namespace RAYS.ViewModels
     public string? Location { get; set; }
 
     public DateTime CreatedAt { get; set; }
+
+    public int LikeCount { get; set; }
     public int UserId { get; set; }
+
+    public string Username { get; set; } = string.Empty;
     public bool IsLikedByUser { get; set; }
 }
 

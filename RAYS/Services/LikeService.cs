@@ -45,9 +45,10 @@ namespace RAYS.Services
             return true; // Returnerer true hvis liken ble fjernet
         }
 
-        public async Task<IEnumerable<Like>> GetLikesForPostAsync(int postId)
+        public async Task<int> GetLikesForPostAsync(int postId)
         {
-            return await _likeRepository.GetLikesForPostAsync(postId);
+            var likes = await _likeRepository.GetLikesForPostAsync(postId);
+            return likes.Count(); // Counts the items and returns the count as an integer
         }
     }
 }
