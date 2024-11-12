@@ -14,12 +14,18 @@ namespace RAYS.Controllers
     public class PostController : Controller
     {
         private readonly PostService _postService;
+
+        private readonly LikeService _likeService;
+
+        private readonly UserService _userService;
         private readonly ILogger<PostController> _logger;
 
 
-        public PostController(PostService postService, ILogger<PostController> logger)
+        public PostController(PostService postService, LikeService likeService,UserService userService,ILogger<PostController> logger)
         {
             _postService = postService;
+            _likeService = likeService;
+            _userService = userService;
              _logger = logger;
         }
 
@@ -28,22 +34,30 @@ namespace RAYS.Controllers
             var userId = int.Parse(User.FindFirst("UserId")?.Value ?? "0");
 
             var posts = await _postService.GetLatestPostsAsync(20);
-            
-            // Collect all the tasks to check if the post is liked by the user
-            var postViewModels = await Task.WhenAll(posts.Select(async post => new PostViewModel
-            {
-                Id = post.Id,
-                Content = post.Content,
-                ImagePath = post.ImagePath,
-                VideoUrl = post.VideoUrl,
-                Location = post.Location,
-                CreatedAt = post.CreatedAt,
-                UserId = post.UserId,
-                IsLikedByUser = await _postService.IsPostLikedByUserAsync(userId, post.Id)
-            }));
 
+            // Collect all tasks to create PostViewModels, including user data for each post
+            var postViewModels = await Task.WhenAll(posts.Select(async post =>
+            {
+                // Fetch the user associated with the post
+                var user = await _userService.GetUserById(post.UserId);
+
+                return new PostViewModel
+                {
+                    Id = post.Id,
+                    Content = post.Content,
+                    ImagePath = post.ImagePath,
+                    VideoUrl = post.VideoUrl,
+                    Location = post.Location,
+                    CreatedAt = post.CreatedAt,
+                    UserId = post.UserId,
+                    Username = user?.Username ?? "Unknown",  // Use "Unknown" if user is null
+                    LikeCount = await _likeService.GetLikesForPostAsync(post.Id),
+                    IsLikedByUser = await _postService.IsPostLikedByUserAsync(userId, post.Id)
+                };
+            }));
             return View(postViewModels);
         }
+
 
         [HttpPost]
         public async Task<IActionResult> Create(PostViewModel model, IFormFile? image)
