@@ -94,7 +94,7 @@
 }
 
 <!-- Navigation buttons (Posts, LikedPosts, Friends) -->
-<div class="mt-10 flex font-lexend justify-center space-x-4">
+<div class="mt-10 flex font-lexend justify-center space-x-4 text-sm md:text-lg">
     <button
         class="px-4 py-2 transition duration-150
             @(ViewBag.ViewType == "Posts" ? "text-emerald-500 font-bold" : "text-black hover:text-white hover:bg-emerald-400 rounded")"
@@ -126,7 +126,7 @@
 
     @foreach (var post in Model.Posts)
     {
-        <div class="bg-emerald-200 shadow-md rounded-lg py-4 px-5 mt-6 mx-auto" id="post-@post.Id">
+        <div class="bg-emerald-200 shadow-md rounded-lg py-4 px-3 md:px-5 mt-6 mx-auto text-sm md:text-base lg:text-lg" id="post-@post.Id">
             <!-- User ID, timestamp, and location -->
             <div class="mb-2">
                 <h3 class="text-black font-semibold">@Model.Username</h3>
@@ -180,7 +180,7 @@
             </form>
 
             <!-- Actions -->
-            <div class="flex justify-start items-center space-x-14 mt-4">
+            <div class="flex justify-start items-center space-x-0 sm:space-x-6 md:space-x-8 lg:space-x-12 mt-4  ">
                 <!-- Like/Unlike button -->
                 <form asp-action="@(post.IsLikedByUser ? "Unlike" : "Like")" method="post">
                     <input type="hidden" name="postId" value="@post.Id" />
@@ -229,7 +229,7 @@ else if (ViewBag.ViewType == "LikedPosts")
     <h2>Liked Posts</h2>
     @foreach (var likedPost in Model.LikedPosts)
     {
-        <div class="bg-emerald-200 shadow-md rounded-lg py-4 px-5 mt-6 mx-auto" id="post-@likedPost.Id">
+        <div class="bg-emerald-200 shadow-md rounded-lg py-4 px-3 md:px-5 mt-6 mx-auto text-sm md:text-base lg:text-lg" id="post-@likedPost.Id">
             <!-- User ID, timestamp, and location -->
             <div class="mb-2">
                 <h3 class="text-black font-semibold">Username</h3> <!-- Changed to dynamic username -->
@@ -284,7 +284,7 @@ else if (ViewBag.ViewType == "LikedPosts")
             </form>
 
             <!-- Actions -->
-            <div class="flex justify-start items-center space-x-14 mt-4">
+            <div class="flex justify-start items-center space-x-0 sm:space-x-6 md:space-x-8 lg:space-x-12 mt-4">
                 <!-- Unlike button -->
                 <form asp-action="Unlike" method="post">
                     <input type="hidden" name="postId" value="@likedPost.Id" />
