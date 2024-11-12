@@ -12,31 +12,33 @@
     var norwegianTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Central European Standard Time");
 }
 
-<div>
-    <div>
-        <a href="@Url.Action("GetConversations", "Message")">← Back to My Conversations</a>
-        <h2>@receiverUsername</h2>
+<div class="flex flex-col h-[90vh] bg-white shadow-2xl rounded-lg p-6">
+    <!-- Header med tilbake-knapp og mottakerens brukernavn -->
+    <div class="flex items-center justify-between bg-emerald-200 p-4 rounded-md mb-4">
+        <button 
+            onclick="window.location.href='@Url.Action("GetConversations", "Message")'"
+            class="text-black text-2xl font-semibold">
+            ←
+        </button>
+        <h2 class="text-xl font-extrabold font-general text-black ml-auto">
+            @receiverUsername
+        </h2>
     </div>
 
-    <!-- Message container with scroll -->
-    <div id="messageContainer" style="overflow-y: auto; height: 400px; margin-bottom: 20px;">
+    <!-- Meldingsområde -->
+    <div id="messageContainer" class="flex-grow space-y-4 overflow-y-auto bg-white rounded-lg p-4">
         @if (messages != null && messages.Any())
         {
             @foreach (var message in messages)
             {
-                <div
-                    style="display: flex; justify-content: @(message.SenderId == currentUserId ? "flex-end" : "flex-start"); margin-bottom: 10px;">
-                    <div
-                        style="padding: 10px; border-radius: 8px; max-width: 60%; 
-                                @(message.SenderId == currentUserId ? "background-color: #cce5ff; text-align: right;" : "background-color: #e2e3e5; text-align: left;")">
-                        <!-- Innhold og informasjon om melding -->
-                        <p style="margin: 0; font-size: 1em;">@message.Content</p>
-                        <p style="margin: 0; font-size: 0.8em; color: #555;">
-                            <!-- Konverter tid til norsk tidssone -->
+                <div class="flex @(message.SenderId == currentUserId ? "justify-end" : "justify-start")">
+                    <div class="max-w-[60%] px-4 py-2 rounded-lg shadow-md text-sm font-medium
+                                 @(message.SenderId == currentUserId ? "bg-blue-500 text-white rounded-tl-2xl rounded-br-2xl" : "bg-gray-300 text-black rounded-tr-2xl rounded-bl-2xl")"
+                         style="word-break: break-word; overflow-wrap: break-word;">
+                        <p class="mb-1">@message.Content</p>
+                        <p class="text-xs"
+                           style="color: @(message.SenderId == currentUserId ? "white" : "black");">
                             @TimeZoneInfo.ConvertTimeFromUtc(message.Timestamp, norwegianTimeZone).ToString("g")
-                        </p>
-                        <p style="font-size: 0.7em; color: #999;">
-                            Sender ID: @message.SenderId, Receiver ID: @message.ReceiverId
                         </p>
                     </div>
                 </div>
@@ -44,41 +46,39 @@
         }
         else
         {
-            <div style="color: gray; text-align: center;">No messages yet</div>
+            <div class="text-gray-400 text-center">No messages yet</div>
         }
+        <div id="scrollToBottom"></div>
     </div>
 
-    <!-- Meldingsskjemaet -->
-    <form method="post" action="@Url.Action("SendMessage", "Message")" style="margin-top: 20px;">
-        <div>
-            <input type="text" name="newMessage" placeholder="Type a message..."
-                style="width: 80%; padding: 8px; border-radius: 5px; border: 1px solid #ccc;" />
-            <input type="hidden" name="receiverId" value="@receiverId" />
-            <button type="submit"
-                style="padding: 8px 16px; border: none; border-radius: 5px; background-color: #007bff; color: white;">
-                Send
-            </button>
-        </div>
+    <!-- Input-område for å sende nye meldinger -->
+    <form method="post" action="@Url.Action("SendMessage", "Message")" class="mt-4 flex items-center bg-emerald-200 border p-4 rounded-md">
+        <input type="hidden" name="receiverId" value="@receiverId" />
+        <input 
+            type="text" 
+            name="newMessage" 
+            placeholder="Type a message..."
+            class="flex-grow p-2 border-gray-300 border-2 rounded bg-white text-black focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+        <button 
+            type="submit" 
+            class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-500 transition duration-200">
+            Send
+        </button>
     </form>
 </div>
 
-<!-- JavaScript to handle automatic scroll -->
+<!-- JavaScript for automatisk scroll til bunn -->
 <script>
-    window.addEventListener('DOMContentLoaded', (event) => {
-        // Function to scroll the message container to the bottom
+    document.addEventListener('DOMContentLoaded', function() {
         function scrollToBottom() {
             var messageContainer = document.getElementById('messageContainer');
             messageContainer.scrollTop = messageContainer.scrollHeight;
         }
 
-        // Scroll to the bottom when the page loads
         scrollToBottom();
 
-        // Set an interval to check for new messages (or trigger this on message send)
         const observer = new MutationObserver(scrollToBottom);
-        observer.observe(document.getElementById('messageContainer'), {
-            childList: true, // Watch for added or removed child elements
-            subtree: true     // Watch all descendants
-        });
+        observer.observe(document.getElementById('messageContainer'), { childList: true, subtree: true });
     });
 </script>
+

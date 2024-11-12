@@ -29,17 +29,17 @@
             <form asp-controller="User" asp-action="Register" method="post">
                 <div class="py-3">
                     <span class="mb-2 text-md">Email</span>
-                    <input type="email" class="w-full p-2 border border-gray-200 rounded-md placeholder:font-light placeholder:text-gray-500" asp-for="Email" />
+                    <input type="email" class="w-full p-2 border border-gray-200 rounded-md placeholder:font-light focus:ring-emerald-500 placeholder:text-gray-500" asp-for="Email" />
                     <span asp-validation-for="Email" class="text-red-500"></span>
                 </div>
                 <div class="py-3">
                     <span class="mb-2 text-md">Username</span>
-                    <input type="text" class="w-full p-2 border border-gray-200 rounded-md placeholder:font-light placeholder:text-gray-500" asp-for="Username" />
+                    <input type="text" class="w-full p-2 border border-gray-200 rounded-md placeholder:font-light focus:ring-emerald-500 placeholder:text-gray-500" asp-for="Username" />
                     <span asp-validation-for="Username" class="text-red-500"></span>
                 </div>
                 <div class="py-3">
                     <span class="mb-2 text-md">Password</span>
-                    <input type="password" class="w-full p-2 border border-gray-200 rounded-md placeholder:font-light placeholder:text-gray-500" asp-for="Password" />
+                    <input type="password" class="w-full p-2 border border-gray-200 rounded-md placeholder:font-light focus:ring-emerald-500 placeholder:text-gray-500" asp-for="Password" />
                     <span asp-validation-for="Password" class="text-red-500"></span>
                 </div>
                 
@@ -56,7 +56,7 @@
 
         <!-- Image Section -->
         <div class="relative flex-1 hidden md:block">
-            <img src="~/images/Login.jpg" alt="Register page background" class="w-full h-full object-cover rounded-r-2xl" />
+            <img src="~/images/Login.jpg" alt="Register page background" class="w-full h-full object-cover rounded-r-2xl blur-sm" />
         </div>
     </div>
 

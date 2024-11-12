@@ -129,7 +129,9 @@
         <div class="bg-emerald-200 shadow-md rounded-lg py-4 px-3 md:px-5 mt-6 mx-auto text-sm md:text-base lg:text-lg" id="post-@post.Id">
             <!-- User ID, timestamp, and location -->
             <div class="mb-2">
-                <h3 class="text-black font-semibold">@Model.Username</h3>
+            <a class="text-black text-2xl" href="@Url.Action("Profile", "Profile", new { userId = post.UserId})">
+                @post.Username
+            </a>
                 <small class="text-gray-500 block">@post.CreatedAt.ToString("f")</small>
                 @if (!string.IsNullOrEmpty(post.Location))
                 {
@@ -178,6 +180,11 @@
                     <button type="button" onclick="toggleEdit(@post.Id)" class="bg-gray-300 rounded-lg px-5 py-2">Cancel</button>
                 </div>
             </form>
+
+            <!--Like Count-->
+            <p class="text-red-700-">
+                @post.LikeCount ❤   
+            </p>
 
             <!-- Actions -->
             <div class="flex justify-start items-center space-x-0 sm:space-x-6 md:space-x-8 lg:space-x-12 mt-4  ">
@@ -232,12 +239,14 @@ else if (ViewBag.ViewType == "LikedPosts")
         <div class="bg-emerald-200 shadow-md rounded-lg py-4 px-3 md:px-5 mt-6 mx-auto text-sm md:text-base lg:text-lg" id="post-@likedPost.Id">
             <!-- User ID, timestamp, and location -->
             <div class="mb-2">
-                <h3 class="text-black font-semibold">Username</h3> <!-- Changed to dynamic username -->
-                <small class="text-gray-500 block">@likedPost.CreatedAt.ToString("f")</small>
-                @if (!string.IsNullOrEmpty(likedPost.Location))
-                {
-                    <small class="text-gray-500 block">Location: @likedPost.Location</small>
-                }
+            <a class="text-black text-2xl" href="@Url.Action("Profile", "Profile", new { userId = likedPost.UserId})">
+                @likedPost.Username
+            </a>
+            <small class="text-gray-500 block">@likedPost.CreatedAt.ToString("f")</small>
+            @if (!string.IsNullOrEmpty(likedPost.Location))
+            {
+                <small class="text-gray-500 block">Location: @likedPost.Location</small>
+            }
             </div>
 
             <!-- Display error message specific to content if this is the post being updated -->
@@ -264,6 +273,11 @@ else if (ViewBag.ViewType == "LikedPosts")
                 <a href="@likedPost.VideoUrl" target="_blank" class="text-blue-600 hover:underline">@likedPost.VideoUrl</a>
             }
 
+            <!--Like Count-->
+            <p class="text-red-700-">
+            @likedPost.LikeCount ❤   
+            </p>
+
             <!-- Edit form (hidden by default) -->
             <form asp-action="Update" method="post" id="edit-form-@likedPost.Id" style="display: none;" class="mt-2">
                 <input type="hidden" name="Id" value="@likedPost.Id" />
@@ -282,6 +296,7 @@ else if (ViewBag.ViewType == "LikedPosts")
                     <button type="button" onclick="toggleEdit(@likedPost.Id)" class="bg-gray-300 rounded-lg px-5 py-2">Cancel</button>
                 </div>
             </form>
+
 
             <!-- Actions -->
             <div class="flex justify-start items-center space-x-0 sm:space-x-6 md:space-x-8 lg:space-x-12 mt-4">
