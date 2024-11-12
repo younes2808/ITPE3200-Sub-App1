@@ -165,6 +165,7 @@
             <!-- Edit form (hidden by default) -->
             <form asp-action="Update" method="post" id="edit-form-@post.Id" style="display: none;" class="mt-2">
                 <input type="hidden" name="Id" value="@post.Id" />
+                <input type="hidden" name="ViewId" value="@Model.UserId" />
                 <input type="hidden" name="UserId" value="@post.UserId" />
 
                 <!-- Textarea for editing content -->
@@ -190,6 +191,7 @@
             <div class="flex justify-start items-center space-x-0 sm:space-x-6 md:space-x-8 lg:space-x-12 mt-4  ">
                 <!-- Like/Unlike button -->
                 <form asp-action="@(post.IsLikedByUser ? "Unlike" : "Like")" method="post">
+                    <input type="hidden" name="ViewId" value="@Model.UserId" />
                     <input type="hidden" name="postId" value="@post.Id" />
                     <button type="submit" class="flex items-center space-x-1 text-blue-600 hover:text-blue-800">
                         <span class="material-icons">
@@ -220,6 +222,7 @@
 
                     <!-- Delete button -->
                     <form asp-action="Delete" method="post">
+                        <input type="hidden" name="ViewId" value="@Model.UserId" />
                         <input type="hidden" name="id" value="@post.Id" />
                         <button type="submit" class="flex items-center space-x-1 text-red-600 hover:text-red-800">
                             <span class="material-icons">delete</span>
@@ -281,6 +284,7 @@ else if (ViewBag.ViewType == "LikedPosts")
             <!-- Edit form (hidden by default) -->
             <form asp-action="Update" method="post" id="edit-form-@likedPost.Id" style="display: none;" class="mt-2">
                 <input type="hidden" name="Id" value="@likedPost.Id" />
+                <input type="hidden" name="ViewId" value="@Model.UserId" />
                 <input type="hidden" name="UserId" value="@likedPost.UserId" />
 
                 <!-- Textarea for editing content -->
@@ -302,6 +306,7 @@ else if (ViewBag.ViewType == "LikedPosts")
             <div class="flex justify-start items-center space-x-0 sm:space-x-6 md:space-x-8 lg:space-x-12 mt-4">
                 <!-- Unlike button -->
                 <form asp-action="Unlike" method="post">
+                    <input type="hidden" name="ViewId" value="@Model.UserId" />
                     <input type="hidden" name="postId" value="@likedPost.Id" />
                     <button type="submit" class="flex items-center space-x-1 text-blue-600 hover:text-blue-800">
                         <span class="material-icons">thumb_down</span>
@@ -329,6 +334,7 @@ else if (ViewBag.ViewType == "LikedPosts")
 
                     <!-- Delete button -->
                     <form asp-action="Delete" method="post">
+                        <input type="hidden" name="ViewId" value="@Model.UserId" />
                         <input type="hidden" name="id" value="@likedPost.Id" />
                         <button type="submit" class="flex items-center space-x-1 text-red-600 hover:text-red-800">
                             <span class="material-icons">delete</span>
