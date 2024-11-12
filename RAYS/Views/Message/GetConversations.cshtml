@@ -2,31 +2,36 @@
 
 @{
     ViewData["Title"] = "Conversations";
+    Func<string, int, string> Truncate = (content, maxLength) =>
+    {
+        if (content == null) return string.Empty;
+        return content.Length > maxLength ? content.Substring(0, maxLength) + "..." : content;
+    };
 }
 
-<div class="flex bg-gray-100 min-h-screen">
+<div class="flex bg-gray-100 h-[90vh]"> <!-- Fixed height -->
     <!-- Main content container -->
     <div class="w-full max-w-7xl mx-auto bg-white shadow-lg rounded-lg p-8 flex flex-col">
         <!-- Header -->
         <h1 class="text-3xl font-extrabold text-gray-900 mb-6">Conversations</h1>
 
         <!-- Conversation list -->
-        <div class="flex-grow space-y-4 overflow-y-auto">
+        <div class="flex-grow space-y-4 overflow-y-auto"> <!-- Increased spacing between items -->
             @if (Model != null && Model.Any())
             {
                 @foreach (var conversation in Model)
                 {
                     <div 
-                        class="p-4 bg-emerald-100 hover:bg-emerald-200 rounded-lg cursor-pointer flex justify-between items-center"
+                        class="p-3 bg-emerald-100 hover:bg-emerald-200 rounded-lg cursor-pointer flex justify-between items-center"
                         onclick="window.location.href='@Url.Action("GetMessages", new { senderId = conversation.CorrespondentId, receiverId = User.FindFirst("UserId")?.Value })'">
                         
                         <!-- Left section: Correspondent username and last message -->
                         <div class="flex flex-col">
-                            <p class="text-lg font-semibold text-gray-800">
+                            <p class="text-lg font-semibold text-gray-800 mb-1"> <!-- Reduced margin -->
                                 User @conversation.CorrespondentId
                             </p>
-                            <p class="text-sm text-gray-600">
-                                @(conversation.IsResponded ? "Sent:" : "Received:") @conversation.Content
+                            <p class="text-sm text-gray-600 mb-1"> <!-- Reduced margin -->
+                                @(conversation.IsResponded ? "Sent:" : "Received:") @Truncate(conversation.Content, 60)
                             </p>
                             <p class="text-xs text-gray-500">
                                 @conversation.Timestamp.ToString("MMMM d, yyyy h:mm:ss tt")
