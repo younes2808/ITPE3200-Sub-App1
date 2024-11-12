@@ -1,78 +1,141 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using RAYS.DAL;
 using RAYS.Models;
-using RAYS.Services;
-using System.Threading.Tasks;
 using RAYS.ViewModels;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+
 namespace RAYS.Controllers
 {
+    [Route("message")]
     public class MessageController : Controller
     {
-        private readonly MessageService _messageService;
+        private readonly ServerAPIContext _context;
 
-        public MessageController(MessageService messageService)
+        public MessageController(ServerAPIContext context)
         {
-            _messageService = messageService;
+            _context = context;
         }
 
-        // GET: Message/Between/{userId1}/{userId2}
-        [HttpGet("Between/{userId1}/{userId2}")]
-        public async Task<IActionResult> GetMessagesBetweenUsers(int userId1, int userId2)
+        // GET: message/send/{senderId}/{receiverId}
+        [HttpGet("send/{senderId}/{receiverId}")]
+        public IActionResult SendMessageView(int senderId, int receiverId)
         {
-            var messages = await _messageService.GetMessagesBetweenUsersAsync(userId1, userId2);
-            
-             var viewModel = new MessagesViewModel
+            var messageRequest = new MessageRequest
             {
-                Messages = messages,
-                MessageRequest = new MessageRequest 
-                {
-                    SenderId = userId1, // Set the SenderId
-                    ReceiverId = userId2, // Set the ReceiverId
-                    Content = string.Empty // Initialize Content to an empty string
-                }
+                SenderId = senderId,
+                ReceiverId = receiverId
             };
-            return View(viewModel); // Return view with the view model
+
+            return View(messageRequest); // Sender messageRequest til visningen
         }
 
-        // POST: Message/Send
-        [HttpPost("Send")]
-        public async Task<IActionResult> SendMessage(MessagesViewModel model)
+
+        // POST: message/send
+        [HttpPost("send")]
+        public async Task<IActionResult> SendMessage([FromForm] MessageRequest messageRequest)
         {
-            if (!ModelState.IsValid)
+            if (messageRequest == null)
             {
-                return View("GetMessagesBetweenUsers", model); // Return to view with validation errors
+                ModelState.AddModelError("", "Message cannot be null");
+                return View("SendMessageView", messageRequest);
             }
 
-            await _messageService.SendMessageAsync(model.MessageRequest);
-            return RedirectToAction("GetMessagesBetweenUsers", new { userId1 = model.MessageRequest.SenderId, userId2 = model.MessageRequest.ReceiverId });
-        }
-
-        // GET: Message/Conversations/{userId}
-        [HttpGet("Conversations/{userId}")]
-        public async Task<IActionResult> GetConversations(int userId)
-        {
-            // Fetch the conversation summaries
-            var conversations = await _messageService.GetConversationsAsync(userId) ?? Enumerable.Empty<Message>();
-
-            // Map to the ConversationSummaryViewModel
-            var conversationSummaries = conversations
-                .GroupBy(m => m?.SenderId == userId ? m?.ReceiverId : m?.SenderId) // Check for null in SenderId/ReceiverId
-                .Select(g => g?.OrderByDescending(m => m?.Timestamp).FirstOrDefault()) // Null-safe sorting and selection
-                .Where(m => m != null) // Ensure no null messages
-                .Select(m => new ConversationSummaryViewModel
-                {
-                    UserId = m?.SenderId == userId ? m?.ReceiverId ?? 0 : m?.SenderId ?? 0, // Null-safe fallback to 0
-                    LastMessage = m?.Content ?? string.Empty,
-                    LastMessageTimestamp = m?.Timestamp ?? DateTime.MinValue,
-                    MessageDirection = m?.SenderId == userId ? "Sent" : "Received"
-                })
-                .ToList();
-
-            var conversationsViewModel = new ConversationsViewModel
+            if (messageRequest.SenderId == messageRequest.ReceiverId)
             {
-                Conversations = conversationSummaries
+                ModelState.AddModelError("", "Sender and receiver cannot be the same.");
+                return View("SendMessageView", messageRequest);
+            }
+
+            var message = new Message
+            {
+                SenderId = messageRequest.SenderId,
+                ReceiverId = messageRequest.ReceiverId,
+                Content = messageRequest.Content,
+                Timestamp = DateTime.UtcNow
             };
 
-            return View("Conversations", conversationsViewModel);
+            _context.Messages.Add(message);
+            await _context.SaveChangesAsync();
+
+            // Redirect to the conversation page after message is sent
+            return RedirectToAction("GetMessages", new { senderId = messageRequest.SenderId, receiverId = messageRequest.ReceiverId });
+        }
+
+        // GET: message/conversations/{userId}
+        [HttpGet("conversations/{userId}")]
+        public async Task<IActionResult> GetConversations(int userId)
+        {
+            // Get all sent messages
+            var sentMessages = await _context.Messages
+                .Where(m => m.SenderId == userId)
+                .Select(m => new
+                {
+                    UserId = m.ReceiverId,
+                    m.Content,
+                    m.Timestamp,
+                    IsResponded = true
+                })
+                .ToListAsync();
+
+            // Get all received messages
+            var receivedMessages = await _context.Messages
+                .Where(m => m.ReceiverId == userId)
+                .Select(m => new
+                {
+                    UserId = m.SenderId,
+                    m.Content,
+                    m.Timestamp,
+                    IsResponded = false
+                })
+                .ToListAsync();
+
+            // Combine both lists and select the latest message for each user
+            var allMessages = sentMessages
+                .Concat(receivedMessages)
+                .GroupBy(m => m.UserId)
+                .Select(g => g.OrderByDescending(m => m.Timestamp).FirstOrDefault())
+                .ToList();
+
+            // Return the view with the messages
+            return View(allMessages);
+        }
+
+        // GET: message/{senderId}/{receiverId}
+        [HttpGet("{senderId}/{receiverId}")]
+        public async Task<IActionResult> GetMessages(int senderId, int receiverId)
+        {
+            // Hent meldinger mellom sender og mottaker
+            var messages = await _context.Messages
+                .Where(m =>
+                    (m.SenderId == senderId && m.ReceiverId == receiverId) ||
+                    (m.SenderId == receiverId && m.ReceiverId == senderId))
+                .ToListAsync();
+
+            // Hent brukernavn for sender og receiver
+            var senderName = await _context.Users
+                .Where(u => u.Id == senderId)
+                .Select(u => u.Username)
+                .FirstOrDefaultAsync();
+
+            var receiverName = await _context.Users
+                .Where(u => u.Id == receiverId)
+                .Select(u => u.Username)
+                .FirstOrDefaultAsync();
+
+            // Opprett MessageViewModel med nødvendige data
+            var viewModel = new MessageViewModel
+            {
+                SenderId = senderId,
+                ReceiverId = receiverId,
+                Messages = messages,  // En liste av Message-objektene
+                SenderName = senderName,
+                ReceiverName = receiverName
+            };
+
+            return View(viewModel); // Returner viewModel som modellen til visningen
         }
 
     }
