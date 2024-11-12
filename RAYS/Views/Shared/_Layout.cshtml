@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] RAYS</title>
-    <link rel="stylesheet" href="~/css/app.css" />
+    <link rel="stylesheet" href="~/css/app.css"/>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <!-- Legg til Material Icons hvis du bruker dem -->
@@ -14,7 +14,7 @@
 <body class="bg-gray-100 flex h-screen flex-col">
     <!-- Top Bar -->
     <div class="sticky top-0 z-10 bg-white shadow">
-        <!-- Her kan du legge til TopBar-innhold, hvis du har det -->
+        @await Html.PartialAsync("_TopBar") <!-- Inkluderer TopBar -->
     </div>
 
     <!-- Hovedcontainer -->
@@ -31,15 +31,15 @@
                 @RenderBody()
             </main>
         </div>
-
+        <!-- Høyre Navbar -->
         <div class="flex-none">
-        @await Html.PartialAsync("_RightNavbar", ViewData)
+            @await Html.PartialAsync("_RightNavbar", ViewData)
         </div>
     </div>
 
     <!-- Bunnnavbar -->
-    <div class="sticky bottom-0 bg-white shadow">
-        <!-- Her kan du legge til BottomNavbar-innhold, hvis du har det -->
+    <div class="sticky bottom-0 z-10 bg-white shadow">
+        @await Html.PartialAsync("_BottomNavbar") <!-- Inkluderer BottomNavbar -->
     </div>
 
     <!-- Script dependencies -->
@@ -53,6 +53,30 @@
 
     <!-- Render validation scripts if present -->
     @await RenderSectionAsync("Scripts", required: false)
+
+    <!-- Scroll handling script -->
+    <script>
+        // Definerer variabler
+        let lastScrollY = window.scrollY; // Start scroll-posisjon
+        const topBar = document.querySelector('#topBar'); // Referanse til top bar elementet
+
+        // Funksjon for å håndtere scroll
+        const handleScroll = () => {
+            if (window.innerWidth < 510) { // Kun aktiv på skjermer mindre enn 510px
+                if (window.scrollY > lastScrollY) {
+                    // Skjul topbaren ved scroll ned
+                    topBar.classList.add('-translate-y-full');
+                } else {
+                    // Vis topbaren ved scroll opp
+                    topBar.classList.remove('-translate-y-full');
+                }
+                lastScrollY = window.scrollY; // Oppdater sist scroll-posisjon
+            }
+        };
+
+        // Lytter på scroll-hendelser
+        window.addEventListener('scroll', handleScroll);
+    </script>
 </body>
 
 </html>

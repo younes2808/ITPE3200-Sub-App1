@@ -1,0 +1,54 @@
+@model RAYS.ViewModels.MessageViewModel
+
+@{
+    ViewData["Title"] = "Messages";
+    var receiverUsername = Model.ReceiverName; // Bruk model for ReceiverName
+    var senderId = Model.SenderId;
+    var receiverId = Model.ReceiverId;
+    var messages = Model.Messages; // Bruk Model for meldinger
+}
+
+<div class="mt-auto flex-grow items-start w-full h-full">
+    <div class="bg-white shadow-2xl border-gray-300 border-2 rounded-lg p-8 h-full flex flex-col">
+        <div class="flex items-center justify-between bg-emerald-200 p-4 rounded-md">
+            <!-- Back button using loggedInUserId -->
+            <a href="@Url.Action("GetConversations", "Message", new { userId = senderId })" class="text-black text-4xl">←</a>
+
+            <h2 class="text-2xl font-extrabold font-general text-black mr-4 cursor-pointer hover:underline ml-auto">
+                @receiverUsername
+            </h2>
+        </div>
+
+        <div class="flex-grow space-y-4 overflow-y-auto mt-4 post-textarea-grey" style="padding-right: 5px;">
+            @if (messages != null && messages.Any())
+            {
+                foreach (var message in messages)
+                {
+                    <div class="mb-4 p-3 w-fit rounded-lg shadow @(message.SenderId == senderId ? "bg-blue-500 text-white font-clash font-normal text-right ml-auto rounded-tl-2xl rounded-br-2xl shadow-lg" : "bg-gray-300 text-black font-clash font-normal text-left rounded-tr-2xl rounded-bl-2xl shadow-lg")">
+                        <p class="text-lg font-semibold font-lexend @(message.SenderId == senderId ? "text-white" : "text-black")">
+                            @message.Content
+                        </p>
+                        <p class="text-xs">
+                            @message.Timestamp.ToString("g")
+                        </p>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="text-gray-400 text-center">No messages yet</div>
+            }
+        </div>
+
+        <form method="post" action="@Url.Action("SendMessage", "Message")" class="bg-emerald-200 border p-4 mt-4 rounded-md">
+            <div class="flex items-center">
+                <input type="text" name="newMessage" class="flex-grow p-2 border-gray-300 border-2 rounded mr-2 bg-white text-black focus:outline-none focus:ring-2 focus:ring-emerald-500" placeholder="Type a message..." />
+                <input type="hidden" name="SenderId" value="@senderId" />
+                <input type="hidden" name="ReceiverId" value="@receiverId" />
+                <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-500 transition duration-200 font-general">
+                    Send
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
