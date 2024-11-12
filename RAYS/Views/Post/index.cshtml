@@ -132,10 +132,13 @@
             <form asp-action="@(post.IsLikedByUser ? "Unlike" : "Like")" method="post">
                 <input type="hidden" name="postId" value="@post.Id" />
                 <button type="submit" class="flex items-center space-x-1 text-blue-600 hover:text-blue-800">
-                    <span class="material-icons">thumb_up</span>
+                    <span class="material-icons">
+                        @(post.IsLikedByUser ? "thumb_down" : "thumb_up")
+                    </span>
                     <span>@(post.IsLikedByUser ? "Unlike" : "Like")</span>
                 </button>
             </form>
+
 
             <form asp-controller="Comment" asp-action="Index" asp-route-postId="@post.Id" method="get" class="inline">
                 <button type="submit" class="flex items-center space-x-1 text-gray-600 hover:text-gray-800">
