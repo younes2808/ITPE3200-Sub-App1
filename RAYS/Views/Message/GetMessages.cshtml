@@ -48,6 +48,14 @@
         }
     </div>
 
+    <!-- Feilmelding: Vis eventuelle feil fra TempData etter meldingsskjemaet -->
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger" style="margin-top: 20px;">
+            @TempData["ErrorMessage"]
+        </div>
+    }
+
     <!-- Meldingsskjemaet -->
     <form method="post" action="@Url.Action("SendMessage", "Message")" style="margin-top: 20px;">
         <div>
@@ -60,6 +68,7 @@
             </button>
         </div>
     </form>
+
 </div>
 
 <!-- JavaScript to handle automatic scroll -->

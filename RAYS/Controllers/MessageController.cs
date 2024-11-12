@@ -35,43 +35,39 @@ namespace RAYS.Controllers
                 return Unauthorized(); // Brukeren er ikke logget inn
             }
 
-            // Hvis det er en POST-forespørsel, betyr det at meldingen skal sendes
-            if (!string.IsNullOrEmpty(newMessage))
+            // Sjekk om meldingen er tom eller bare består av hvite mellomrom
+            // Sjekk om meldingen er tom eller bare består av hvite mellomrom
+            if (string.IsNullOrWhiteSpace(newMessage))
             {
-                // Valider at sender og mottaker ikke er samme bruker
-                if (userId == receiverId)
-                {
-                    ModelState.AddModelError("", "Sender and receiver cannot be the same.");
-                    return RedirectToAction("GetMessages", new { senderId = userId, receiverId = receiverId });
-                }
-
-                // Null check before accessing receiverId
-                if (!receiverId.HasValue)
-                {
-                    ModelState.AddModelError("", "Receiver ID cannot be null.");
-                    return RedirectToAction("GetMessages", new { senderId = userId });
-                }
-
-                // Lag den nye meldingen
-                var message = new Message
-                {
-                    SenderId = userId, // Bruk den innloggede brukerens ID som sender
-                    ReceiverId = receiverId.Value, // Now safe to access .Value
-                    Content = newMessage,
-                    Timestamp = DateTime.UtcNow
-                };
-
-                // Legg til meldingen i databasen og lagre
-                _context.Messages.Add(message);
-                await _context.SaveChangesAsync();
-
-                // Redirect til samtalen etter at meldingen er sendt
+                TempData["ErrorMessage"] = "Message cannot be empty or just whitespace."; // Sett feilmeldingen i TempData
                 return RedirectToAction("GetMessages", new { senderId = userId, receiverId = receiverId });
             }
 
-            // Hvis det er en GET-forespørsel, viser vi skjemaet for å skrive en melding
+
+            // Null check before accessing receiverId
+            if (!receiverId.HasValue)
+            {
+                ModelState.AddModelError("", "Receiver ID cannot be null.");
+                return RedirectToAction("GetMessages", new { senderId = userId });
+            }
+
+            // Lag den nye meldingen
+            var message = new Message
+            {
+                SenderId = userId, // Bruk den innloggede brukerens ID som sender
+                ReceiverId = receiverId.Value, // Now safe to access .Value
+                Content = newMessage,
+                Timestamp = DateTime.UtcNow
+            };
+
+            // Legg til meldingen i databasen og lagre
+            _context.Messages.Add(message);
+            await _context.SaveChangesAsync();
+
+            // Redirect til samtalen etter at meldingen er sendt
             return RedirectToAction("GetMessages", new { senderId = userId, receiverId = receiverId });
         }
+
 
         // GET: message/conversations
         [HttpGet("conversations")]
