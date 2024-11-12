@@ -1,0 +1,62 @@
+@{
+    // Retrieve the user ID from claims if available, default to 0 if not found
+    var userId = int.Parse(User.FindFirst("UserId")?.Value ?? "0");
+
+    // Få controller-navn fra ruten og håndtere mulig null-verdi
+    var controllerName = (ViewContext.RouteData.Values["controller"] as string)?.ToLower() ?? string.Empty;
+
+    // Determine the active button based on the controller name
+    var activeButton = controllerName switch
+    {
+        "user" => "logout", // For UserController (logout button)
+        "usersearch" => "search", // For UserSearchController (search button)
+        "feed" => "home", // For FeedController (home button)
+        "message" => "messages", // For MessageController (messages button)
+        "friendrequest" => "people", // For FriendRequestController (requests button)
+        "profile" => "profile", // For ProfileController (profile button)
+        _ => "home" // Default to home if no match
+    };
+}
+
+<!-- Navigasjonsmeny -->
+<div class="fixed bottom-0 w-full bg-white text-black flex justify-around py-3 510px:hidden">
+    <!-- Hjem knapp -->
+    <form asp-controller="Post" asp-action="Index" method="get" class="w-full">
+        <button type="submit"
+            class="flex flex-col items-center cursor-pointer transition-colors duration-200 @(activeButton == "home" ? "border-l-2 border-emerald-300 border-r-2 bg-emerald-50" : "hover:bg-emerald-100") w-full">
+            <span class="material-icons text-3xl">home</span>
+        </button>
+    </form>
+
+    <!-- Meldinger knapp -->
+    <form asp-controller="Message" asp-action="GetConversations" asp-route-userId="@userId" method="get" class="w-full">
+        <button type="submit"
+            class="flex flex-col items-center cursor-pointer transition-colors duration-200 @(activeButton == "messages" ? "border-l-2 border-emerald-300 border-r-2 bg-emerald-50" : "hover:bg-emerald-100") w-full">
+            <span class="material-icons text-3xl">message</span>
+        </button>
+    </form>
+
+    <!-- Forespørsler knapp -->
+    <form asp-controller="FriendRequest" asp-action="Index" method="get" class="w-full">
+        <button type="submit"
+            class="flex flex-col items-center cursor-pointer transition-colors duration-200 @(activeButton == "people" ? "border-l-2 border-emerald-300 border-r-2 bg-emerald-50" : "hover:bg-emerald-100") w-full">
+            <span class="material-icons text-3xl">people</span>
+        </button>
+    </form>
+
+    <!-- Søk knapp -->
+    <form asp-controller="UserSearch" asp-action="Search" method="get" class="w-full">
+        <button type="submit"
+            class="flex flex-col items-center cursor-pointer transition-colors duration-200 @(activeButton == "search" ? "border-l-2 border-emerald-300 border-r-2 bg-emerald-50" : "hover:bg-emerald-100") w-full">
+            <span class="material-icons text-3xl">search</span>
+        </button>
+    </form>
+
+    <!-- Logg ut knapp -->
+    <form asp-controller="User" asp-action="Logout" method="post" class="w-full">
+        <button type="submit"
+            class="flex flex-col items-center cursor-pointer transition-colors duration-200 @(activeButton == "logout" ? "border-l-2 border-emerald-300 border-r-2 bg-emerald-50" : "hover:bg-emerald-100") w-full">
+            <span class="material-icons text-3xl">logout</span>
+        </button>
+    </form>
+</div>
