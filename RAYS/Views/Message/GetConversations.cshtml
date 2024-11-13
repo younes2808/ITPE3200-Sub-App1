@@ -39,7 +39,7 @@
                             </p>
                             <p class="text-xs text-gray-500">
                                 <!-- Adjusting the timestamp to Norwegian Time -->
-                                @TimeZoneInfo.ConvertTimeFromUtc(conversation.Timestamp, norwayTimeZone).ToString("MMMM d, yyyy h:mm:ss tt")
+                                @TimeZoneInfo.ConvertTimeFromUtc(conversation.Timestamp, norwayTimeZone).ToString("g")
                             </p>
                         </div>
 
