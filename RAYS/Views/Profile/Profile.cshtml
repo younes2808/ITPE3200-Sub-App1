@@ -59,7 +59,7 @@
             <!-- Send Friend Request button -->
             <form asp-action="SendFriendRequest" method="post">
                 <input type="hidden" name="receiverId" value="@Model.UserId" />
-                <button type="submit" class="bg-blue-500 text-white rounded px-4 py-2 hover:bg-blue-700">
+                <button type="submit" class="bg-emerald-500 text-white rounded px-4 py-2 hover:bg-blue-700">
                     Send Friend Request
                 </button>
             </form>
@@ -129,9 +129,13 @@
         <div class="bg-emerald-200 shadow-md rounded-lg py-4 px-3 md:px-5 mt-6 mx-auto text-sm md:text-base lg:text-lg" id="post-@post.Id">
             <!-- User ID, timestamp, and location -->
             <div class="mb-2">
-            <a class="text-black text-2xl" href="@Url.Action("Profile", "Profile", new { userId = post.UserId})">
-                @post.Username
-            </a>
+            <!--Username as clickable link-->
+            <form action="@Url.Action("Profile", "Profile")" method="get" class="inline">
+                <input type="hidden" name="userId" value="@post.UserId" />
+                <button type="submit" class="text-2xl font-light text-black bg-transparent border-none hover:underline cursor-pointer">
+                    @post.Username
+                </button>
+            </form>
                 <small class="text-gray-500 block">@post.CreatedAt.ToString("f")</small>
                 @if (!string.IsNullOrEmpty(post.Location))
                 {
@@ -239,9 +243,12 @@ else if (ViewBag.ViewType == "LikedPosts")
         <div class="bg-emerald-200 shadow-md rounded-lg py-4 px-3 md:px-5 mt-6 mx-auto text-sm md:text-base lg:text-lg" id="post-@likedPost.Id">
             <!-- User ID, timestamp, and location -->
             <div class="mb-2">
-            <a class="text-black text-2xl" href="@Url.Action("Profile", "Profile", new { userId = likedPost.UserId})">
-                @likedPost.Username
-            </a>
+            <form action="@Url.Action("Profile", "Profile")" method="get" class="inline">
+                <input type="hidden" name="userId" value="@likedPost.UserId" />
+                <button type="submit" class="text-2xl font-light text-black bg-transparent border-none hover:underline cursor-pointer">
+                    @likedPost.Username
+                </button>
+            </form>
             <small class="text-gray-500 block">@likedPost.CreatedAt.ToString("f")</small>
             @if (!string.IsNullOrEmpty(likedPost.Location))
             {
