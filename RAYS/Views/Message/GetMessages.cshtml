@@ -20,9 +20,14 @@
             class="text-black text-2xl font-semibold">
             ←
         </button>
-        <h2 class="text-xl font-extrabold font-general text-black ml-auto">
-            @receiverUsername
-        </h2>
+        <!--Username as clickable link-->
+        <form action="@Url.Action("Profile", "Profile")" method="get" class="inline">
+            <input type="hidden" name="userId" value="@receiverId" />
+            <button type="submit" class="text-xl font-extrabold font-general text-black ml-auto bg-transparent border-none hover:underline cursor-pointer">
+                @receiverUsername
+            </button>
+        </form>
+
     </div>
 
     <!-- Meldingsområde -->
