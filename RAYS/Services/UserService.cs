@@ -59,7 +59,7 @@ namespace RAYS.Services
                 {
                     // Log the failed login attempt due to invalid password
                     _logger.LogWarning("Failed login attempt for: {UsernameOrEmail}. Invalid password.", usernameOrEmail);
-                    throw new InvalidOperationException("Invalid credentials.");
+                    throw new UnauthorizedAccessException("Invalid credentials.");
                 }
 
                 // Log successful login
@@ -68,11 +68,21 @@ namespace RAYS.Services
                 // Return the user on successful login
                 return user;
             }
+            catch (InvalidOperationException ex)
+            {
+                // Known error - propagate with the original message
+                throw new InvalidOperationException(ex.Message);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                // Known error - propagate with the original message
+                throw new UnauthorizedAccessException(ex.Message);
+            }
             catch (Exception ex)
             {
                 // Log any unexpected errors with critical error level
                 _logger.LogError(ex, "An unexpected error occurred during login for: {UsernameOrEmail}", usernameOrEmail);
-                throw new SystemException("An unexpected error occurred. Please try again later.");
+                throw new Exception("An unexpected error occurred. Please try again later.");
             }
         }
 

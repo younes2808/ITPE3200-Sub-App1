@@ -167,6 +167,7 @@
                 <input type="hidden" name="Id" value="@post.Id" />
                 <input type="hidden" name="ViewId" value="@Model.UserId" />
                 <input type="hidden" name="UserId" value="@post.UserId" />
+                <input type="hidden" name="viewType" value="Posts" /> <!-- Passes the viewType -->
 
                 <!-- Textarea for editing content -->
                 <textarea name="Content" class="w-full p-2 border rounded-lg">@post.Content</textarea>
@@ -193,6 +194,7 @@
                 <form asp-action="@(post.IsLikedByUser ? "Unlike" : "Like")" method="post">
                     <input type="hidden" name="ViewId" value="@Model.UserId" />
                     <input type="hidden" name="postId" value="@post.Id" />
+                    <input type="hidden" name="viewType" value="Posts" /> <!-- Passes the viewType -->
                     <button type="submit" class="flex items-center space-x-1 text-blue-600 hover:text-blue-800">
                         <span class="material-icons">
                             @(post.IsLikedByUser ? "thumb_down" : "thumb_up")
@@ -223,6 +225,7 @@
                     <!-- Delete button -->
                     <form asp-action="Delete" method="post">
                         <input type="hidden" name="ViewId" value="@Model.UserId" />
+                        <input type="hidden" name="viewType" value="Posts" /> <!-- Passes the viewType -->
                         <input type="hidden" name="id" value="@post.Id" />
                         <button type="submit" class="flex items-center space-x-1 text-red-600 hover:text-red-800">
                             <span class="material-icons">delete</span>
@@ -286,6 +289,7 @@ else if (ViewBag.ViewType == "LikedPosts")
                 <input type="hidden" name="Id" value="@likedPost.Id" />
                 <input type="hidden" name="ViewId" value="@Model.UserId" />
                 <input type="hidden" name="UserId" value="@likedPost.UserId" />
+                <input type="hidden" name="viewType" value="LikedPosts" /> <!-- Passes the viewType -->
 
                 <!-- Textarea for editing content -->
                 <textarea name="Content" class="w-full p-2 border rounded-lg">@likedPost.Content</textarea>
@@ -304,13 +308,16 @@ else if (ViewBag.ViewType == "LikedPosts")
 
             <!-- Actions -->
             <div class="flex justify-start items-center space-x-0 sm:space-x-6 md:space-x-8 lg:space-x-12 mt-4">
-                <!-- Unlike button -->
-                <form asp-action="Unlike" method="post">
+                <!-- Like/Unlike button -->
+                <form asp-action="@(likedPost.IsLikedByUser ? "Unlike" : "Like"  )" method="post">
                     <input type="hidden" name="ViewId" value="@Model.UserId" />
                     <input type="hidden" name="postId" value="@likedPost.Id" />
+                    <input type="hidden" name="viewType" value="LikedPosts" /> <!-- Passes the viewType -->
                     <button type="submit" class="flex items-center space-x-1 text-blue-600 hover:text-blue-800">
-                        <span class="material-icons">thumb_down</span>
-                        <span>Unlike</span>
+                        <span class="material-icons">
+                            @(likedPost.IsLikedByUser ? "thumb_down" : "thumb_up")
+                        </span>
+                        <span>@(likedPost.IsLikedByUser ? "Unlike" : "Like")</span>
                     </button>
                 </form>
 
@@ -336,6 +343,7 @@ else if (ViewBag.ViewType == "LikedPosts")
                     <form asp-action="Delete" method="post">
                         <input type="hidden" name="ViewId" value="@Model.UserId" />
                         <input type="hidden" name="id" value="@likedPost.Id" />
+                        <input type="hidden" name="viewType" value="LikedPosts" /> <!-- Passes the viewType -->
                         <button type="submit" class="flex items-center space-x-1 text-red-600 hover:text-red-800">
                             <span class="material-icons">delete</span>
                             <span>Delete</span>
