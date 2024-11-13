@@ -12,17 +12,20 @@
     var norwegianTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Central European Standard Time");
 }
 
-<div class="flex flex-col h-[90vh] bg-white shadow-2xl rounded-lg p-6">
+<div class="flex flex-col h-[90vh] bg-white shadow-2xl rounded-lg p-3">
     <!-- Header med tilbake-knapp og mottakerens brukernavn -->
     <div class="flex items-center justify-between bg-emerald-200 p-4 rounded-md mb-4">
-        <button 
-            onclick="window.location.href='@Url.Action("GetConversations", "Message")'"
-            class="text-black text-2xl font-semibold">
+        <button onclick="window.location.href='@Url.Action("GetConversations", "Message")'"
+            class="text-black text-4xl font-semibold">
             ←
         </button>
-        <h2 class="text-xl font-extrabold font-general text-black ml-auto">
+
+        <button onclick="location.href='/Profile/Profile?userId=@receiverId'"
+            class="text-xl font-extrabold font-general text-black hover:text-blue-800 underline cursor-pointer ml-auto bg-transparent border-none">
             @receiverUsername
-        </h2>
+        </button>
+
+
     </div>
 
     <!-- Meldingsområde -->
@@ -32,12 +35,11 @@
             @foreach (var message in messages)
             {
                 <div class="flex @(message.SenderId == currentUserId ? "justify-end" : "justify-start")">
-                    <div class="max-w-[60%] px-4 py-2 rounded-lg shadow-md text-sm font-medium
-                                 @(message.SenderId == currentUserId ? "bg-blue-500 text-white rounded-tl-2xl rounded-br-2xl" : "bg-gray-300 text-black rounded-tr-2xl rounded-bl-2xl")"
-                         style="word-break: break-word; overflow-wrap: break-word;">
-                        <p class="mb-1">@message.Content</p>
-                        <p class="text-xs"
-                           style="color: @(message.SenderId == currentUserId ? "white" : "black");">
+                    <div class="max-w-[60%] px-2 py-2 rounded-lg shadow-md text-base font-medium
+                        @(message.SenderId == currentUserId ? "bg-blue-500 text-white rounded-tl-2xl rounded-br-2xl" : "bg-gray-300 text-black rounded-tr-2xl rounded-bl-2xl")"
+                        style="word-break: break-word; overflow-wrap: break-word;">
+                        <p class="mb-0">@message.Content</p>
+                        <p class="text-xs pt-2" style="color: @(message.SenderId == currentUserId ? "white" : "black");">
                             @TimeZoneInfo.ConvertTimeFromUtc(message.Timestamp, norwegianTimeZone).ToString("g")
                         </p>
                     </div>
@@ -52,16 +54,13 @@
     </div>
 
     <!-- Input-område for å sende nye meldinger -->
-    <form method="post" action="@Url.Action("SendMessage", "Message")" class="mt-4 flex items-center bg-emerald-200 border p-4 rounded-md">
+    <form method="post" action="@Url.Action("SendMessage", "Message")"
+        class="mt-4 flex items-center bg-emerald-200 border p-4 rounded-md">
         <input type="hidden" name="receiverId" value="@receiverId" />
-        <input 
-            type="text" 
-            name="newMessage" 
-            placeholder="Type a message..."
+        <input type="text" name="newMessage" placeholder="Type a message..."
             class="flex-grow p-2 border-gray-300 border-2 rounded bg-white text-black focus:outline-none focus:ring-2 focus:ring-emerald-500" />
-        <button 
-            type="submit" 
-            class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-500 transition duration-200">
+        <button type="submit"
+            class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-500 transition duration-200 pl-10">
             Send
         </button>
     </form>
@@ -69,7 +68,7 @@
 
 <!-- JavaScript for automatisk scroll til bunn -->
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         function scrollToBottom() {
             var messageContainer = document.getElementById('messageContainer');
             messageContainer.scrollTop = messageContainer.scrollHeight;
@@ -81,4 +80,3 @@
         observer.observe(document.getElementById('messageContainer'), { childList: true, subtree: true });
     });
 </script>
-
