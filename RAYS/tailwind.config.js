@@ -8,6 +8,11 @@ module.exports = {
     theme: {
         extend: {
             screens: {
+                sm: '640px', // Small screens (mobile devices)
+                md: '768px', // Medium screens (tablets)
+                lg: '1024px', // Large screens (laptops)
+                xl: '1280px', // Extra large screens (desktops)
+                '2xl': '1536px', // 2x extra large screens
                 '1650px': '1650px',
                 '1350px': '1350px',
                 '1250px': '1250px',

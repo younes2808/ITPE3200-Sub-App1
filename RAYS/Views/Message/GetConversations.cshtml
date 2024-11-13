@@ -31,7 +31,7 @@
                                 User @conversation.CorrespondentId
                             </p>
                             <p class="text-sm text-gray-600 mb-1"> <!-- Reduced margin -->
-                                @(conversation.IsResponded ? "Sent:" : "Received:") @Truncate(conversation.Content, 60)
+                                @(conversation.IsResponded ? "Sent:" : "Received:") @Truncate(conversation.Content, 20)
                             </p>
                             <p class="text-xs text-gray-500">
                                 @conversation.Timestamp.ToString("MMMM d, yyyy h:mm:ss tt")
