@@ -166,6 +166,8 @@ namespace RAYS.Controllers
         {
             var posts = await _postService.GetByUserIdAsync(userId);
             var postViewModels = new List<PostViewModel>();
+            // Retrieve the current user's ID
+            var currentUserId = int.Parse(User.FindFirst("UserId")?.Value ?? "0");
 
             foreach (var post in posts)
             {
@@ -184,7 +186,7 @@ namespace RAYS.Controllers
                     UserId = post.UserId,
                     Username = user?.Username ?? "Unknown",  // Use "Unknown" if user is null
                     LikeCount = await _likeService.GetLikesForPostAsync(post.Id),
-                    IsLikedByUser = await _postService.IsPostLikedByUserAsync(userId, post.Id)
+                    IsLikedByUser = await _postService.IsPostLikedByUserAsync(currentUserId, post.Id)
                 });
             }
 
@@ -196,6 +198,9 @@ namespace RAYS.Controllers
         {
             var likedPosts = await _postService.GetLikedPostsByUserIdAsync(userId);
             var likedPostViewModels = new List<PostViewModel>();
+
+            // Retrieve the current user's ID (the viewer, e.g., User 1)
+            var currentUserId = int.Parse(User.FindFirst("UserId")?.Value ?? "0");
 
             foreach (var post in likedPosts)
             {
@@ -214,12 +219,15 @@ namespace RAYS.Controllers
                     UserId = post.UserId,
                     Username = user?.Username ?? "Unknown",  // Use "Unknown" if user is null
                     LikeCount = await _likeService.GetLikesForPostAsync(post.Id),
-                    IsLikedByUser = true // All liked posts are considered liked
+
+                    // Use currentUserId (the viewer's ID) to determine if they have liked the post
+                    IsLikedByUser = await _postService.IsPostLikedByUserAsync(currentUserId, post.Id)
                 });
             }
 
             return likedPostViewModels;
         }
+
 
 
         private async Task<List<UserViewModel>> GetFriends(int userId)

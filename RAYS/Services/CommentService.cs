@@ -52,8 +52,10 @@ namespace RAYS.Services
 
         public async Task<IEnumerable<CommentViewModel>> GetCommentsForPost(int postId)
         {
-            // Log the request
-            _logger.LogInformation("Retrieving comments for post ID {PostId}.", postId);
+            // Logging the request
+            // This has many instances so we will not be using it
+            // This was mainly for debugging purposes
+            //_logger.LogInformation("Retrieving comments for post ID {PostId}.", postId);
 
             // Check if the post exists
             var post = await _postRepository.GetByIdAsync(postId);
@@ -84,7 +86,8 @@ namespace RAYS.Services
             }
 
             // Log the number of comments retrieved
-            _logger.LogInformation("Retrieved {Count} comments for post ID {PostId}.", commentsWithUsernames.Count, postId);
+            //NOT IN USE DUE TO MANY INSTANCES BEING LOGGED
+            //_logger.LogInformation("Retrieved {Count} comments for post ID {PostId}.", commentsWithUsernames.Count, postId);
 
             // Return the list of comments with usernames
             return commentsWithUsernames;
