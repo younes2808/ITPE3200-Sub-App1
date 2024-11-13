@@ -31,6 +31,9 @@ builder.Services.AddScoped<FriendService>();
 // Comment related services
 builder.Services.AddScoped<ICommentRepository, CommentRepository>();
 builder.Services.AddScoped<CommentService>();
+// Like related services
+builder.Services.AddScoped<ILikeRepository, LikeRepository>();
+builder.Services.AddScoped<LikeService>();
 // Configure authentication
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
