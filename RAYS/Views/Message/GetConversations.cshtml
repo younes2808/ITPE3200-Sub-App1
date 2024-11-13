@@ -7,6 +7,9 @@
         if (content == null) return string.Empty;
         return content.Length > maxLength ? content.Substring(0, maxLength) + "..." : content;
     };
+
+    // Norwegian Time Zone
+    var norwayTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Central European Standard Time");
 }
 
 <div class="flex bg-gray-100 h-[90vh]"> <!-- Fixed height -->
@@ -21,25 +24,27 @@
             {
                 @foreach (var conversation in Model)
                 {
-                    <div 
-                        class="p-3 bg-emerald-100 hover:bg-emerald-200 rounded-lg cursor-pointer flex justify-between items-center"
+                    <div class="p-3 bg-emerald-100 hover:bg-emerald-200 rounded-lg cursor-pointer flex justify-between items-center"
                         onclick="window.location.href='@Url.Action("GetMessages", new { senderId = conversation.CorrespondentId, receiverId = User.FindFirst("UserId")?.Value })'">
-                        
+
                         <!-- Left section: Correspondent username and last message -->
                         <div class="flex flex-col">
                             <p class="text-lg font-semibold text-gray-800 mb-1"> <!-- Reduced margin -->
-                                User @conversation.CorrespondentId
+                                @conversation.CorrespondentUsername
                             </p>
                             <p class="text-sm text-gray-600 mb-1"> <!-- Reduced margin -->
-                                @(conversation.IsResponded ? "Sent:" : "Received:") @Truncate(conversation.Content, 20)
+
+                                @(conversation.IsResponded ? "Received:" : "Sent:") @Truncate(conversation.Content, 60)
+
                             </p>
                             <p class="text-xs text-gray-500">
-                                @conversation.Timestamp.ToString("MMMM d, yyyy h:mm:ss tt")
+                                <!-- Adjusting the timestamp to Norwegian Time -->
+                                @TimeZoneInfo.ConvertTimeFromUtc(conversation.Timestamp, norwayTimeZone).ToString("MMMM d, yyyy h:mm:ss tt")
                             </p>
                         </div>
 
                         <!-- New message indicator -->
-                        @if (!conversation.IsResponded)
+                        @if (conversation.IsResponded)
                         {
                             <div class="bg-blue-500 w-3 h-3 rounded-full"></div>
                         }
@@ -53,4 +58,3 @@
         </div>
     </div>
 </div>
-

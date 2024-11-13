@@ -1,9 +1,9 @@
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using RAYS.Models;
 using RAYS.Repositories;
+using RAYS.ViewModels;
+using System;
+using System.Threading.Tasks;
 
 namespace RAYS.Services
 {
@@ -12,62 +12,102 @@ namespace RAYS.Services
         private readonly IMessageRepository _messageRepository;
         private readonly ILogger<MessageService> _logger;
 
+        // Bruk IMessageRepository i stedet for MessageRepository
         public MessageService(IMessageRepository messageRepository, ILogger<MessageService> logger)
         {
             _messageRepository = messageRepository;
             _logger = logger;
         }
 
-        public async Task AddMessageAsync(Message message)
+        public async Task<bool> SendMessageAsync(int userId, int receiverId, string newMessage)
         {
-            _logger.LogInformation("Adding a new message from {SenderId} to {ReceiverId}.", message.SenderId, message.ReceiverId);
-
             try
             {
-                await _messageRepository.AddMessageAsync(message);
-                _logger.LogInformation("Message successfully added.");
+                var success = await _messageRepository.SendMessageAsync(userId, receiverId, newMessage);
+                if (!success)
+                {
+                    _logger.LogWarning($"User {userId} attempted to send an empty or whitespace-only message to User {receiverId}.");
+                    return false;
+                }
+
+                _logger.LogInformation($"User {userId} sent a message to User {receiverId}.");
+                return true;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "An error occurred while adding a message from {SenderId} to {ReceiverId}.", message.SenderId, message.ReceiverId);
-                throw; // Rethrow exception after logging it
+                _logger.LogError(ex, $"An error occurred while sending a message from User {userId} to User {receiverId}.");
+                return false;
             }
         }
 
-        public async Task<IEnumerable<Message>> GetConversationsAsync(int userId)
+        public async Task<object?> GetConversationsAsync(int userId)
         {
-            _logger.LogInformation("Fetching conversations for user {UserId}.", userId);
-
             try
             {
                 var conversations = await _messageRepository.GetConversationsAsync(userId);
-                _logger.LogInformation("Successfully retrieved conversations for user {UserId}.", userId);
+
+                if (conversations == null)
+                {
+                    _logger.LogWarning($"User {userId} failed to fetch conversations.");
+                    return null;
+                }
+
+                _logger.LogInformation($"User {userId} fetched conversations. Total conversations: {conversations.Count}.");
                 return conversations;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "An error occurred while fetching conversations for user {UserId}.", userId);
-                throw;
+                _logger.LogError(ex, $"An error occurred while fetching conversations for User {userId}.");
+                return null;
             }
         }
 
-        public async Task<IEnumerable<Message>> GetMessagesAsync(int senderId, int receiverId)
+        public async Task<MessageViewModel?> GetMessagesAsync(int userId, int receiverId)
         {
-            _logger.LogInformation("Fetching messages between {SenderId} and {ReceiverId}.", senderId, receiverId);
-
             try
             {
-                var messages = await _messageRepository.GetMessagesAsync(senderId, receiverId);
-                _logger.LogInformation("Successfully retrieved messages between {SenderId} and {ReceiverId}.", senderId, receiverId);
-                return messages;
+                // Determine the actual sender and receiver based on who is logged in
+                int senderId = userId;  // The logged-in user is the sender
+                int actualReceiverId = receiverId;  // The other user is the receiver
+
+                // Fetch messages between the sender and receiver
+                var messages = await _messageRepository.GetMessagesAsync(senderId, actualReceiverId);
+
+                // If there are no messages (this is a new conversation), create an empty message list
+                if (messages == null || !messages.Any())
+                {
+                    _logger.LogWarning($"No messages found for User {userId} between Sender {senderId} and Receiver {receiverId}. Starting a new conversation.");
+                    messages = new List<Message>();  // Initialize with an empty message list
+                }
+
+                // Get usernames for the sender and receiver
+                var (senderName, receiverName) = await _messageRepository.GetUserNamesByIdsAsync(senderId, actualReceiverId);
+
+                // Apply default values for null names
+                senderName = senderName ?? "Unknown";
+                receiverName = receiverName ?? "Unknown";
+
+                // Construct and return the MessageViewModel
+                var viewModel = new MessageViewModel
+                {
+                    SenderId = senderId,
+                    ReceiverId = actualReceiverId,
+                    Messages = messages,
+                    SenderName = senderName,
+                    ReceiverName = receiverName,
+                    CurrentUserId = userId // Include the logged-in user ID
+                };
+
+                return viewModel;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "An error occurred while fetching messages between {SenderId} and {ReceiverId}.", senderId, receiverId);
-
-                // Return an empty list instead of failing silently or returning nothing
-                return new List<Message>();
+                _logger.LogError(ex, $"An error occurred while fetching messages between User {userId} and Receiver {receiverId}.");
+                return null;
             }
         }
+
+
+
     }
 }

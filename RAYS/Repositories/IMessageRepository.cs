@@ -6,8 +6,14 @@ namespace RAYS.Repositories
 {
     public interface IMessageRepository
     {
-        Task AddMessageAsync(Message message);
-        Task<IEnumerable<Message>> GetConversationsAsync(int userId);
-        Task<IEnumerable<Message>> GetMessagesAsync(int senderId, int receiverId);
+        Task<bool> SendMessageAsync(int senderId, int receiverId, string content);
+        Task<List<Message>> GetMessagesAsync(int senderId, int receiverId);
+
+        // Returnerer en liste av anonyme objekter for samtaler
+        Task<List<dynamic>> GetConversationsAsync(int userId);
+        Task<string> GetUserNameByIdAsync(int userId);
+        // In IMessageRepository
+        Task<(string? SenderName, string? ReceiverName)> GetUserNamesByIdsAsync(int senderId, int receiverId);
+
     }
 }
