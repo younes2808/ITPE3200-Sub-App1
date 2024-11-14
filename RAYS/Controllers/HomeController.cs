@@ -17,7 +17,8 @@ namespace RAYS.Controllers
         [Authorize]
         public IActionResult Index()
         {
-            return View();
+            //
+            return RedirectToAction("Index", "Post");
         }
 
         public IActionResult Privacy()

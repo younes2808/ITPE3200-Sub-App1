@@ -1,18 +1,23 @@
 @model List<dynamic>
 
+@{
+    // The colors to cycle through
+    var colors = new[] { "#FCA5A5", "#A5B4FC", "#FCD34D", "#F0ABFC" };
+}
+
 <div class="grid grid-cols-1 gap-3 w-full pr-2">
     @if (Model != null && Model.Any())
     {
-        @foreach (var friend in Model)
+        @foreach (var friend in Model.Select((friend, index) => new { friend, index }))
         {
             <div class="flex flex-col items-center bg-emerald-50 border-2 p-3 border-emerald-200 rounded-lg w-full h-40">
                 <div class="h-16 w-12 rounded-full flex items-center justify-center text-white font-bold mb-2" 
-                     style="background-color: #6EE7B7;">
-                    <span class="text-black text-l font-bold">@friend.Username[0]</span>
+                     style="background-color: @colors[friend.index % colors.Length];">
+                    <span class="text-black text-l font-bold">@friend.friend.Username[0]</span>
                 </div>
-                <p class="text-pretty font-general font-medium leading-tight">@friend.Username</p>
+                <p class="text-pretty font-general font-medium leading-tight">@friend.friend.Username</p>
                 <button
-                    onclick="location.href='/Profile/Profile?userId=@friend.UserId'"
+                    onclick="location.href='/Profile/Profile?userId=@friend.friend.UserId'"
                     class="mt-1 w-20 py-1 font-general bg-emerald-300 text-sm text-black rounded-lg hover:bg-emerald-500 hover:text-white transition duration-200 1150px:w-36 1150px:text-base"
                 >
                     View Profile
