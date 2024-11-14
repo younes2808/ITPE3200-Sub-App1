@@ -72,6 +72,7 @@ namespace RAYS.Controllers
                 var user = await _userService.LoginUser(model.Username, model.Password);
                 if (user != null)
                 {
+                    //Making Claim
                     var claims = new List<Claim>
                     {
                         new Claim(ClaimTypes.Name, user.Username),

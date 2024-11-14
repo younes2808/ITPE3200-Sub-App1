@@ -9,7 +9,7 @@ namespace RAYS.Controllers
 {
     [Route("like")]
     [Authorize]
-    [ApiController] // Du kan endre dette til ControllerBase hvis det ikke er en API-kontroller
+    [ApiController]
     public class LikeController : Controller
     {
         private readonly LikeService _likeService;
@@ -26,17 +26,17 @@ namespace RAYS.Controllers
             if (like == null)
             {
                 ModelState.AddModelError("", "Invalid like data.");
-                return View("Error"); // Returner en feilsiden hvis liken er ugyldig
+                return View("Error"); // Returns error if like is null
             }
 
             var result = await _likeService.LikePostAsync(like);
             if (!result)
             {
                 ModelState.AddModelError("", "Post already liked by this user.");
-                return View("Error"); // Returner en feilsiden hvis liken allerede eksisterer
+                return View("Error"); // Returns an error if Like already exists
             }
 
-            return RedirectToAction("PostDetails", "Post", new { id = like.PostId }); // Forutsatt at du har en PostController med en PostDetails-visning
+            return RedirectToAction("PostDetails", "Post", new { id = like.PostId });
         }
 
         // DELETE: like (To Unlike a Post)
@@ -46,17 +46,17 @@ namespace RAYS.Controllers
             if (like == null)
             {
                 ModelState.AddModelError("", "Invalid unlike data.");
-                return View("Error"); // Returner en feilsiden hvis liken er ugyldig
+                return View("Error"); // Returns error if like is invalid
             }
 
             var result = await _likeService.UnlikePostAsync(like);
             if (!result)
             {
                 ModelState.AddModelError("", "Like not found.");
-                return View("Error"); // Returner en feilsiden hvis liken ikke finnes
+                return View("Error"); // Returns error if like doesnt exist
             }
 
-            return RedirectToAction("PostDetails", "Post", new { id = like.PostId }); // Forutsatt at du har en PostController med en PostDetails-visning
+            return RedirectToAction("PostDetails", "Post", new { id = like.PostId });
         }
     }
 }

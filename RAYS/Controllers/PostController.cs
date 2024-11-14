@@ -190,9 +190,11 @@ namespace RAYS.Controllers
         [HttpPost]
         public async Task<IActionResult> Delete(int id)
         {
+            //Gettig UserID
             var userId = int.Parse(User.FindFirst("UserId")?.Value ?? "0");
 
             var post = await _postService.GetByIdAsync(id);
+            //CHECKING CREDENTIALS
             if (post == null || post.UserId != userId)
                 return Forbid();
 

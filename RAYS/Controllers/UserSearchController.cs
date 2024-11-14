@@ -31,7 +31,7 @@ namespace RAYS.Controllers
                 var results = await _userService.SearchUsersAsync(model.Query);
                 model.Results = results;
             }
-            return View(model); // Returner samme view med oppdatert modell som inneholder resultater
+            return View(model); // Return view with results from query
         }
     }
 }
