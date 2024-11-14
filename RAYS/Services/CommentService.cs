@@ -26,7 +26,6 @@ namespace RAYS.Services
 
         public async Task<Comment> AddComment(Comment comment)
         {
-            _logger.LogInformation("Attempting to add a new comment.");
 
             // Check if the post exists
             var post = await _postRepository.GetByIdAsync(comment.PostId);
@@ -108,7 +107,6 @@ namespace RAYS.Services
 
         public async Task<Comment> UpdateComment(int commentId, string text, int userId)
         {
-            _logger.LogInformation("Attempting to update comment with ID {CommentId}.", commentId);
             var existingComment = await _commentRepository.GetByIdAsync(commentId);
             if (existingComment == null)
             {
@@ -131,7 +129,6 @@ namespace RAYS.Services
 
         public async Task DeleteComment(int id, int userId)
         {
-            _logger.LogInformation("Attempting to delete comment with ID {CommentId}.", id);
             var comment = await _commentRepository.GetByIdAsync(id);
             if (comment == null)
             {

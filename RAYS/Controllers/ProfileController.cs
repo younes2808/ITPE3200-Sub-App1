@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using RAYS.Models;
+using Microsoft.Extensions.Logging;
 
 namespace RAYS.Controllers
 {
@@ -15,15 +16,16 @@ namespace RAYS.Controllers
         private readonly PostService _postService;
         private readonly UserService _userService;
         private readonly FriendService _friendService;
-
         private readonly LikeService _likeService;
+        private readonly ILogger<ProfileController> _logger;
 
-        public ProfileController(PostService postService, UserService userService, FriendService friendService, LikeService likeService)
+        public ProfileController(PostService postService, UserService userService, FriendService friendService, LikeService likeService, ILogger<ProfileController> logger)
         {
             _postService = postService;
             _userService = userService;
             _friendService = friendService;
             _likeService = likeService;
+            _logger = logger;
         }
 
         public async Task<IActionResult> Profile(int userId, string viewType = "Posts")
@@ -32,6 +34,7 @@ namespace RAYS.Controllers
             var user = await _userService.GetUserById(userId);
             if (user == null)
             {
+                _logger.LogWarning("User not found for userId: {UserId}", userId);
                 return NotFound();
             }
 
@@ -90,6 +93,7 @@ namespace RAYS.Controllers
             var friendRequest = new Friend { SenderId = senderId, ReceiverId = receiverId, Status = "Pending" };
 
             await _friendService.SendFriendRequestAsync(friendRequest);
+            _logger.LogInformation("UserId {SenderId} sent a friend request to UserId {ReceiverId}", senderId, receiverId);
             return RedirectToAction("Profile", new { userId = receiverId });
         }
 
@@ -106,11 +110,14 @@ namespace RAYS.Controllers
             var friendRequest = friendRequests.FirstOrDefault(r => r.Id == requestId);
             if (friendRequest == null)
             {
+                _logger.LogWarning("Friend request with ID {RequestId} not found for UserId {CurrentUserId}", requestId, currentUserId);
                 return NotFound(); // If the request does not exist, handle accordingly
             }
 
             // Accept the friend request
             await _friendService.AcceptFriendRequestAsync(requestId);
+            _logger.LogInformation("UserId {CurrentUserId} accepted friend request from UserId {SenderId}", currentUserId, friendRequest.SenderId);
+
 
             // Redirect to the sender's profile (the one who sent the request)
             return RedirectToAction("Profile", new { userId = friendRequest.SenderId });
@@ -129,11 +136,13 @@ namespace RAYS.Controllers
             var friendRequest = friendRequests.FirstOrDefault(r => r.Id == requestId);
             if (friendRequest == null)
             {
+                _logger.LogWarning("Friend request with ID {RequestId} not found for UserId {CurrentUserId}", requestId, currentUserId);
                 return NotFound(); // If the request does not exist, handle accordingly
             }
 
             // Reject the friend request
             await _friendService.RejectFriendRequestAsync(requestId);
+            _logger.LogInformation("UserId {CurrentUserId} rejected friend request from UserId {SenderId}", currentUserId, friendRequest.SenderId); 
 
             // Redirect to the sender's profile (the one who sent the request)
             return RedirectToAction("Profile", new { userId = friendRequest.SenderId });
@@ -150,10 +159,12 @@ namespace RAYS.Controllers
 
             if (result)
             {
+                _logger.LogInformation("UserId {CurrentUserId} deleted friend UserId {FriendId}", currentUserId, friendId);
                 TempData["Message"] = "Friend deleted successfully!";
             }
             else
             {
+                _logger.LogError("Failed to delete friend UserId {FriendId} for UserId {CurrentUserId}", friendId, currentUserId);
                 TempData["Message"] = "Failed to delete friend.";
             }
 
@@ -266,14 +277,17 @@ namespace RAYS.Controllers
         [HttpPost]
         public async Task<IActionResult> Like(int postId, string viewType, int ViewId)
         {
+            //Getting UserID
             var userId = int.Parse(User.FindFirst("UserId")?.Value ?? "0");
 
+            //If unliked, like else unlike
             if (!await _postService.IsPostLikedByUserAsync(userId, postId))
             {
                 await _postService.LikePostAsync(userId, postId);
+                _logger.LogInformation("UserId {UserId} liked post {PostId}", userId, postId);
             } else {
                 await _postService.UnlikePostAsync(userId, postId);
-                
+                _logger.LogInformation("UserId {UserId} unliked post {PostId}", userId, postId);
             }
 
             return RedirectToAction("Profile", new { userId = ViewId, viewType = viewType });
@@ -282,13 +296,17 @@ namespace RAYS.Controllers
         [HttpPost]
         public async Task<IActionResult> Unlike(int postId, string viewType, int ViewId)
         {
+            //Getting UserID
             var userId = int.Parse(User.FindFirst("UserId")?.Value ?? "0");
 
+            //If liked, unlike else like
             if (await _postService.IsPostLikedByUserAsync(userId, postId))
             {
                 await _postService.UnlikePostAsync(userId, postId);
+                _logger.LogInformation("UserId {UserId} unliked post {PostId}", userId, postId);
             } else {
                 await _postService.LikePostAsync(userId, postId);
+                _logger.LogInformation("UserId {UserId} liked post {PostId}", userId, postId);
             }
 
             return RedirectToAction("Profile", new { userId = ViewId, viewType = viewType });
@@ -300,8 +318,11 @@ namespace RAYS.Controllers
         {
             var userId = int.Parse(User.FindFirst("UserId")?.Value ?? "0");
 
-            if (model.UserId != userId)
+            //Checking CREDENTIALS
+            if (model.UserId != userId){
+              _logger.LogWarning("UserId {UserId} attempted to update another user's post {PostId}", userId, model.Id);
                 return Forbid();
+            }
 
             // Check if content is empty
             if (string.IsNullOrEmpty(model.Content))
@@ -312,20 +333,23 @@ namespace RAYS.Controllers
             }
 
             var post = await _postService.GetByIdAsync(model.Id);
-            if (post == null)
+            if (post == null){
+                _logger.LogWarning("Post with ID {PostId} not found for update by UserId {UserId}", model.Id, userId);
                 return NotFound();
-
+            }
             post.Content = model.Content;
             post.VideoUrl = model.VideoUrl;
             post.Location = model.Location;
-
+            //Updating post
             try
             {
                 await _postService.UpdateAsync(post);
+                _logger.LogInformation("UserId {UserId} successfully updated post {PostId}", userId, model.Id);
                 return RedirectToAction("Profile", new { userId = ViewId, viewType = viewType });
             }
             catch (Exception)
             {
+                _logger.LogError( "An error occurred while updating post {PostId} by UserId {UserId}", model.Id, userId);
                 TempData["ErrorPostId"] = model.Id;  // Store post ID for error display
                 TempData["ContentErrorMessage"] = "An error occurred while updating the post. Please try again."; // Store error message
                 return RedirectToAction("Profile", new { userId = ViewId, viewType = viewType });
@@ -336,13 +360,18 @@ namespace RAYS.Controllers
         [HttpPost]
         public async Task<IActionResult> Delete(int id, string viewType, int ViewId)
         {
+
             var userId = int.Parse(User.FindFirst("UserId")?.Value ?? "0");
-
+            //Getting Post-object by ID
             var post = await _postService.GetByIdAsync(id);
-            if (post == null || post.UserId != userId)
+            //Checking credentials
+            if (post == null || post.UserId != userId){
+                _logger.LogWarning("Unauthorized attempt to delete post {PostId} by UserId {UserId}", id, userId);
                 return Forbid();
-
+            }
             await _postService.DeleteAsync(id);
+            //Deleting post
+            _logger.LogInformation("UserId {UserId} deleted post {PostId}", userId, id);
             return RedirectToAction("Profile", new { userId = ViewId, viewType = viewType });
         }
     }

@@ -8,38 +8,38 @@
     <link rel="stylesheet" href="~/css/app.css"/>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <!-- Legg til Material Icons hvis du bruker dem -->
+    <!-- Add Material Icons if you are using them -->
 </head>
 
 <body class="bg-gray-100 flex h-screen flex-col">
     <!-- Top Bar -->
     <div class="sticky top-0 z-10 bg-white shadow">
-        @await Html.PartialAsync("_TopBar") <!-- Inkluderer TopBar -->
+        @await Html.PartialAsync("_TopBar") <!-- Includes TopBar -->
     </div>
 
-    <!-- Hovedcontainer -->
+    <!-- Main container -->
     <div class="flex w-full max-w-[1200px] mx-auto bg-gray-100 min-h-screen overflow-y-auto">
-        <!-- Venstre Navbar -->
+        <!-- Left Navbar -->
         <div class="flex-none">
             <partial name="_LeftNavbar" />
         </div>
 
-        <!-- Hovedinnhold -->
+        <!-- Main content -->
         <div
             class="flex-grow post-textarea-grey bg-gray-100 p-6 pr-2 pl-2 overflow-y-auto w-full 300px:mb-12 510px:mb-0 510px:pl-24 510px:pr-5 580px:pr-10 md:pl-44 md:pr-16 870px:pl-48 870px:pr-20 970px:pr-16 1150px:pl-64 1150px:pr-14">
             <main role="main">
                 @RenderBody()
             </main>
         </div>
-        <!-- Høyre Navbar -->
+        <!-- Right Navbar -->
         <div class="flex-none">
             @await Html.PartialAsync("_RightNavbar", ViewData)
         </div>
     </div>
 
-    <!-- Bunnnavbar -->
+    <!-- Bottom navbar -->
     <div class="sticky bottom-0 z-10 bg-white shadow">
-        @await Html.PartialAsync("_BottomNavbar") <!-- Inkluderer BottomNavbar -->
+        @await Html.PartialAsync("_BottomNavbar") <!-- Includes BottomNavbar -->
     </div>
 
     <!-- Script dependencies -->
@@ -53,6 +53,7 @@
 
     <!-- Render validation scripts if present -->
     @await RenderSectionAsync("Scripts", required: false)
+
 
 </body>
 

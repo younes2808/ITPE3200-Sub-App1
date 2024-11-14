@@ -2,7 +2,7 @@
     // Retrieve the user ID from claims if available, default to 0 if not found
     var userId = int.Parse(User.FindFirst("UserId")?.Value ?? "0");
 
-    // Få controller-navn fra ruten og håndtere mulig null-verdi
+    // Get controller name from the route and handle possible null value
     var controllerName = (ViewContext.RouteData.Values["controller"] as string)?.ToLower() ?? string.Empty;
 
     // Determine the active button based on the controller name
@@ -18,9 +18,9 @@
     };
 }
 
-<!-- Navigasjonsmeny -->
+<!-- Navigation menu -->
 <div class="fixed bottom-0 w-full bg-white text-black flex justify-around py-3 510px:hidden">
-    <!-- Hjem knapp -->
+    <!-- Home button -->
     <form asp-controller="Post" asp-action="Index" method="get" class="w-full">
         <button type="submit"
             class="flex flex-col items-center cursor-pointer transition-colors duration-200 @(activeButton == "home" ? "border-l-2 border-emerald-300 border-r-2 bg-emerald-50" : "hover:bg-emerald-100") w-full">
@@ -28,7 +28,7 @@
         </button>
     </form>
 
-    <!-- Meldinger knapp -->
+    <!-- Messages button -->
     <form asp-controller="Message" asp-action="GetConversations" asp-route-userId="@userId" method="get" class="w-full">
         <button type="submit"
             class="flex flex-col items-center cursor-pointer transition-colors duration-200 @(activeButton == "messages" ? "border-l-2 border-emerald-300 border-r-2 bg-emerald-50" : "hover:bg-emerald-100") w-full">
@@ -36,7 +36,7 @@
         </button>
     </form>
 
-    <!-- Forespørsler knapp -->
+    <!-- Requests button -->
     <form asp-controller="FriendRequest" asp-action="Index" method="get" class="w-full">
         <button type="submit"
             class="flex flex-col items-center cursor-pointer transition-colors duration-200 @(activeButton == "people" ? "border-l-2 border-emerald-300 border-r-2 bg-emerald-50" : "hover:bg-emerald-100") w-full">
@@ -44,7 +44,7 @@
         </button>
     </form>
 
-    <!-- Søk knapp -->
+    <!-- Search button -->
     <form asp-controller="UserSearch" asp-action="Search" method="get" class="w-full">
         <button type="submit"
             class="flex flex-col items-center cursor-pointer transition-colors duration-200 @(activeButton == "search" ? "border-l-2 border-emerald-300 border-r-2 bg-emerald-50" : "hover:bg-emerald-100") w-full">
@@ -52,7 +52,7 @@
         </button>
     </form>
 
-    <!-- Logg ut knapp -->
+    <!-- Logout button -->
     <form asp-controller="User" asp-action="Logout" method="post" class="w-full">
         <button type="submit"
             class="flex flex-col items-center cursor-pointer transition-colors duration-200 @(activeButton == "logout" ? "border-l-2 border-emerald-300 border-r-2 bg-emerald-50" : "hover:bg-emerald-100") w-full">

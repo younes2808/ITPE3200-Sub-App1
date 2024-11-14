@@ -17,7 +17,7 @@ namespace RAYS.Controllers
             _messageService = messageService;
         }
 
-        // Hjelpemetode for å hente userId fra den innloggede brukeren
+        // Method to get UserID from logged in User
         private int GetLoggedInUserId()
         {
             var userId = int.Parse(User.FindFirst("UserId")?.Value ?? "0");
@@ -31,20 +31,20 @@ namespace RAYS.Controllers
         {
             var userId = GetLoggedInUserId();
 
-            // Sjekk at brukeren er innlogget
+            // Checking that user is logged in
             if (userId == 0)
             {
-                return Unauthorized(); // Brukeren er ikke logget inn
+                return Unauthorized(); // User is not logged in
             }
 
-            // Valider at receiverId ikke er null
+            // Checking that RECEIVERID is not null
             if (!receiverId.HasValue)
             {
                 ModelState.AddModelError("", "Receiver ID cannot be null.");
                 return RedirectToAction("GetMessages", new { senderId = userId });
             }
 
-            // Send meldingen via service-laget
+            // Sending Message via the service layer
             var success = await _messageService.SendMessageAsync(userId, receiverId.Value, newMessage);
 
             if (!success)
@@ -61,13 +61,13 @@ namespace RAYS.Controllers
         {
             var userId = GetLoggedInUserId();
 
-            // Sjekk at brukeren er innlogget
+            // Checking that user is logged in
             if (userId == 0)
             {
-                return Unauthorized(); // Brukeren er ikke logget inn
+                return Unauthorized(); // User is not logged in
             }
 
-            // Hent samtaler via service-laget
+            // Getting conversation via the service layer
             var latestMessages = await _messageService.GetConversationsAsync(userId);
 
             return View(latestMessages);
@@ -79,26 +79,26 @@ namespace RAYS.Controllers
         {
             var userId = GetLoggedInUserId();
 
-            // Sjekk at brukeren er innlogget
+            // Checking that user is logged in
             if (userId == 0)
             {
-                return Unauthorized(); // Brukeren er ikke logget inn
+                return Unauthorized(); // User is not logged in
             }
 
-            // Kontroller at den innloggede brukeren er enten sender eller mottaker
+            // Checking that user is either sender or receiver
             if (userId != senderId && userId != receiverId)
             {
-                return Forbid(); // Den innloggede brukeren prøver å se en samtale de ikke er en del av
+                return Forbid(); // User trying to access conversation that user is not part of
             }
 
             int actualSenderId = userId == senderId ? senderId : receiverId;
             int actualReceiverId = userId == senderId ? receiverId : senderId;
 
-            // Hent meldinger via service-laget
+            // Getting messages via the service layer
             var viewModel = await _messageService.GetMessagesAsync(actualSenderId, actualReceiverId);
 
 
-            // Returner viewModel som modellen til visningen
+            // Returning viewModel
             return View(viewModel);
         }
     }
