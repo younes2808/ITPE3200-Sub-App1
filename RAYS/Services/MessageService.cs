@@ -3,6 +3,7 @@ using RAYS.Models;
 using RAYS.Repositories;
 using RAYS.ViewModels;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace RAYS.Services
@@ -12,102 +13,127 @@ namespace RAYS.Services
         private readonly IMessageRepository _messageRepository;
         private readonly ILogger<MessageService> _logger;
 
-        // Bruk IMessageRepository i stedet for MessageRepository
         public MessageService(IMessageRepository messageRepository, ILogger<MessageService> logger)
         {
             _messageRepository = messageRepository;
             _logger = logger;
         }
 
+        // SendMessageAsync
         public async Task<bool> SendMessageAsync(int userId, int receiverId, string newMessage)
         {
+            // _logger.LogInformation($"Starting SendMessageAsync with userId: {userId}, receiverId: {receiverId}");
+
+            // Inputvalidering
+            if (userId <= 0 || receiverId <= 0)
+            {
+                _logger.LogWarning($"Invalid userId or receiverId. userId: {userId}, receiverId: {receiverId}");
+                return false;
+            }
+
+            if (string.IsNullOrWhiteSpace(newMessage))
+            {
+                _logger.LogWarning($"Message content is empty. userId: {userId}, receiverId: {receiverId}");
+                return false;
+            }
+
             try
             {
+                // Kall til repository, ingen logging av DB-operasjoner her
                 var success = await _messageRepository.SendMessageAsync(userId, receiverId, newMessage);
-                if (!success)
-                {
-                    _logger.LogWarning($"User {userId} attempted to send an empty or whitespace-only message to User {receiverId}.");
-                    return false;
-                }
 
-                _logger.LogInformation($"User {userId} sent a message to User {receiverId}.");
-                return true;
+                // Logge resultatet av forretningslogikk
+                _logger.LogInformation($"SendMessageAsync completed with status: {(success ? "Success" : "Failure")}, message sent from userId: {userId} to receiverId: {receiverId}");
+                return success;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"An error occurred while sending a message from User {userId} to User {receiverId}.");
+                _logger.LogError(ex, $"Exception in SendMessageAsync for userId {userId} to receiverId {receiverId}");
                 return false;
             }
         }
 
+        // GetConversationsAsync
         public async Task<object?> GetConversationsAsync(int userId)
         {
+           // _logger.LogInformation($"Starting GetConversationsAsync for userId: {userId}");
+
+            // Inputvalidering
+            if (userId <= 0)
+            {
+                _logger.LogWarning($"Invalid userId: {userId} in GetConversationsAsync.");
+                return null;
+            }
+
             try
             {
+                // Henter samtaler, overlater logging av DB til repository
                 var conversations = await _messageRepository.GetConversationsAsync(userId);
 
-                if (conversations == null)
+                if (conversations == null || conversations.Count == 0)
                 {
-                    _logger.LogWarning($"User {userId} failed to fetch conversations.");
-                    return null;
+                    _logger.LogInformation($"No conversations found for userId: {userId}");
+                }
+                else
+                {
+                    _logger.LogInformation($"Conversations fetched successfully for userId: {userId}, count: {conversations.Count}");
                 }
 
-                _logger.LogInformation($"User {userId} fetched conversations. Total conversations: {conversations.Count}.");
                 return conversations;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"An error occurred while fetching conversations for User {userId}.");
+                _logger.LogError(ex, $"Exception in GetConversationsAsync for userId: {userId}");
                 return null;
             }
         }
 
+        // GetMessagesAsync
         public async Task<MessageViewModel?> GetMessagesAsync(int userId, int receiverId)
         {
+           // _logger.LogInformation($"Starting GetMessagesAsync with userId: {userId}, receiverId: {receiverId}");
+
+            // Inputvalidering
+            if (userId <= 0 || receiverId <= 0)
+            {
+                _logger.LogWarning($"Invalid userId or receiverId. userId: {userId}, receiverId: {receiverId}");
+                return null;
+            }
+
             try
             {
-                // Determine the actual sender and receiver based on who is logged in
-                int senderId = userId;  // The logged-in user is the sender
-                int actualReceiverId = receiverId;  // The other user is the receiver
+                // Henter meldinger uten å logge databaseoperasjoner
+                var messages = await _messageRepository.GetMessagesAsync(userId, receiverId);
 
-                // Fetch messages between the sender and receiver
-                var messages = await _messageRepository.GetMessagesAsync(senderId, actualReceiverId);
-
-                // If there are no messages (this is a new conversation), create an empty message list
-                if (messages == null || !messages.Any())
+                // Sjekk om meldinger ble funnet
+                if (messages == null || messages.Count == 0)
                 {
-                    _logger.LogWarning($"No messages found for User {userId} between Sender {senderId} and Receiver {receiverId}. Starting a new conversation.");
-                    messages = new List<Message>();  // Initialize with an empty message list
+                    _logger.LogInformation($"No messages found between userId: {userId} and receiverId: {receiverId}");
+                    messages = new List<Message>();
                 }
 
-                // Get usernames for the sender and receiver
-                var (senderName, receiverName) = await _messageRepository.GetUserNamesByIdsAsync(senderId, actualReceiverId);
+                // Henter brukernavn fra repository
+                var (senderName, receiverName) = await _messageRepository.GetUserNamesByIdsAsync(userId, receiverId);
 
-                // Apply default values for null names
-                senderName = senderName ?? "Unknown";
-                receiverName = receiverName ?? "Unknown";
-
-                // Construct and return the MessageViewModel
+                // Lag MessageViewModel
                 var viewModel = new MessageViewModel
                 {
-                    SenderId = senderId,
-                    ReceiverId = actualReceiverId,
+                    SenderId = userId,
+                    ReceiverId = receiverId,
                     Messages = messages,
-                    SenderName = senderName,
-                    ReceiverName = receiverName,
-                    CurrentUserId = userId // Include the logged-in user ID
+                    SenderName = senderName ?? "Unknown",
+                    ReceiverName = receiverName ?? "Unknown",
+                    CurrentUserId = userId
                 };
 
+                _logger.LogInformation($"MessageViewModel created successfully for userId: {userId}, receiverId: {receiverId}");
                 return viewModel;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"An error occurred while fetching messages between User {userId} and Receiver {receiverId}.");
+                _logger.LogError(ex, $"Exception in GetMessagesAsync for userId: {userId} and receiverId: {receiverId}");
                 return null;
             }
         }
-
-
-
     }
 }

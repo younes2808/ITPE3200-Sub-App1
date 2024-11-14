@@ -54,29 +54,7 @@
     <!-- Render validation scripts if present -->
     @await RenderSectionAsync("Scripts", required: false)
 
-    <!-- Scroll handling script -->
-    <script>
-        // Define variables
-        let lastScrollY = window.scrollY; // Start scroll position
-        const topBar = document.querySelector('#topBar'); // Reference to top bar element
 
-        // Function to handle scroll
-        const handleScroll = () => {
-            if (window.innerWidth < 510) { // Only active on screens smaller than 510px
-                if (window.scrollY > lastScrollY) {
-                    // Hide the top bar when scrolling down
-                    topBar.classList.add('-translate-y-full');
-                } else {
-                    // Show the top bar when scrolling up
-                    topBar.classList.remove('-translate-y-full');
-                }
-                lastScrollY = window.scrollY; // Update last scroll position
-            }
-        };
-
-        // Listen for scroll events
-        window.addEventListener('scroll', handleScroll);
-    </script>
 </body>
 
 </html>

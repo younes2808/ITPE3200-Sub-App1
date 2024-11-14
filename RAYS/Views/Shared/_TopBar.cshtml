@@ -31,26 +31,3 @@
         </form>
     </div>
 </div>
-
-<script>
-    // JavaScript to handle scroll and hide/show topbar on screens smaller than 510px
-    let lastScrollY = window.scrollY; // Initialize last scroll position
-    const topBar = document.getElementById('topBar'); // Reference to top bar element
-
-    // Event listener for scroll event
-    window.addEventListener('scroll', () => {
-        // Only handle scroll effect on screens smaller than 510px
-        if (window.innerWidth < 510) {
-            if (window.scrollY > lastScrollY) {
-                // If we scroll down, hide the top bar
-                topBar.classList.add('-translate-y-full');
-            } else {
-                // If we scroll up, show the top bar
-                topBar.classList.remove('-translate-y-full');
-            }
-        }
-
-        // Update last scroll position
-        lastScrollY = window.scrollY;
-    });
-</script>

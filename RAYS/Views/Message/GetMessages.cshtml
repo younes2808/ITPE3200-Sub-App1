@@ -14,6 +14,7 @@
 
 <div class="flex flex-col h-[80vh] sm:h-[90vh] bg-white shadow-2xl rounded-lg p-6 mt-20 510px:mt-0">
     <!-- Header with back button and receiver's username -->
+
     <div class="flex items-center justify-between bg-emerald-200 p-4 rounded-md mb-4">
         <button onclick="window.location.href='@Url.Action("GetConversations", "Message")'"
             class="text-black text-4xl font-semibold">
@@ -54,6 +55,14 @@
         <div id="scrollToBottom"></div>
     </div>
 
+    <!-- Check for ErrorMessage in TempData -->
+    @if (TempData["ErrorMessage"] != null)
+    {
+    <div class="bg-red-500 text-white text-center p-2 rounded-lg shadow-lg border-2 border-red-700">
+        <p class="font-semibold text-lg">@TempData["ErrorMessage"]</p>
+    </div>
+    }   
+  
     <!-- Input area for sending new messages -->
     <form method="post" action="@Url.Action("SendMessage", "Message")"
         class="mt-4 flex items-center bg-emerald-200 border p-4 rounded-md">
