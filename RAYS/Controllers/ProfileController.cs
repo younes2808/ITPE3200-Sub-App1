@@ -277,8 +277,10 @@ namespace RAYS.Controllers
         [HttpPost]
         public async Task<IActionResult> Like(int postId, string viewType, int ViewId)
         {
+            //Getting UserID
             var userId = int.Parse(User.FindFirst("UserId")?.Value ?? "0");
 
+            //If unliked, like else unlike
             if (!await _postService.IsPostLikedByUserAsync(userId, postId))
             {
                 await _postService.LikePostAsync(userId, postId);
@@ -294,8 +296,10 @@ namespace RAYS.Controllers
         [HttpPost]
         public async Task<IActionResult> Unlike(int postId, string viewType, int ViewId)
         {
+            //Getting UserID
             var userId = int.Parse(User.FindFirst("UserId")?.Value ?? "0");
 
+            //If liked, unlike else like
             if (await _postService.IsPostLikedByUserAsync(userId, postId))
             {
                 await _postService.UnlikePostAsync(userId, postId);
@@ -314,6 +318,7 @@ namespace RAYS.Controllers
         {
             var userId = int.Parse(User.FindFirst("UserId")?.Value ?? "0");
 
+            //Checking CREDENTIALS
             if (model.UserId != userId){
               _logger.LogWarning("UserId {UserId} attempted to update another user's post {PostId}", userId, model.Id);
                 return Forbid();
@@ -335,7 +340,7 @@ namespace RAYS.Controllers
             post.Content = model.Content;
             post.VideoUrl = model.VideoUrl;
             post.Location = model.Location;
-
+            //Updating post
             try
             {
                 await _postService.UpdateAsync(post);
@@ -355,14 +360,17 @@ namespace RAYS.Controllers
         [HttpPost]
         public async Task<IActionResult> Delete(int id, string viewType, int ViewId)
         {
-            var userId = int.Parse(User.FindFirst("UserId")?.Value ?? "0");
 
+            var userId = int.Parse(User.FindFirst("UserId")?.Value ?? "0");
+            //Getting Post-object by ID
             var post = await _postService.GetByIdAsync(id);
+            //Checking credentials
             if (post == null || post.UserId != userId){
                 _logger.LogWarning("Unauthorized attempt to delete post {PostId} by UserId {UserId}", id, userId);
                 return Forbid();
             }
             await _postService.DeleteAsync(id);
+            //Deleting post
             _logger.LogInformation("UserId {UserId} deleted post {PostId}", userId, id);
             return RedirectToAction("Profile", new { userId = ViewId, viewType = viewType });
         }

@@ -87,14 +87,14 @@ namespace RAYS.Services
         }
 
 
-        public async Task<User?> GetUserById(int id) // Endret til User? for å indikere at den kan være null
+        public async Task<User?> GetUserById(int id) // User? = Because User can be null
         {
             var user = await _userRepository.GetUserByIdAsync(id);
             if (user == null)
             {
                 _logger.LogWarning("User not found with ID: {Id}", id);
             }
-            return user; // Returnerer user, som kan være null
+            return user; // Returning User
         }
 
         public async Task<IEnumerable<User>> SearchUsers(string query)
