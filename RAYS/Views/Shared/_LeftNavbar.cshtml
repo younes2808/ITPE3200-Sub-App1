@@ -2,7 +2,7 @@
     // Retrieve the user ID from claims if available, default to 0 if not found
     var userId = int.Parse(User.FindFirst("UserId")?.Value ?? "0");
 
-    // Få controller-navn fra ruten og håndtere mulig null-verdi
+    // Get controller name from the route and handle potential null value
     var controllerName = (ViewContext.RouteData.Values["controller"] as string)?.ToLower() ?? string.Empty;
 
     // Determine the active button based on the controller name
@@ -17,15 +17,15 @@
         _ => "home" // Default to home if no match
     };
 
-    // Hent brukerens identitet og initialer for profilseksjonen
+    // Retrieve the user's identity and initials for the profile section
     var identity = User.Identity;
     var userInitial = string.Empty;
     var userName = string.Empty;
 
     if (identity != null && identity.IsAuthenticated && !string.IsNullOrEmpty(identity.Name))
     {
-        userInitial = identity.Name[0].ToString().ToUpper(); // Første bokstav i navnet
-        userName = identity.Name; // Fullt brukernavn
+        userInitial = identity.Name[0].ToString().ToUpper(); // First letter of the name
+        userName = identity.Name; // Full username
     }
 }
 
@@ -55,10 +55,10 @@
         </button>
     </form>
 
-    <!-- Navigasjonsmeny -->
+    <!-- Navigation Menu -->
     <nav class="flex-col flex-grow transition-all duration-300 mt-4 w-full">
         <div class="flex flex-col space-y-4 mb-2">
-            <!-- Navigasjonslenker -->
+            <!-- Navigation Links -->
             <form asp-controller="Post" asp-action="Index" method="get" class="w-full">
                 <button type="submit"
                     class="px-2 transition-colors duration-200 @(activeButton == "home" ? "border-emerald-200 border-t-2 border-b-2 bg-emerald-50 font-semibold" : "510px:hover:bg-emerald-100 md:hover:bg-emerald-100") w-full">
@@ -93,7 +93,7 @@
                 </button>
             </form>
 
-            <!-- Søkeknapp som et skjema -->
+            <!-- Search Button as a Form -->
             <form asp-controller="UserSearch" asp-action="Search" method="get" class="w-full">
                 <button type="submit"
                     class="px-2 transition-colors duration-200 @(activeButton == "search" ? "border-emerald-300 border-t-2 border-b-2 bg-emerald-50 font-semibold" : "510px:hover:bg-emerald-100 md:hover:bg-emerald-100") w-full">
@@ -105,7 +105,7 @@
                 </button>
             </form>
 
-            <!-- Logg ut-knapp -->
+            <!-- Logout Button -->
             <form asp-controller="User" asp-action="Logout" method="post" class="w-full">
                 <button type="submit"
                     class="px-2 transition-colors duration-200 @(activeButton == "logout" ? "border-b-2 border-emerald-300 border-t-2 border-b-2 bg-emerald-50 font-semibold" : "510px:hover:bg-emerald-100 md:hover:bg-emerald-100") w-full">

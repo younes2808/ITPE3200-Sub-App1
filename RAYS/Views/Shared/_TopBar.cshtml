@@ -1,31 +1,31 @@
 @{
-    // Hent brukerens ID fra claims (eller session)
+    // Retrieve the user's ID from claims (or session)
     var userId = int.Parse(User.FindFirst("UserId")?.Value ?? "0");
 
-    // Hent brukerens identitet og initialer
+    // Retrieve the user's identity and initials
     var identity = User.Identity;
     var userInitial = string.Empty;
 
     if (identity != null && identity.IsAuthenticated && !string.IsNullOrEmpty(identity.Name))
     {
-        userInitial = identity.Name[0].ToString().ToUpper(); // Første bokstav i navnet
+        userInitial = identity.Name[0].ToString().ToUpper(); // First letter of the name
     }
 }
 
 <div class="fixed 510px:hidden border-b-2 border-emerald-200 top-0 left-0 right-0 bg-white text-black flex items-center justify-between px-6 py-2 z-50 transition-transform duration-300"
     id="topBar">
-    <!-- Venstre side med "RAYS" -->
+    <!-- Left side with "RAYS" -->
     <div class="text-3xl font-light">RAYS</div>
 
-    <!-- Høyre side med profilbilde lenke -->
+    <!-- Right side with profile picture link -->
     <div>
-        <!-- Endret fra en lenke til en form -->
+        <!-- Changed from a link to a form -->
         <form asp-action="Profile" asp-controller="Profile" method="get"
             class="flex items-center rounded-lg transition-colors duration-200">
             <input type="hidden" name="userid" value="@userId" />
             <button type="submit" class="flex items-center space-x-2 p-2">
                 <div class="text-center pt-1 w-12 h-12 cursor-pointer rounded-full hover:bg-emerald-300 bg-emerald-200">
-                    <span class="text-3xl font-semibold">@userInitial</span> <!-- Vist første bokstav i brukernavn -->
+                    <span class="text-3xl font-semibold">@userInitial</span> <!-- Display first letter of username -->
                 </div>
             </button>
         </form>
@@ -33,24 +33,24 @@
 </div>
 
 <script>
-    // JavaScript for å håndtere scroll og skjule/vis topbar på skjermer mindre enn 510px
-    let lastScrollY = window.scrollY; // Initialiserer sist scroll-posisjon
-    const topBar = document.getElementById('topBar'); // Referanse til top bar-elementet
+    // JavaScript to handle scroll and hide/show topbar on screens smaller than 510px
+    let lastScrollY = window.scrollY; // Initialize last scroll position
+    const topBar = document.getElementById('topBar'); // Reference to top bar element
 
-    // Event listener for scroll-hendelse
+    // Event listener for scroll event
     window.addEventListener('scroll', () => {
-        // Kun håndter scroll-effekten på skjermer mindre enn 510px
+        // Only handle scroll effect on screens smaller than 510px
         if (window.innerWidth < 510) {
             if (window.scrollY > lastScrollY) {
-                // Hvis vi scroller ned, skjul topbaren
+                // If we scroll down, hide the top bar
                 topBar.classList.add('-translate-y-full');
             } else {
-                // Hvis vi scroller opp, vis topbaren
+                // If we scroll up, show the top bar
                 topBar.classList.remove('-translate-y-full');
             }
         }
 
-        // Oppdater sist scroll-posisjon
+        // Update last scroll position
         lastScrollY = window.scrollY;
     });
 </script>
