@@ -122,6 +122,7 @@ namespace RAYS.Controllers
                 };
 
                 await _postService.AddAsync(post);
+                _logger.LogInformation("Successfully created post by UserID: {UserId}", userId);
                 return RedirectToAction("Index");
             }
             catch (Exception ex)
@@ -171,6 +172,7 @@ namespace RAYS.Controllers
             try
             {
                 await _postService.UpdateAsync(post);
+                _logger.LogInformation("Successfully updated post ID {PostId} by UserID: {UserId}", model.Id, userId);
                 return RedirectToAction("Index");
             }
             catch (Exception)
@@ -195,6 +197,7 @@ namespace RAYS.Controllers
                 return Forbid();
 
             await _postService.DeleteAsync(id);
+            _logger.LogInformation("Successfully deleted post ID {PostId} by UserID: {UserId}", id, userId);
             return RedirectToAction("Index");
         }
 
@@ -205,6 +208,7 @@ namespace RAYS.Controllers
 
             if (!await _postService.IsPostLikedByUserAsync(userId, postId))
                 await _postService.LikePostAsync(userId, postId);
+                _logger.LogInformation("Post ID {PostId} liked by UserID: {UserId}", postId, userId);
 
             return RedirectToAction("Index");
         }
@@ -216,6 +220,7 @@ namespace RAYS.Controllers
 
             if (await _postService.IsPostLikedByUserAsync(userId, postId))
                 await _postService.UnlikePostAsync(userId, postId);
+                _logger.LogInformation("Post ID {PostId} Unliked by UserID: {UserId}", postId, userId);
 
             return RedirectToAction("Index");
         }

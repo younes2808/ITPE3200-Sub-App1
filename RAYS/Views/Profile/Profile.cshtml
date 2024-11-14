@@ -365,16 +365,19 @@ else if (ViewBag.ViewType == "Friends")
 {
     <h2 class="text-2xl text-black">Friends</h2>
     <div class="mt-3 grid grid-cols-1 md:grid-cols-2 gap-4">
-        @foreach (var friend in Model.Friends)
-        {
-            <div key="@friend.UserId" class="p-2 bg-white rounded-md">
-                <a href="@Url.Action("Profile", "Profile", new { userId = friend.UserId })" 
-                   class="text-blue-600 hover:underline">
-                    @friend.Username <!-- Vis vennens brukernavn -->
-                </a>
-            </div>
-        }
-    </div>
+    @foreach (var friend in Model.Friends)
+    {
+        <div key="@friend.UserId" class="p-2 bg-white rounded-md">
+            <form action="@Url.Action("Profile", "Profile")" method="get" class="inline">
+                <input type="hidden" name="userId" value="@friend.UserId" />
+                <button type="submit" class="text-blue-400 font-light bg-transparent border-none hover:underline">
+                    @friend.Username <!-- Display friend's username as clickable link -->
+                </button>
+            </form>
+        </div>
+    }
+</div>
+
 }
 
 
