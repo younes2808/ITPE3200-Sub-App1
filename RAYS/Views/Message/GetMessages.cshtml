@@ -12,7 +12,7 @@
     var norwegianTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Central European Standard Time");
 }
 
-<div class="flex flex-col h-[90vh] bg-white shadow-2xl rounded-lg p-6 mt-20 510px:mt-0">
+<div class="flex flex-col h-[80vh] sm:h-[90vh] bg-white shadow-2xl rounded-lg p-6 mt-20 510px:mt-0">
     <!-- Header med tilbake-knapp og mottakerens brukernavn -->
     <div class="flex items-center justify-between bg-emerald-200 p-4 rounded-md mb-4">
         <button onclick="window.location.href='@Url.Action("GetConversations", "Message")'"
@@ -59,9 +59,9 @@
         class="mt-4 flex items-center bg-emerald-200 border p-4 rounded-md">
         <input type="hidden" name="receiverId" value="@receiverId" />
         <input type="text" name="newMessage" placeholder="Type a message..."
-            class="flex-grow p-2 border-gray-300 border-2 rounded bg-white text-black focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+            class="flex-grow  p-1 sm:p-2 border-gray-300 border-2 rounded bg-white text-black focus:outline-none focus:ring-2 focus:ring-emerald-500" />
         <button type="submit"
-            class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-500 transition duration-200 pl-10">
+            class="bg-blue-600 text-white px-1 sm:px-4 py-1 sm:py-2 rounded-lg hover:bg-blue-500 transition duration-200 pl-10">
             Send
         </button>
     </form>

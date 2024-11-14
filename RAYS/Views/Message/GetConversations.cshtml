@@ -12,7 +12,7 @@
     var norwayTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Central European Standard Time");
 }
 
-<div class="flex bg-gray-100 h-[90vh]"> <!-- Fixed height -->
+<div class="flex bg-gray-100 h-[89vh] sm:h-[90vh]"> <!-- Fixed height -->
     <!-- Main content container -->
     <div class="w-full max-w-7xl mx-auto bg-white shadow-lg rounded-lg p-8 flex flex-col mt-20 510px:mt-0">
         <!-- Header -->
@@ -34,7 +34,7 @@
                             </p>
                             <p class="text-sm text-gray-600 mb-1"> <!-- Reduced margin -->
 
-                                @(conversation.IsResponded ? "Received:" : "Sent:") @Truncate(conversation.Content, 60)
+                                @(conversation.IsResponded ? "Received:" : "Sent:") @Truncate(conversation.Content, 30)
 
                             </p>
                             <p class="text-xs text-gray-500">
