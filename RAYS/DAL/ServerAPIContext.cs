@@ -5,10 +5,7 @@ namespace RAYS.DAL
 {
     public class ServerAPIContext : DbContext
     {
-        public ServerAPIContext(DbContextOptions<ServerAPIContext> options) : base(options)
-        {
-        }
-
+        // DbSet properties
         public DbSet<User> Users { get; set; }
         public DbSet<Post> Posts { get; set; }
         public DbSet<Comment> Comments { get; set; }
@@ -16,6 +13,19 @@ namespace RAYS.DAL
         public DbSet<Friend> Friends { get; set; }
         public DbSet<Message> Messages { get; set; }
 
+        // Constructor to initialize DbSet properties
+        public ServerAPIContext(DbContextOptions<ServerAPIContext> options) : base(options)
+        {
+            // Initialize the DbSets using the Set<T> method to satisfy the non-nullable warning
+            Users = Set<User>();
+            Posts = Set<Post>();
+            Comments = Set<Comment>();
+            Likes = Set<Like>();
+            Friends = Set<Friend>();
+            Messages = Set<Message>();
+        }
+
+        // Model configuration
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
