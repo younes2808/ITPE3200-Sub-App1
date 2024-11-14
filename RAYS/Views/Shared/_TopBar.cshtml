@@ -32,25 +32,3 @@
     </div>
 </div>
 
-<script>
-    // JavaScript for å håndtere scroll og skjule/vis topbar på skjermer mindre enn 510px
-    let lastScrollY = window.scrollY; // Initialiserer sist scroll-posisjon
-    const topBar = document.getElementById('topBar'); // Referanse til top bar-elementet
-
-    // Event listener for scroll-hendelse
-    window.addEventListener('scroll', () => {
-        // Kun håndter scroll-effekten på skjermer mindre enn 510px
-        if (window.innerWidth < 510) {
-            if (window.scrollY > lastScrollY) {
-                // Hvis vi scroller ned, skjul topbaren
-                topBar.classList.add('-translate-y-full');
-            } else {
-                // Hvis vi scroller opp, vis topbaren
-                topBar.classList.remove('-translate-y-full');
-            }
-        }
-
-        // Oppdater sist scroll-posisjon
-        lastScrollY = window.scrollY;
-    });
-</script>

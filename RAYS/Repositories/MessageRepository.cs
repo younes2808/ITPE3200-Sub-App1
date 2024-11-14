@@ -12,7 +12,7 @@ namespace RAYS.Repositories
     public class MessageRepository : IMessageRepository
     {
         private readonly ServerAPIContext _context;
-        private readonly ILogger<MessageRepository> _logger;  // Add logger
+        private readonly ILogger<MessageRepository> _logger;
 
         public MessageRepository(ServerAPIContext context, ILogger<MessageRepository> logger)
         {
@@ -24,7 +24,8 @@ namespace RAYS.Repositories
         {
             try
             {
-                // Fetch the sender and receiver usernames from the database
+                _logger.LogDebug($"Fetching usernames for senderId: {senderId}, receiverId: {receiverId}");
+                
                 var sender = await _context.Users
                     .Where(u => u.Id == senderId)
                     .Select(u => u.Username)
@@ -39,8 +40,8 @@ namespace RAYS.Repositories
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error fetching usernames for senderId: {senderId} and receiverId: {receiverId}");
-                throw new Exception("Failed to fetch usernames.", ex); // Throw custom exception with context
+                _logger.LogError(ex, $"Database error while fetching usernames for senderId: {senderId}, receiverId: {receiverId}");
+                throw new Exception("Failed to fetch usernames.", ex);
             }
         }
 
@@ -48,14 +49,12 @@ namespace RAYS.Repositories
         {
             try
             {
-                // Validate the message
                 if (string.IsNullOrWhiteSpace(newMessage))
                 {
-                    _logger.LogWarning($"Message is empty or contains only whitespace. userId: {userId}, receiverId: {receiverId}");
-                    return false;  // Invalid message
+                    _logger.LogDebug($"Invalid message content. Skipping message creation for userId: {userId}, receiverId: {receiverId}");
+                    return false;
                 }
 
-                // Create the new message
                 var message = new Message
                 {
                     SenderId = userId,
@@ -64,17 +63,16 @@ namespace RAYS.Repositories
                     Timestamp = DateTime.UtcNow
                 };
 
-                // Add to the database and save
                 _context.Messages.Add(message);
                 await _context.SaveChangesAsync();
 
-                _logger.LogInformation($"Message sent from user {userId} to user {receiverId}.");
+                _logger.LogDebug($"Message added to database from userId: {userId} to receiverId: {receiverId}");
                 return true;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error sending message from user {userId} to user {receiverId}");
-                throw new Exception("Failed to send message.", ex);  // Throw custom exception
+                _logger.LogError(ex, $"Database error while saving message from userId: {userId} to receiverId: {receiverId}");
+                throw new Exception("Failed to send message.", ex);
             }
         }
 
@@ -82,13 +80,13 @@ namespace RAYS.Repositories
         {
             try
             {
-                // Fetch conversations where the user is either the sender or the receiver
+                _logger.LogDebug($"Fetching conversations for userId: {userId}");
+
                 var conversations = await _context.Messages
                     .Where(m => m.SenderId == userId || m.ReceiverId == userId)
                     .Select(m => new
                     {
                         CorrespondentId = m.SenderId == userId ? m.ReceiverId : m.SenderId,
-                        // Dynamically fetch the correspondent's username based on who is the sender or receiver
                         CorrespondentUsername = m.SenderId == userId
                             ? _context.Users.Where(u => u.Id == m.ReceiverId).Select(u => u.Username).FirstOrDefault()
                             : _context.Users.Where(u => u.Id == m.SenderId).Select(u => u.Username).FirstOrDefault(),
@@ -98,13 +96,8 @@ namespace RAYS.Repositories
                     })
                     .ToListAsync();
 
-                if (!conversations.Any())
-                {
-                    _logger.LogInformation($"No conversations found for user {userId}.");
-                    return new List<dynamic>();  // Return empty list if no conversations exist
-                }
+                _logger.LogDebug($"Fetched {conversations.Count} conversations for userId: {userId}");
 
-                // Group by correspondent and select the most recent message per conversation
                 var latestMessages = conversations
                     .GroupBy(m => m.CorrespondentId)
                     .Select(g => g.OrderByDescending(m => m.Timestamp).FirstOrDefault())
@@ -114,17 +107,17 @@ namespace RAYS.Repositories
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error fetching conversations for user {userId}");
-                throw new Exception("Failed to fetch conversations.", ex);  // Throw custom exception
+                _logger.LogError(ex, $"Database error while fetching conversations for userId: {userId}");
+                throw new Exception("Failed to fetch conversations.", ex);
             }
         }
-
 
         public async Task<List<Message>> GetMessagesAsync(int senderId, int receiverId)
         {
             try
             {
-                // Fetch messages between two users, regardless of who is sender or receiver
+                _logger.LogDebug($"Fetching messages between senderId: {senderId} and receiverId: {receiverId}");
+
                 var messages = await _context.Messages
                     .Where(m =>
                         (m.SenderId == senderId && m.ReceiverId == receiverId) ||
@@ -132,18 +125,14 @@ namespace RAYS.Repositories
                     .OrderBy(m => m.Timestamp)
                     .ToListAsync();
 
-                if (!messages.Any())
-                {
-                    _logger.LogInformation($"No messages found between user {senderId} and user {receiverId}.");
-                    return new List<Message>();  // Return empty list if no messages exist
-                }
+                _logger.LogDebug($"Fetched {messages.Count} messages between senderId: {senderId} and receiverId: {receiverId}");
 
                 return messages;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error fetching messages between user {senderId} and user {receiverId}");
-                throw new Exception("Failed to fetch messages.", ex);  // Throw custom exception
+                _logger.LogError(ex, $"Database error while fetching messages between senderId: {senderId} and receiverId: {receiverId}");
+                throw new Exception("Failed to fetch messages.", ex);
             }
         }
 
@@ -151,23 +140,19 @@ namespace RAYS.Repositories
         {
             try
             {
+                _logger.LogDebug($"Fetching username for userId: {userId}");
+
                 var user = await _context.Users
                     .Where(u => u.Id == userId)
                     .Select(u => u.Username)
                     .FirstOrDefaultAsync();
 
-                if (user == null)
-                {
-                    _logger.LogWarning($"User with ID {userId} not found.");
-                    return "Unknown"; // Default return value
-                }
-
-                return user;
+                return user ?? "Unknown";
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error fetching username for userId: {userId}");
-                throw new Exception($"Failed to fetch username for userId: {userId}.", ex);  // Throw custom exception
+                _logger.LogError(ex, $"Database error while fetching username for userId: {userId}");
+                throw new Exception($"Failed to fetch username for userId: {userId}.", ex);
             }
         }
     }

@@ -54,29 +54,6 @@
     <!-- Render validation scripts if present -->
     @await RenderSectionAsync("Scripts", required: false)
 
-    <!-- Scroll handling script -->
-    <script>
-        // Definerer variabler
-        let lastScrollY = window.scrollY; // Start scroll-posisjon
-        const topBar = document.querySelector('#topBar'); // Referanse til top bar elementet
-
-        // Funksjon for å håndtere scroll
-        const handleScroll = () => {
-            if (window.innerWidth < 510) { // Kun aktiv på skjermer mindre enn 510px
-                if (window.scrollY > lastScrollY) {
-                    // Skjul topbaren ved scroll ned
-                    topBar.classList.add('-translate-y-full');
-                } else {
-                    // Vis topbaren ved scroll opp
-                    topBar.classList.remove('-translate-y-full');
-                }
-                lastScrollY = window.scrollY; // Oppdater sist scroll-posisjon
-            }
-        };
-
-        // Lytter på scroll-hendelser
-        window.addEventListener('scroll', handleScroll);
-    </script>
 </body>
 
 </html>
