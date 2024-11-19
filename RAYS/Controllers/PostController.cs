@@ -21,12 +21,12 @@ namespace RAYS.Controllers
         private readonly ILogger<PostController> _logger;
 
 
-        public PostController(PostService postService, LikeService likeService,UserService userService,ILogger<PostController> logger)
+        public PostController(PostService postService, LikeService likeService, UserService userService, ILogger<PostController> logger)
         {
             _postService = postService;
             _likeService = likeService;
             _userService = userService;
-             _logger = logger;
+            _logger = logger;
         }
 
         public async Task<IActionResult> Index()
@@ -61,7 +61,7 @@ namespace RAYS.Controllers
 
         [HttpPost]
         public async Task<IActionResult> Create(PostViewModel model, IFormFile? image)
-        {            
+        {
             // Check if content is empty or null
             if (string.IsNullOrWhiteSpace(model.Content))
             {
@@ -101,6 +101,19 @@ namespace RAYS.Controllers
                     return RedirectToAction("Index");
                 }
             }
+
+            // Validate VideoUrl (if provided)
+            if (!string.IsNullOrWhiteSpace(model.VideoUrl))
+            {
+                // Ensure URL starts with http or https
+                if (!(Uri.TryCreate(model.VideoUrl, UriKind.Absolute, out var uriResult)
+                    && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps)))
+                {
+                    TempData["ErrorMessage"] = "Please enter a valid video URL (must start with http:// or https://).";
+                    return RedirectToAction("Index");
+                }
+            }
+
 
             // If the content is valid (not empty), continue with saving and processing the post
             var userId = int.Parse(User.FindFirst("UserId")?.Value ?? "0");
@@ -210,7 +223,7 @@ namespace RAYS.Controllers
 
             if (!await _postService.IsPostLikedByUserAsync(userId, postId))
                 await _postService.LikePostAsync(userId, postId);
-                _logger.LogInformation("Post ID {PostId} liked by UserID: {UserId}", postId, userId);
+            _logger.LogInformation("Post ID {PostId} liked by UserID: {UserId}", postId, userId);
 
             return RedirectToAction("Index");
         }
@@ -222,7 +235,7 @@ namespace RAYS.Controllers
 
             if (await _postService.IsPostLikedByUserAsync(userId, postId))
                 await _postService.UnlikePostAsync(userId, postId);
-                _logger.LogInformation("Post ID {PostId} Unliked by UserID: {UserId}", postId, userId);
+            _logger.LogInformation("Post ID {PostId} Unliked by UserID: {UserId}", postId, userId);
 
             return RedirectToAction("Index");
         }

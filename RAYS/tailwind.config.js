@@ -23,11 +23,10 @@ module.exports = {
                 '580px': '580px',
                 '510px': '510px',
                 '500px': '500px',
+                '420px': '420px',
                 '400px': '400px',
                 '355px': '355px',
-                '300px': '300px',
-                '200px': '200px',
-                '100px': '100px', // Custom breakpoints
+                '300px': '300px', // Custom breakpoints
             },
         },
     },
