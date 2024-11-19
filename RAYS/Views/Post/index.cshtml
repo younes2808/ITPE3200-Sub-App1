@@ -30,10 +30,11 @@
                 class="post-textarea w-full p-4 bg-white text-black rounded-lg resize-none h-28 focus:outline-none focus:ring-2 focus:ring-gray-300"></textarea>
         </div>
 
-        <div class="flex items-center justify-between">
+        <div class="flex items-center justify-between pt-1">
 
-            <div class="flex space-x-0 sm:space-x-2 sm:pl-5">
-                <button type="button" id="uploadImageButton" class="flex items-center bg-white text-black border border-gray-300 rounded-lg px-1 sm:px-2 py-1">
+            <div class="flex space-x-0 pl-0 420px:space-x-2 sm:pl-5">
+                <button type="button" id="uploadImageButton"
+                    class="flex items-center bg-white text-black border border-gray-300 rounded-lg px-1 sm:px-2 py-1">
 
                     <span class="material-icons mr-1">photo</span> Media
                 </button>
@@ -48,9 +49,10 @@
             </div>
 
             <button type="submit"
-                class="flex items-center bg-blue-600 text-white rounded-lg px-1 sm:px-2 py-1 hover:bg-blue-500 transition-colors duration-300">
-                Post <span class="material-icons ml-1">send</span>
+                class="flex items-center bg-blue-600 text-white px-1 420px:px-3 py-1 text-sm 420px:text-base font-medium rounded-lg hover:bg-blue-500 transition-colors duration-300">
+                Post <span class="material-icons ml-1 text-lg sm:text-xl">send</span>
             </button>
+
         </div>
 
         <!-- Image Preview Section -->
@@ -67,7 +69,7 @@
         </div>
 
         <div id="videoUrlInput" class="hidden mt-2">
-            <input type="url" name="VideoUrl" placeholder="Add a video URL"
+            <input type="text" name="VideoUrl" placeholder="Add a video URL"
                 class="w-full p-3 bg-white text-black rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-300" />
         </div>
 
@@ -86,7 +88,8 @@
             <!--Username as clickable link-->
             <form action="@Url.Action("Profile", "Profile")" method="get" class="inline">
                 <input type="hidden" name="userId" value="@post.UserId" /> <!-- Endret til å være relatert til post -->
-                <button type="submit" class="text-2xl font-light font-general text-black bg-transparent border-none hover:underline cursor-pointer">
+                <button type="submit"
+                    class="text-2xl font-medium font-general text-black bg-transparent border-none hover:underline cursor-pointer">
                     @post.Username <!-- Endret til å være relatert til post -->
                 </button>
             </form>
@@ -144,11 +147,12 @@
         }
         <!--Like Count-->
         <p class="text-red-700-">
-        @post.LikeCount ❤   
+            @post.LikeCount ❤
         </p>
 
         <!-- Like/Comment/Edit/Delete actions -->
-        <div class="flex justify-start items-center space-x-0 sm:space-x-6 md:space-x-8 lg:space-x-12 mt-4" id="post-@post.Id">
+        <div class="flex justify-center items-center space-x-2 420px:space-x-6 sm:space-x-10 970px:space-x-12 mt-4"
+            id="post-@post.Id">
             <form asp-action="@(post.IsLikedByUser ? "Unlike" : "Like")" method="post">
                 <input type="hidden" name="postId" value="@post.Id" />
                 <button type="submit" class="flex items-center space-x-1 text-blue-600 hover:text-blue-800">
@@ -187,7 +191,7 @@
 
 <!-- JavaScript for å håndtere Like/Unlike og lagre post-ID -->
 <script>
-       // Lagre postId til localStorage når en bruker klikker på "Like" eller "Unlike"-knappen
+    // Lagre postId til localStorage når en bruker klikker på "Like" eller "Unlike"-knappen
     document.querySelectorAll('form[method="post"]').forEach(function (form) {
         form.addEventListener('submit', function (event) {
             const postId = event.target.querySelector('input[name="postId"]').value;
@@ -209,13 +213,13 @@
         if (isPostLiked === 'true' && likedPostId) {
             // Finn elementet som har den spesifikke post-ID-en
             const postElement = document.getElementById('post-' + likedPostId);
-            
+
             if (postElement) {
                 console.log('Scroller til posten med ID: ', likedPostId);
-                postElement.scrollIntoView({ 
-                    behavior: 'smooth', 
+                postElement.scrollIntoView({
+                    behavior: 'smooth',
                     block: 'center',  // Får elementet til å være nær toppen av skjermen
-                    inline: 'nearest' 
+                    inline: 'nearest'
                 });
 
                 // Alternativ for litt mer plass til toppen (valgfritt):
