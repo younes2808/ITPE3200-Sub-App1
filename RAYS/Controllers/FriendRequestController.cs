@@ -86,7 +86,7 @@ namespace RAYS.Controllers
         }
         public async Task<IActionResult> FriendsList(int i)
         {
-             var userId = int.Parse(User.FindFirst("UserId")?.Value ?? "0");
+            var userId = int.Parse(User.FindFirst("UserId")?.Value ?? "0");
             var friends = await _friendService.GetFriendsAsync(userId); // Fetch friends dynamically
             ViewData["FriendsList"] = friends; // Set ViewData to pass to the partial
             return View();
