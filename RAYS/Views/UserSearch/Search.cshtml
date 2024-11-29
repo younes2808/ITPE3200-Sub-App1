@@ -13,6 +13,13 @@
         </div>
     </form>
 
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="bg-red-500 text-white mt-2 p-2 rounded-md mb-2">
+            @TempData["ErrorMessage"]
+        </div>
+    }
+
     @if (Model.Results != null && Model.Results.Count > 0)
     {
         <div class="mt-4 w-2/5 mx-auto max-w-xl">
