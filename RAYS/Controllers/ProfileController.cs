@@ -54,7 +54,7 @@ namespace RAYS.Controllers
             );
 
             var incomingRequests = allFriendRequests
-                .Where(r => r.ReceiverId == currentUserId && r.Status == "Pending");
+                .Where(r => r.ReceiverId == currentUserId && r.SenderId == userId && r.Status == "Pending");
 
             // The view model will include:
             var userViewModel = new UserViewModel
