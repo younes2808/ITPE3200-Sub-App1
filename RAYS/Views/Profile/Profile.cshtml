@@ -5,7 +5,8 @@
 
 
 <!-- Add a rectangle with a border and padding after the profile title -->
-<div class="relative w-full bg-emerald-200 z-0 h-40 sm:h-48 flex items-center justify-center rounded-md border-2 border-emerald-400 mt-20 510px:mt-0">
+<div
+    class="relative w-full bg-emerald-200 z-0 h-40 sm:h-48 flex items-center justify-center rounded-md border-2 border-emerald-400 mt-20 510px:mt-0">
     <!-- Display the initial of the username inside the rectangle -->
     <div class="absolute text-black text-4xl font-bold">
         @Model.Username.Substring(0, 1).ToUpper() <!-- Display the first letter as the initial in uppercase -->
@@ -74,21 +75,23 @@
         <!-- Display the username -->
         @foreach (var request in Model.FriendRequests)
         {
-                <!-- Display the Accept and Reject buttons -->
-                <div class="mt-3 flex justify-center space-x-4">
-                    <form asp-action="AcceptFriendRequest" method="post" class="inline">
-                        <input type="hidden" name="requestId" value="@request.Id" />
-                        <button type="submit" class="bg-green-500 text-white rounded px-4 py-2 hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500">
-                            Accept
-                        </button>
-                    </form>
-                    <form asp-action="RejectFriendRequest" method="post" class="inline">
-                        <input type="hidden" name="requestId" value="@request.Id" />
-                        <button type="submit" class="bg-red-500 text-white rounded px-4 py-2 hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500">
-                            Reject
-                        </button>
-                    </form>
-                </div>
+            <!-- Display the Accept and Reject buttons -->
+            <div class="mt-3 flex justify-center space-x-4">
+                <form asp-action="AcceptFriendRequest" method="post" class="inline">
+                    <input type="hidden" name="requestId" value="@request.Id" />
+                    <button type="submit"
+                        class="bg-green-500 text-white rounded px-4 py-2 hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500">
+                        Accept
+                    </button>
+                </form>
+                <form asp-action="RejectFriendRequest" method="post" class="inline">
+                    <input type="hidden" name="requestId" value="@request.Id" />
+                    <button type="submit"
+                        class="bg-red-500 text-white rounded px-4 py-2 hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500">
+                        Reject
+                    </button>
+                </form>
+            </div>
         }
     </div>
 }
@@ -126,16 +129,18 @@
 
     @foreach (var post in Model.Posts)
     {
-        <div class="bg-emerald-200 shadow-md rounded-lg py-4 px-3 md:px-5 mt-6 mx-auto text-sm md:text-base lg:text-lg" id="post-@post.Id">
+        <div class="bg-emerald-200 shadow-md rounded-lg py-4 px-3 md:px-5 mt-6 mx-auto text-sm md:text-base lg:text-lg"
+            id="post-@post.Id">
             <!-- User ID, timestamp, and location -->
             <div class="mb-2">
-            <!--Username as clickable link-->
-            <form action="@Url.Action("Profile", "Profile")" method="get" class="inline">
-                <input type="hidden" name="userId" value="@post.UserId" />
-                <button type="submit" class="text-2xl font-light text-black bg-transparent border-none hover:underline cursor-pointer">
-                    @post.Username
-                </button>
-            </form>
+                <!--Username as clickable link-->
+                <form action="@Url.Action("Profile", "Profile")" method="get" class="inline">
+                    <input type="hidden" name="userId" value="@post.UserId" />
+                    <button type="submit"
+                        class="text-2xl font-medium font-general text-black bg-transparent border-none hover:underline cursor-pointer">
+                        @post.Username
+                    </button>
+                </form>
                 <small class="text-gray-500 block">@post.CreatedAt.ToString("f")</small>
                 @if (!string.IsNullOrEmpty(post.Location))
                 {
@@ -149,7 +154,7 @@
                     @TempData["ContentErrorMessage"]
                 </div>
             }
-        
+
 
             <!-- Post content -->
             <p id="content-@post.Id" class="text-gray-800 mt-2">@post.Content</p>
@@ -177,23 +182,26 @@
                 <textarea name="Content" class="w-full p-2 border rounded-lg">@post.Content</textarea>
 
                 <!-- Optional fields for editing -->
-                <input type="text" name="VideoUrl" value="@post.VideoUrl" placeholder="Video URL" class="w-full p-2 border rounded-lg mt-3" />
-                <input type="text" name="Location" value="@post.Location" placeholder="Location" class="w-full p-2 border rounded-lg mt-3" />
+                <input type="text" name="VideoUrl" value="@post.VideoUrl" placeholder="Video URL"
+                    class="w-full p-2 border rounded-lg mt-3" />
+                <input type="text" name="Location" value="@post.Location" placeholder="Location"
+                    class="w-full p-2 border rounded-lg mt-3" />
 
                 <!-- Update and cancel buttons -->
                 <div class="flex justify-end space-x-4 mt-4">
                     <button type="submit" class="bg-blue-600 text-white rounded-lg px-5 py-2">Save</button>
-                    <button type="button" onclick="toggleEdit(@post.Id)" class="bg-gray-300 rounded-lg px-5 py-2">Cancel</button>
+                    <button type="button" onclick="toggleEdit(@post.Id)"
+                        class="bg-gray-300 rounded-lg px-5 py-2">Cancel</button>
                 </div>
             </form>
 
             <!--Like Count-->
             <p class="text-red-700-">
-                @post.LikeCount ❤   
+                @post.LikeCount ❤
             </p>
 
             <!-- Actions -->
-            <div class="flex justify-start items-center space-x-0 sm:space-x-6 md:space-x-8 lg:space-x-12 mt-4  ">
+            <div class="flex justify-center items-center space-x-2 420px:space-x-6 sm:space-x-10 970px:space-x-12 mt-4">
                 <!-- Like/Unlike button -->
                 <form asp-action="@(post.IsLikedByUser ? "Unlike" : "Like")" method="post">
                     <input type="hidden" name="ViewId" value="@Model.UserId" />
@@ -246,20 +254,22 @@ else if (ViewBag.ViewType == "LikedPosts")
     <h2>Liked Posts</h2>
     @foreach (var likedPost in Model.LikedPosts)
     {
-        <div class="bg-emerald-200 shadow-md rounded-lg py-4 px-3 md:px-5 mt-6 mx-auto text-sm md:text-base lg:text-lg" id="post-@likedPost.Id">
+        <div class="bg-emerald-200 shadow-md rounded-lg py-4 px-3 md:px-5 mt-6 mx-auto text-sm md:text-base lg:text-lg"
+            id="post-@likedPost.Id">
             <!-- User ID, timestamp, and location -->
             <div class="mb-2">
-            <form action="@Url.Action("Profile", "Profile")" method="get" class="inline">
-                <input type="hidden" name="userId" value="@likedPost.UserId" />
-                <button type="submit" class="text-2xl font-light text-black bg-transparent border-none hover:underline cursor-pointer">
-                    @likedPost.Username
-                </button>
-            </form>
-            <small class="text-gray-500 block">@likedPost.CreatedAt.ToString("f")</small>
-            @if (!string.IsNullOrEmpty(likedPost.Location))
-            {
-                <small class="text-gray-500 block">Location: @likedPost.Location</small>
-            }
+                <form action="@Url.Action("Profile", "Profile")" method="get" class="inline">
+                    <input type="hidden" name="userId" value="@likedPost.UserId" />
+                    <button type="submit"
+                        class="text-2xl font-medium font-general text-black bg-transparent border-none hover:underline cursor-pointer">
+                        @likedPost.Username
+                    </button>
+                </form>
+                <small class="text-gray-500 block">@likedPost.CreatedAt.ToString("f")</small>
+                @if (!string.IsNullOrEmpty(likedPost.Location))
+                {
+                    <small class="text-gray-500 block">Location: @likedPost.Location</small>
+                }
             </div>
 
             <!-- Display error message specific to content if this is the post being updated -->
@@ -269,7 +279,7 @@ else if (ViewBag.ViewType == "LikedPosts")
                     @TempData["ContentErrorMessage"]
                 </div>
             }
-        
+
 
             <!-- Post content -->
             <p id="content-@likedPost.Id" class="text-gray-800 mt-2">@likedPost.Content</p>
@@ -288,7 +298,7 @@ else if (ViewBag.ViewType == "LikedPosts")
 
             <!--Like Count-->
             <p class="text-red-700-">
-            @likedPost.LikeCount ❤   
+                @likedPost.LikeCount ❤
             </p>
 
             <!-- Edit form (hidden by default) -->
@@ -302,19 +312,22 @@ else if (ViewBag.ViewType == "LikedPosts")
                 <textarea name="Content" class="w-full p-2 border rounded-lg">@likedPost.Content</textarea>
 
                 <!-- Optional fields for editing -->
-                <input type="text" name="VideoUrl" value="@likedPost.VideoUrl" placeholder="Video URL" class="w-full p-2 border rounded-lg mt-3" />
-                <input type="text" name="Location" value="@likedPost.Location" placeholder="Location" class="w-full p-2 border rounded-lg mt-3" />
+                <input type="text" name="VideoUrl" value="@likedPost.VideoUrl" placeholder="Video URL"
+                    class="w-full p-2 border rounded-lg mt-3" />
+                <input type="text" name="Location" value="@likedPost.Location" placeholder="Location"
+                    class="w-full p-2 border rounded-lg mt-3" />
 
                 <!-- Update and cancel buttons -->
                 <div class="flex justify-end space-x-4 mt-4">
                     <button type="submit" class="bg-blue-600 text-white rounded-lg px-5 py-2">Save</button>
-                    <button type="button" onclick="toggleEdit(@likedPost.Id)" class="bg-gray-300 rounded-lg px-5 py-2">Cancel</button>
+                    <button type="button" onclick="toggleEdit(@likedPost.Id)"
+                        class="bg-gray-300 rounded-lg px-5 py-2">Cancel</button>
                 </div>
             </form>
 
 
             <!-- Actions -->
-            <div class="flex justify-start items-center space-x-0 sm:space-x-6 md:space-x-8 lg:space-x-12 mt-4">
+            <div class="flex justify-center items-center space-x-2 420px:space-x-6 sm:space-x-10 970px:space-x-12 mt-4">
                 <!-- Like/Unlike button -->
                 <form asp-action="@(likedPost.IsLikedByUser ? "Unlike" : "Like"  )" method="post">
                     <input type="hidden" name="ViewId" value="@Model.UserId" />
@@ -365,22 +378,66 @@ else if (ViewBag.ViewType == "Friends")
 {
     <h2 class="text-2xl text-black">Friends</h2>
     <div class="mt-3 grid grid-cols-1 md:grid-cols-2 gap-4">
-    @foreach (var friend in Model.Friends)
-    {
-        <div key="@friend.UserId" class="p-2 bg-white rounded-md">
-            <form action="@Url.Action("Profile", "Profile")" method="get" class="inline">
-                <input type="hidden" name="userId" value="@friend.UserId" />
-                <button type="submit" class="text-blue-400 font-light bg-transparent border-none hover:underline">
-                    @friend.Username <!-- Display friend's username as clickable link -->
-                </button>
-            </form>
-        </div>
-    }
-</div>
+        @foreach (var friend in Model.Friends)
+        {
+            <div key="@friend.UserId" class="p-2 bg-white rounded-md">
+                <form action="@Url.Action("Profile", "Profile")" method="get" class="inline">
+                    <input type="hidden" name="userId" value="@friend.UserId" />
+                    <button type="submit"
+                        class="text-lg font-medium font-general text-blue-500 bg-transparent border-none hover:underline cursor-pointer">
+                        @friend.Username <!-- Display friend's username as clickable link -->
+                    </button>
+                </form>
+            </div>
+        }
+    </div>
 
 }
 
+<!-- JavaScript for å håndtere Like/Unlike og lagre post-ID -->
+<script>
+    // Lagre postId til localStorage når en bruker klikker på "Like" eller "Unlike"-knappen
+    document.querySelectorAll('form[method="post"]').forEach(function (form) {
+        form.addEventListener('submit', function (event) {
+            const postId = event.target.querySelector('input[name="postId"]').value;
+            console.log('Lagrer postId til localStorage: ', postId);
 
+            // Lagre postId og flagget "isPostLiked" i localStorage
+            localStorage.setItem('likedPostId', postId);
+            localStorage.setItem('isPostLiked', 'true'); // Angi at en post har blitt likt/ulikt
+        });
+    });
+
+    // Når siden lastes, hent lagret postId fra localStorage og sjekk om brukeren har trykket på Like/Unlike
+    window.addEventListener('load', function () {
+        const likedPostId = localStorage.getItem('likedPostId');
+        const isPostLiked = localStorage.getItem('isPostLiked'); // Sjekk om brukeren har likt/uliket en post
+        console.log('Henter lagret postId fra localStorage: ', likedPostId);
+        console.log('Er post likt/uliket? ', isPostLiked);
+
+        if (isPostLiked === 'true' && likedPostId) {
+            // Finn elementet som har den spesifikke post-ID-en
+            const postElement = document.getElementById('post-' + likedPostId);
+
+            if (postElement) {
+                console.log('Scroller til posten med ID: ', likedPostId);
+                postElement.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'center',  // Får elementet til å være nær toppen av skjermen
+                    inline: 'nearest'
+                });
+
+                // Alternativ for litt mer plass til toppen (valgfritt):
+                window.scrollBy(0, -150); // Juster med 50px for å unngå at posten er for nær toppen
+            } else {
+                console.log('Fant ikke posten med ID: ', likedPostId);
+            }
+
+            // Etter scrollen, fjern flagget så vi ikke scroller neste gang siden lastes
+            localStorage.removeItem('isPostLiked'); // Fjerne flagget etter at scrollen er gjort
+        }
+    });
+</script>
 
 <!-- JavaScript function to toggle the edit form -->
 <script>

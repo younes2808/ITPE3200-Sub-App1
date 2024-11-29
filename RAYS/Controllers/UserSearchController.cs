@@ -26,12 +26,22 @@ namespace RAYS.Controllers
         [HttpPost]
         public async Task<IActionResult> Search(UserSearchViewModel model)
         {
-            if (ModelState.IsValid && !string.IsNullOrWhiteSpace(model.Query))
+            if (ModelState.IsValid)
             {
+
+                // Perform the search if the model is valid and Query is not empty
                 var results = await _userService.SearchUsersAsync(model.Query);
                 model.Results = results;
             }
-            return View(model); // Return view with results from query
+            else
+            {
+                // Set an error message if model validation fails
+                TempData["ErrorMessage"] = "Search field cannot be empty. Please try again.";
+            }
+
+            return View(model); // Return the view (with results or error message)
         }
+
+
     }
 }
