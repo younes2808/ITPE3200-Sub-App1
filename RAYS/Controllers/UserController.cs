@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging; 
+using Microsoft.Extensions.Logging;
 using RAYS.Models;
 using RAYS.Services;
 using RAYS.ViewModels;
@@ -103,15 +103,31 @@ namespace RAYS.Controllers
             return View(model);
         }
 
-
-
         // POST: user/logout
         [HttpPost("logout")]
         public async Task<IActionResult> Logout()
         {
+            // Check if the user is authenticated and that User.Identity is not null
+            if (User.Identity?.IsAuthenticated == true)
+            {
+                var userId = User.FindFirstValue("UserId"); // Retrieve the UserId claim
+                var username = User.Identity.Name; // Retrieve the Username from the Name claim
+
+                // Log the logout action with UserId and Username
+                _logger.LogInformation("User with ID {UserId} and Username {Username} logged out successfully.", userId, username);
+            }
+            else
+            {
+                // Log the case where the user is not authenticated (just in case)
+                _logger.LogWarning("Attempted logout by an unauthenticated user.");
+            }
+
+            // Sign out the user by clearing the authentication cookie
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-            _logger.LogInformation("User logged out successfully.");
+
+            // Redirect to the Login page after logging out
             return RedirectToAction("Login");
         }
+
     }
 }

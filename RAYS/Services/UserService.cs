@@ -63,7 +63,7 @@ namespace RAYS.Services
                 }
 
                 // Log successful login
-                _logger.LogInformation("User logged in successfully: {UsernameOrEmail}", usernameOrEmail);
+                _logger.LogInformation("User logged in successfully: {UsernameOrEmail}, with UserId: {UserId}", usernameOrEmail, user.Id);
 
                 // Return the user on successful login
                 return user;

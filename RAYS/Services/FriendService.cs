@@ -21,18 +21,18 @@ namespace RAYS.Services
         {
             if (!friend.IsValid())
             {
-                _logger.LogWarning($"Invalid friend request from {friend.SenderId} to {friend.ReceiverId}.");
+                _logger.LogWarning($"Invalid friend request from UserId: {friend.SenderId} to UserId: {friend.ReceiverId}.");
                 return false; // Return false if the request is invalid
             }
 
             var result = await _friendRepository.SendFriendRequestAsync(friend);
             if (result)
             {
-                _logger.LogInformation($"Friend request sent from {friend.SenderId} to {friend.ReceiverId}.");
+                _logger.LogInformation($"Friend request sent from UserId: {friend.SenderId} to UserId: {friend.ReceiverId}.");
             }
             else
             {
-                _logger.LogWarning($"Failed to send friend request from {friend.SenderId} to {friend.ReceiverId}.");
+                _logger.LogWarning($"Failed to send friend request from UserId: {friend.SenderId} to UserId: {friend.ReceiverId}.");
             }
             return result;
         }
@@ -84,7 +84,8 @@ namespace RAYS.Services
             var result = await _friendRepository.DeleteFriendAsync(userId, friendId);
             if (result)
             {
-                _logger.LogInformation($"Friend {friendId} deleted for user {userId}.");
+                _logger.LogInformation("User with ID {CurrentUserId} has deleted their friend with ID {FriendId}.", userId, friendId);
+
             }
             else
             {
