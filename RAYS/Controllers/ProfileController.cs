@@ -93,7 +93,6 @@ namespace RAYS.Controllers
             var friendRequest = new Friend { SenderId = senderId, ReceiverId = receiverId, Status = "Pending" };
 
             await _friendService.SendFriendRequestAsync(friendRequest);
-            _logger.LogInformation("UserId {SenderId} sent a friend request to UserId {ReceiverId}", senderId, receiverId);
             return RedirectToAction("Profile", new { userId = receiverId });
         }
 
@@ -142,7 +141,7 @@ namespace RAYS.Controllers
 
             // Reject the friend request
             await _friendService.RejectFriendRequestAsync(requestId);
-            _logger.LogInformation("UserId {CurrentUserId} rejected friend request from UserId {SenderId}", currentUserId, friendRequest.SenderId); 
+            _logger.LogInformation("UserId {CurrentUserId} rejected friend request from UserId {SenderId}", currentUserId, friendRequest.SenderId);
 
             // Redirect to the sender's profile (the one who sent the request)
             return RedirectToAction("Profile", new { userId = friendRequest.SenderId });
@@ -159,7 +158,6 @@ namespace RAYS.Controllers
 
             if (result)
             {
-                _logger.LogInformation("UserId {CurrentUserId} deleted friend UserId {FriendId}", currentUserId, friendId);
                 TempData["Message"] = "Friend deleted successfully!";
             }
             else
@@ -285,7 +283,9 @@ namespace RAYS.Controllers
             {
                 await _postService.LikePostAsync(userId, postId);
                 _logger.LogInformation("UserId {UserId} liked post {PostId}", userId, postId);
-            } else {
+            }
+            else
+            {
                 await _postService.UnlikePostAsync(userId, postId);
                 _logger.LogInformation("UserId {UserId} unliked post {PostId}", userId, postId);
             }
@@ -304,7 +304,9 @@ namespace RAYS.Controllers
             {
                 await _postService.UnlikePostAsync(userId, postId);
                 _logger.LogInformation("UserId {UserId} unliked post {PostId}", userId, postId);
-            } else {
+            }
+            else
+            {
                 await _postService.LikePostAsync(userId, postId);
                 _logger.LogInformation("UserId {UserId} liked post {PostId}", userId, postId);
             }
@@ -319,8 +321,9 @@ namespace RAYS.Controllers
             var userId = int.Parse(User.FindFirst("UserId")?.Value ?? "0");
 
             //Checking CREDENTIALS
-            if (model.UserId != userId){
-              _logger.LogWarning("UserId {UserId} attempted to update another user's post {PostId}", userId, model.Id);
+            if (model.UserId != userId)
+            {
+                _logger.LogWarning("UserId {UserId} attempted to update another user's post {PostId}", userId, model.Id);
                 return Forbid();
             }
 
@@ -333,7 +336,8 @@ namespace RAYS.Controllers
             }
 
             var post = await _postService.GetByIdAsync(model.Id);
-            if (post == null){
+            if (post == null)
+            {
                 _logger.LogWarning("Post with ID {PostId} not found for update by UserId {UserId}", model.Id, userId);
                 return NotFound();
             }
@@ -349,7 +353,7 @@ namespace RAYS.Controllers
             }
             catch (Exception)
             {
-                _logger.LogError( "An error occurred while updating post {PostId} by UserId {UserId}", model.Id, userId);
+                _logger.LogError("An error occurred while updating post {PostId} by UserId {UserId}", model.Id, userId);
                 TempData["ErrorPostId"] = model.Id;  // Store post ID for error display
                 TempData["ContentErrorMessage"] = "An error occurred while updating the post. Please try again."; // Store error message
                 return RedirectToAction("Profile", new { userId = ViewId, viewType = viewType });
@@ -365,7 +369,8 @@ namespace RAYS.Controllers
             //Getting Post-object by ID
             var post = await _postService.GetByIdAsync(id);
             //Checking credentials
-            if (post == null || post.UserId != userId){
+            if (post == null || post.UserId != userId)
+            {
                 _logger.LogWarning("Unauthorized attempt to delete post {PostId} by UserId {UserId}", id, userId);
                 return Forbid();
             }
