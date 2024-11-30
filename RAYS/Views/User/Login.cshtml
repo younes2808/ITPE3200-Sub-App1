@@ -25,7 +25,7 @@
             </span>
 
             <!-- Display Validation Errors -->
-            <div asp-validation-summary="All" class="text-red-500 mb-4"></div>
+            <div asp-validation-summary="ModelOnly" class="text-red-500 mb-4"></div>
 
             <form asp-controller="User" asp-action="Login" method="post">
                 <div class="py-3">
@@ -33,6 +33,7 @@
                     <input type="text"
                         class="w-full p-2 border border-gray-200 rounded-md placeholder:font-light focus:ring-emerald-500 placeholder:text-gray-500"
                         asp-for="Username" />
+                    <!-- Display Validation Errors -->
                     <span asp-validation-for="Username" class="text-red-500"></span>
                 </div>
                 <div class="py-4">
@@ -40,6 +41,7 @@
                     <input type="password"
                         class="w-full p-2 border border-gray-200 rounded-md placeholder:font-light focus:ring-emerald-500 placeholder:text-gray-500"
                         asp-for="Password" />
+                    <!-- Display Validation Errors -->
                     <span asp-validation-for="Password" class="text-red-500"></span>
                 </div>
                 <button type="submit"
